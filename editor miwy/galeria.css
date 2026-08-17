@@ -1,0 +1,335 @@
+/* =========================================================
+   MIWY — GALERÍA DE PROYECTOS
+   Estilo videojuego retro
+   ========================================================= */
+
+:root {
+    --miwy-bg: #080808;
+    --miwy-panel: #101010;
+    --miwy-panel-2: #151515;
+    --miwy-border: #2a2a2a;
+    --miwy-orange: #ff6a00;
+    --miwy-orange-soft: #ff8a32;
+    --miwy-text: #f2f2f2;
+    --miwy-muted: #888;
+    --miwy-danger: #ff3b30;
+    --miwy-radius: 8px;
+}
+
+/* CONTENEDOR GENERAL */
+.miwy-gallery {
+    width: min(100%, 720px);
+    margin: 0 auto;
+    padding: 18px;
+    box-sizing: border-box;
+    color: var(--miwy-text);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* =========================================================
+   VISTA PREVIA
+   ========================================================= */
+
+.miwy-preview {
+    width: 100%;
+    height: 220px;
+    margin: 0 auto 28px;
+    box-sizing: border-box;
+
+    background: #050505;
+    border: 2px solid var(--miwy-border);
+    border-radius: var(--miwy-radius);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    position: relative;
+    overflow: hidden;
+
+    box-shadow:
+        inset 0 0 0 1px #000,
+        0 8px 0 #030303;
+}
+
+/* Texto de la pantalla */
+.miwy-preview-content {
+    text-align: center;
+    user-select: none;
+}
+
+.miwy-preview-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.miwy-preview-subtitle {
+    margin: 8px 0 0;
+    color: var(--miwy-muted);
+    font-size: 12px;
+    letter-spacing: 1px;
+}
+
+/* =========================================================
+   CABECERA
+   ========================================================= */
+
+.miwy-projects-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 16px;
+}
+
+.miwy-projects-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* Botón CREAR PROYECTO */
+
+.miwy-create-project {
+    border: 1px solid var(--miwy-orange);
+    background: transparent;
+    color: var(--miwy-orange);
+    padding: 9px 13px;
+
+    border-radius: 6px;
+
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .5px;
+
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.miwy-create-project:hover {
+    background: var(--miwy-orange);
+    color: #000;
+}
+
+/* =========================================================
+   LISTA DE PROYECTOS
+   ========================================================= */
+
+.miwy-projects-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* TARJETA */
+
+.miwy-project-card {
+    width: 100%;
+    min-height: 82px;
+
+    box-sizing: border-box;
+
+    background: var(--miwy-panel);
+    border: 1px solid var(--miwy-border);
+    border-radius: var(--miwy-radius);
+
+    padding: 14px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 15px;
+}
+
+/* Información del proyecto */
+
+.miwy-project-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.miwy-project-name {
+    margin: 0 0 7px;
+
+    font-size: 14px;
+    font-weight: 800;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.miwy-project-description {
+    margin: 0;
+
+    color: var(--miwy-muted);
+
+    font-size: 11px;
+    line-height: 1.3;
+}
+
+/* =========================================================
+   ICONO DEL PROYECTO
+   ========================================================= */
+
+.miwy-project-icon {
+    width: 34px;
+    height: 34px;
+
+    flex: 0 0 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid var(--miwy-border);
+    border-radius: 6px;
+
+    background: #090909;
+
+    font-size: 17px;
+}
+
+/* =========================================================
+   BOTONES
+   ========================================================= */
+
+.miwy-project-actions {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-shrink: 0;
+}
+
+.miwy-open-btn,
+.miwy-delete-btn {
+    height: 34px;
+    border-radius: 5px;
+
+    font-size: 10px;
+    font-weight: 900;
+
+    cursor: pointer;
+}
+
+/* ABRIR */
+
+.miwy-open-btn {
+    padding: 0 14px;
+
+    border: 1px solid var(--miwy-orange);
+    background: var(--miwy-orange);
+    color: #000;
+
+    letter-spacing: .5px;
+}
+
+.miwy-open-btn:hover {
+    background: var(--miwy-orange-soft);
+}
+
+/* ELIMINAR */
+
+.miwy-delete-btn {
+    width: 34px;
+
+    border: 1px solid #303030;
+    background: #111;
+    color: #aaa;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.miwy-delete-btn:hover {
+    border-color: var(--miwy-danger);
+    color: var(--miwy-danger);
+}
+
+/* =========================================================
+   ESTADO VACÍO
+   ========================================================= */
+
+.miwy-empty-projects {
+    min-height: 120px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px dashed var(--miwy-border);
+    border-radius: var(--miwy-radius);
+
+    color: var(--miwy-muted);
+
+    font-size: 12px;
+    text-align: center;
+}
+
+/* =========================================================
+   RESPONSIVE — TELÉFONO
+   ========================================================= */
+
+@media (max-width: 520px) {
+
+    .miwy-gallery {
+        padding: 12px;
+    }
+
+    .miwy-preview {
+        height: 200px;
+        margin-bottom: 24px;
+    }
+
+    .miwy-projects-header {
+        align-items: flex-start;
+    }
+
+    .miwy-projects-title {
+        font-size: 16px;
+    }
+
+    .miwy-create-project {
+        padding: 8px 10px;
+        font-size: 10px;
+    }
+
+    .miwy-project-card {
+        padding: 12px;
+    }
+
+    .miwy-project-description {
+        font-size: 10px;
+    }
+
+    .miwy-open-btn {
+        padding: 0 11px;
+    }
+}
+
+/* =========================================================
+   PANTALLAS MUY PEQUEÑAS
+   ========================================================= */
+
+@media (max-width: 360px) {
+
+    .miwy-project-card {
+        align-items: flex-start;
+    }
+
+    .miwy-project-actions {
+        flex-direction: column;
+    }
+
+    .miwy-open-btn {
+        width: 60px;
+        padding: 0;
+    }
+}
