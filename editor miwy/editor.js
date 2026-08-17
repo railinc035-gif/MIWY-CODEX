@@ -4,6 +4,7 @@
 
 let isVisualEditing = false; 
 window.__pendingCodeFix = null;
+let updatePreviewTimer = null;
 
 function getDockOrientation() {
     return localStorage.getItem("miwy_dock_orientation") || "horizontal";
@@ -66,7 +67,12 @@ function toggleVisualEdit() {
 /* =====================================================  
    PREVIEW / VISTA DE APLICACIÓN  
 ===================================================== */  
-function updatePreview(){  
+function updatePreview() {
+    clearTimeout(updatePreviewTimer);
+    updatePreviewTimer = setTimeout(updatePreviewImmediate, 200);
+}
+
+function updatePreviewImmediate(){  
     const project = typeof getCurrentProject === "function" ? getCurrentProject() : null;  
     if(!project) return;  
   
@@ -89,15 +95,31 @@ function updatePreview(){
   
     Object.keys(files).forEach(filename => {  
         const type = typeof getFileType === "function" ? getFileType(filename) : "";  
-        if(type === "css") css += "\n" + files[filename];  
-        if(type === "js") js += "\n" + files[filename];  
+        const fileContent = files[filename] || "";
 
-        const fileContent = files[filename];
-        if (fileContent && (filename.includes("/") || filename.includes("."))) {
+        if (type === "css") {
             const escapedName = filename.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-            const srcRegex = new RegExp('(src|href)=["\']' + escapedName + '["\']', 'g');
-            if (fileContent.startsWith("data:")) {
-                html = html.replace(srcRegex, '$1="' + fileContent + '"');
+            const cssRegex = new RegExp('<link[^>]*href=["\'](?:\\./)?' + escapedName + '["\'][^>]*>', 'gi');
+            if (cssRegex.test(html)) {
+                html = html.replace(cssRegex, '<style>/* ' + filename + ' */\n' + fileContent + '</style>');
+            } else {
+                css += "\n/* " + filename + " */\n" + fileContent;
+            }
+        } else if (type === "js") {
+            const escapedName = filename.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+            const jsRegex = new RegExp('<script[^>]*src=["\'](?:\\./)?' + escapedName + '["\'][^>]*>\\s*</script>', 'gi');
+            if (jsRegex.test(html)) {
+                html = html.replace(jsRegex, '<script>/* ' + filename + ' */\n' + fileContent + '<\/script>');
+            } else {
+                js += "\n/* " + filename + " */\n" + fileContent;
+            }
+        } else {
+            if (fileContent && (filename.includes("/") || filename.includes("."))) {
+                const escapedName = filename.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                const srcRegex = new RegExp('(src|href)=["\']' + escapedName + '["\']', 'gi');
+                if (fileContent.startsWith("data:")) {
+                    html = html.replace(srcRegex, '$1="' + fileContent + '"');
+                }
             }
         }
     });  
@@ -166,6 +188,8 @@ function updatePreview(){
         errorBanner.style.display = "none"; 
     }
  
+    const currentOrientation = getDockOrientation();
+
     // Inject global error catcher and visual editor inside iframe
     const errorCatcherScript = ` 
 <script id="__miwy_system_script__"> 
@@ -533,7 +557,10 @@ window.onunhandledrejection = function(event) {
  
     const previewFrame = document.getElementById("previewFrame");
     if (previewFrame) {
-        previewFrame.srcdoc = html;  
+        if (previewFrame.__lastHtml !== html) {
+            previewFrame.__lastHtml = html;
+            previewFrame.srcdoc = html;  
+        }
     }
 }  
 
@@ -568,7 +595,9 @@ window.addEventListener("message", function(event) {
  
         if (typeof saveProjects === "function") saveProjects(); 
         if (typeof saveCurrentFile === "function") saveCurrentFile();
-        showTopNotification("💾 Cambios visuales guardados automáticamente", null, 2500);
+        if (typeof showTopNotification === "function") {
+            showTopNotification("💾 Cambios visuales guardados automáticamente", null, 2500);
+        }
         return; 
     } 
  
@@ -590,7 +619,9 @@ window.addEventListener("message", function(event) {
             proposedFixCode = `\n<script>var ${varName} = ${varName} || function(){ console.log('${varName} inicializado'); };<\/script>`;
         }
 
-        showTopNotification(`⚠️ Error: ${errorText}`, proposedFixCode ? { text: fixText, code: proposedFixCode } : null);
+        if (typeof showTopNotification === "function") {
+            showTopNotification(`⚠️ Error: ${errorText}`, proposedFixCode ? { text: fixText, code: proposedFixCode } : null);
+        }
     } 
 }); 
 
@@ -657,7 +688,6 @@ document.addEventListener("DOMContentLoaded", function() {
             draggingParentDock = false;
         });
 
-        // Parent Dock Button Event Delegation
         parentDock.addEventListener("click", (e) => {
             e.stopPropagation();
             const btn = e.target.closest(".miwy-tb-btn");
@@ -693,7 +723,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // Error banner Apply Fix button handler
     const applyFixBtn = document.getElementById("applyFixBtn");
     if (applyFixBtn) {
         applyFixBtn.addEventListener("click", () => {
@@ -702,7 +731,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 if (typeof saveCurrentFile === "function") saveCurrentFile();
                 if (typeof saveProjects === "function") saveProjects();
                 if (typeof updatePreview === "function") updatePreview();
-                showTopNotification("✅ Solución aplicada correctamente al código", null, 2500);
+                if (typeof showTopNotification === "function") {
+                    showTopNotification("✅ Solución aplicada correctamente al código", null, 2500);
+                }
             }
         });
     }
@@ -726,4 +757,470 @@ document.addEventListener("DOMContentLoaded", function() {
     if (vertBtn) vertBtn.addEventListener("click", () => setDockOrientation("vertical"));
 
     updateDockSettingsUI();
+
+    initCodeSearchAndReplace();
+    initAutocompleteAndFormatter();
+    initSettingsToggles();
 });
+
+function initSettingsToggles() {
+    const searchBtn = document.getElementById("toggleSearchSettingBtn");
+    const autoBtn = document.getElementById("toggleAutocompleteSettingBtn");
+    const autoStatus = document.getElementById("autocompleteSettingStatus");
+    const settingsOverlay = document.getElementById("settingsOverlay");
+
+    if (searchBtn) {
+        searchBtn.addEventListener("click", () => {
+            if (settingsOverlay) settingsOverlay.classList.remove("open");
+            toggleCodeSearch(true);
+        });
+    }
+
+    if (autoBtn) {
+        autoBtn.addEventListener("click", () => {
+            isAutocompleteEnabled = !isAutocompleteEnabled;
+            if (autoStatus) {
+                autoStatus.textContent = isAutocompleteEnabled ? "Activado (Sugerencias e IntelliSense)" : "Desactivado";
+                autoStatus.style.color = isAutocompleteEnabled ? "#42d66b" : "#ff4d4d";
+            }
+            if (typeof showTopNotification === "function") {
+                showTopNotification(isAutocompleteEnabled ? "💡 Auto-Completado Activado" : "💡 Auto-Completado Desactivado", null, 2500);
+            }
+        });
+    }
+}
+
+/* =====================================================
+   AUTO-COMPLETADO E INTELLISENSE
+===================================================== */
+let isAutocompleteEnabled = true;
+let isFormatterEnabled = true;
+let autocompleteSelectedIndex = 0;
+let currentCompletions = [];
+
+const COMPLETER_DICTIONARY = {
+    html: [
+        { label: "div", snippet: "<div></div>", desc: "Contenedor div HTML" },
+        { label: "span", snippet: "<span></span>", desc: "Elemento inline span" },
+        { label: "button", snippet: "<button></button>", desc: "Botón clickeable" },
+        { label: "p", snippet: "<p></p>", desc: "Párrafo de texto" },
+        { label: "h1", snippet: "<h1></h1>", desc: "Encabezado principal H1" },
+        { label: "h2", snippet: "<h2></h2>", desc: "Encabezado H2" },
+        { label: "input", snippet: '<input type="text" placeholder="...">', desc: "Campo de entrada" },
+        { label: "a", snippet: '<a href="#"></a>', desc: "Enlace hipertexto" },
+        { label: "img", snippet: '<img src="" alt="...">', desc: "Imagen HTML" },
+        { label: "script", snippet: "<script>\n  \n</script>", desc: "Bloque Script JS" },
+        { label: "style", snippet: "<style>\n  \n</style>", desc: "Bloque Estilo CSS" },
+        { label: "flex", snippet: '<div style="display: flex; gap: 10px; align-items: center;">\n  \n</div>', desc: "Layout Flexbox" }
+    ],
+    css: [
+        { label: "display", snippet: "display: flex;", desc: "Modelo de caja flex" },
+        { label: "background", snippet: "background: #111;", desc: "Color de fondo" },
+        { label: "color", snippet: "color: #fff;", desc: "Color de texto" },
+        { label: "padding", snippet: "padding: 10px;", desc: "Relleno interior" },
+        { label: "margin", snippet: "margin: 0;", desc: "Margen exterior" },
+        { label: "border-radius", snippet: "border-radius: 8px;", desc: "Borde redondeado" },
+        { label: "font-size", snippet: "font-size: 14px;", desc: "Tamaño de fuente" },
+        { label: "align-items", snippet: "align-items: center;", desc: "Alineación vertical" },
+        { label: "justify-content", snippet: "justify-content: center;", desc: "Alineación horizontal" },
+        { label: "box-shadow", snippet: "box-shadow: 0 4px 12px rgba(0,0,0,0.3);", desc: "Sombra paralela" }
+    ],
+    js: [
+        { label: "function", snippet: "function miFuncion() {\n    \n}", desc: "Declaración de función" },
+        { label: "addEventListener", snippet: 'addEventListener("click", (event) => {\n    \n});', desc: "Escuchador de eventos" },
+        { label: "getElementById", snippet: 'document.getElementById("")', desc: "Obtener elemento por ID" },
+        { label: "querySelector", snippet: 'document.querySelector("")', desc: "Seleccionar por CSS" },
+        { label: "console.log", snippet: "console.log();", desc: "Imprimir en consola" },
+        { label: "setTimeout", snippet: "setTimeout(() => {\n    \n}, 1000);", desc: "Temporizador de ejecución" },
+        { label: "fetch", snippet: 'fetch("url")\n  .then(res => res.json())\n  .then(data => {\n    \n  });', desc: "Petición HTTP Fetch" }
+    ]
+};
+
+function initAutocompleteAndFormatter() {
+    const editor = document.getElementById("codeEditor");
+    const popup = document.getElementById("autocompletePopup");
+
+    if (!editor || !popup) return;
+
+    editor.addEventListener("input", (e) => {
+        if (!isAutocompleteEnabled) {
+            popup.style.display = "none";
+            return;
+        }
+
+        const cursor = editor.selectionStart;
+        const textBefore = editor.value.substring(0, cursor);
+        const match = textBefore.match(/([a-zA-Z0-9_\-<]+)$/);
+
+        if (!match || match[1].length < 2) {
+            popup.style.display = "none";
+            return;
+        }
+
+        const query = match[1].toLowerCase().replace(/^</, "");
+        const fileExt = typeof currentFileName !== "undefined" && currentFileName ? currentFileName.split(".").pop().toLowerCase() : "html";
+        const category = fileExt === "js" ? "js" : (fileExt === "css" ? "css" : "html");
+
+        currentCompletions = (COMPLETER_DICTIONARY[category] || []).filter(item => item.label.toLowerCase().includes(query));
+
+        if (currentCompletions.length === 0) {
+            popup.style.display = "none";
+            return;
+        }
+
+        autocompleteSelectedIndex = 0;
+        renderAutocompletePopup(match[1]);
+    });
+
+    editor.addEventListener("keydown", (e) => {
+        if (popup.style.display === "block" && currentCompletions.length > 0) {
+            if (e.key === "ArrowDown") {
+                e.preventDefault();
+                autocompleteSelectedIndex = (autocompleteSelectedIndex + 1) % currentCompletions.length;
+                updateAutocompleteSelectionUI();
+                return;
+            }
+            if (e.key === "ArrowUp") {
+                e.preventDefault();
+                autocompleteSelectedIndex = (autocompleteSelectedIndex - 1 + currentCompletions.length) % currentCompletions.length;
+                updateAutocompleteSelectionUI();
+                return;
+            }
+            if (e.key === "Enter" || e.key === "Tab") {
+                e.preventDefault();
+                insertAutocompleteSnippet(currentCompletions[autocompleteSelectedIndex]);
+                popup.style.display = "none";
+                return;
+            }
+            if (e.key === "Escape") {
+                popup.style.display = "none";
+                return;
+            }
+        }
+
+        // Ctrl+Shift+F: Formatear código
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "F" || e.key === "f")) {
+            e.preventDefault();
+            formatCurrentCode();
+        }
+    });
+
+    document.addEventListener("click", (e) => {
+        if (!e.target.closest("#autocompletePopup") && e.target !== editor) {
+            popup.style.display = "none";
+        }
+    });
+}
+
+function renderAutocompletePopup(token) {
+    const popup = document.getElementById("autocompletePopup");
+    if (!popup) return;
+
+    popup.innerHTML = "";
+    currentCompletions.forEach((item, idx) => {
+        const div = document.createElement("div");
+        div.style.padding = "6px 10px";
+        div.style.cursor = "pointer";
+        div.style.fontSize = "11px";
+        div.style.display = "flex";
+        div.style.flexDirection = "column";
+        div.style.borderBottom = "1px solid #1f1f1f";
+
+        if (idx === autocompleteSelectedIndex) {
+            div.style.background = "#25170d";
+            div.style.color = "var(--orange)";
+        } else {
+            div.style.color = "#ccc";
+        }
+
+        div.innerHTML = `<strong style="font-size:11px;">${item.label}</strong><small style="color:#777; font-size:9px;">${item.desc}</small>`;
+
+        div.addEventListener("click", () => {
+            insertAutocompleteSnippet(item);
+            popup.style.display = "none";
+        });
+
+        popup.appendChild(div);
+    });
+
+    popup.style.display = "block";
+}
+
+function updateAutocompleteSelectionUI() {
+    const popup = document.getElementById("autocompletePopup");
+    if (!popup) return;
+
+    const items = popup.children;
+    for (let i = 0; i < items.length; i++) {
+        if (i === autocompleteSelectedIndex) {
+            items[i].style.background = "#25170d";
+            items[i].style.color = "var(--orange)";
+        } else {
+            items[i].style.background = "transparent";
+            items[i].style.color = "#ccc";
+        }
+    }
+}
+
+function insertAutocompleteSnippet(item) {
+    const editor = document.getElementById("codeEditor");
+    if (!editor || !item) return;
+
+    const cursor = editor.selectionStart;
+    const textBefore = editor.value.substring(0, cursor);
+    const match = textBefore.match(/([a-zA-Z0-9_\-<]+)$/);
+    const tokenLength = match ? match[1].length : 0;
+
+    const startPos = cursor - tokenLength;
+    const textAfter = editor.value.substring(cursor);
+
+    editor.value = editor.value.substring(0, startPos) + item.snippet + textAfter;
+    editor.selectionStart = editor.selectionEnd = startPos + item.snippet.length;
+
+    if (typeof saveCurrentFile === "function") saveCurrentFile();
+    if (typeof updateLineCounter === "function") updateLineCounter();
+    if (typeof updatePreview === "function") updatePreview();
+}
+
+/* =====================================================
+   FORMATEADOR DE CÓDIGO (BEAUTIFIER)
+===================================================== */
+function formatCurrentCode() {
+    const editor = document.getElementById("codeEditor");
+    if (!editor || editor.disabled || !editor.value.trim()) return;
+
+    const raw = editor.value;
+    let formatted = raw;
+
+    let indent = 0;
+    const indentStr = "  "; // 2 espacios
+    const lines = raw.split("\n");
+
+    const formattedLines = lines.map(line => {
+        let trimmed = line.trim();
+        if (!trimmed) return "";
+
+        // Si la línea empieza con etiqueta de cierre o }, reducir indentación antes
+        if (trimmed.startsWith("</") || trimmed.startsWith("}") || trimmed.startsWith("]")) {
+            indent = Math.max(0, indent - 1);
+        }
+
+        const currentLine = indentStr.repeat(indent) + trimmed;
+
+        // Calcular ajuste de indentación para la siguiente línea
+        const openTags = (trimmed.match(/<[a-zA-Z0-9]+(?:\s[^>]*)?>/g) || []).filter(tag => !tag.endsWith("/>") && !tag.startsWith("<!")).length;
+        const closeTags = (trimmed.match(/<\/[a-zA-Z0-9]+>/g) || []).length;
+        const openBrackets = (trimmed.match(/[\{\[]/g) || []).length;
+        const closeBrackets = (trimmed.match(/[\}\]]/g) || []).length;
+
+        indent += (openTags - closeTags) + (openBrackets - closeBrackets);
+        indent = Math.max(0, indent);
+
+        return currentLine;
+    });
+
+    editor.value = formattedLines.join("\n");
+
+    if (typeof saveCurrentFile === "function") saveCurrentFile();
+    if (typeof updateLineCounter === "function") updateLineCounter();
+    if (typeof updatePreview === "function") updatePreview();
+
+    if (typeof showTopNotification === "function") {
+        showTopNotification("✨ Código formateado correctamente", null, 2500);
+    }
+}
+
+/* =====================================================
+   BUSCADOR Y REEMPLAZO DE CÓDIGO
+===================================================== */
+let searchMatches = [];
+let currentMatchIndex = -1;
+
+function initCodeSearchAndReplace() {
+    const searchInput = document.getElementById("codeSearchInput");
+    const replaceInput = document.getElementById("codeReplaceInput");
+    const prevBtn = document.getElementById("codeSearchPrevBtn");
+    const nextBtn = document.getElementById("codeSearchNextBtn");
+    const replaceBtn = document.getElementById("codeReplaceBtn");
+    const replaceAllBtn = document.getElementById("codeReplaceAllBtn");
+    const closeBtn = document.getElementById("codeSearchCloseBtn");
+
+    if (searchInput) searchInput.addEventListener("input", performCodeSearch);
+    if (prevBtn) prevBtn.addEventListener("click", () => navigateSearchMatch(-1));
+    if (nextBtn) nextBtn.addEventListener("click", () => navigateSearchMatch(1));
+    if (replaceBtn) replaceBtn.addEventListener("click", replaceCurrentMatch);
+    if (replaceAllBtn) replaceAllBtn.addEventListener("click", replaceAllMatches);
+    if (closeBtn) closeBtn.addEventListener("click", () => toggleCodeSearch(false));
+
+    if (searchInput) {
+        searchInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                navigateSearchMatch(e.shiftKey ? -1 : 1);
+            }
+            if (e.key === "Escape") {
+                toggleCodeSearch(false);
+            }
+        });
+    }
+
+    if (replaceInput) {
+        replaceInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                replaceCurrentMatch();
+            }
+        });
+    }
+}
+
+function toggleCodeSearch(show) {
+    const container = document.getElementById("codeSearchContainer");
+    if (!container) return;
+
+    if (typeof show === "undefined") {
+        show = container.style.display === "none";
+    }
+
+    container.style.display = show ? "flex" : "none";
+
+    if (show) {
+        const searchInput = document.getElementById("codeSearchInput");
+        if (searchInput) {
+            searchInput.focus();
+            searchInput.select();
+        }
+        performCodeSearch();
+    } else {
+        const editor = document.getElementById("codeEditor");
+        if (editor) editor.focus();
+    }
+}
+
+function performCodeSearch() {
+    const editor = document.getElementById("codeEditor");
+    const searchInput = document.getElementById("codeSearchInput");
+    const countEl = document.getElementById("codeSearchMatchCount");
+
+    if (!editor || !searchInput || !countEl) return;
+
+    const query = searchInput.value;
+    searchMatches = [];
+    currentMatchIndex = -1;
+
+    if (!query) {
+        countEl.textContent = "0 / 0";
+        return;
+    }
+
+    const text = editor.value;
+    const lowerText = text.toLowerCase();
+    const lowerQuery = query.toLowerCase();
+    let index = 0;
+
+    while ((index = lowerText.indexOf(lowerQuery, index)) !== -1) {
+        searchMatches.push(index);
+        index += query.length || 1;
+    }
+
+    if (searchMatches.length > 0) {
+        currentMatchIndex = 0;
+        highlightCurrentMatch();
+    }
+
+    updateMatchCountUI();
+}
+
+function updateMatchCountUI() {
+    const countEl = document.getElementById("codeSearchMatchCount");
+    if (!countEl) return;
+
+    if (searchMatches.length === 0) {
+        countEl.textContent = "0 / 0";
+    } else {
+        countEl.textContent = `${currentMatchIndex + 1} / ${searchMatches.length}`;
+    }
+}
+
+function highlightCurrentMatch() {
+    const editor = document.getElementById("codeEditor");
+    const searchInput = document.getElementById("codeSearchInput");
+    if (!editor || !searchInput || currentMatchIndex < 0 || currentMatchIndex >= searchMatches.length) return;
+
+    const start = searchMatches[currentMatchIndex];
+    const query = searchInput.value;
+    const end = start + query.length;
+
+    const activeEl = document.activeElement;
+    editor.setSelectionRange(start, end);
+
+    // Scroll editor to view match without stealing focus if typing in search inputs
+    const textBefore = editor.value.substring(0, start);
+    const lineCount = textBefore.split("\n").length;
+    const lineHeight = 23; // standard line height for 14px editor
+    editor.scrollTop = Math.max(0, (lineCount - 3) * lineHeight);
+
+    if (activeEl && (activeEl.id === "codeSearchInput" || activeEl.id === "codeReplaceInput")) {
+        activeEl.focus();
+    } else {
+        editor.focus();
+    }
+}
+
+function navigateSearchMatch(dir) {
+    if (searchMatches.length === 0) return;
+
+    currentMatchIndex += dir;
+    if (currentMatchIndex >= searchMatches.length) currentMatchIndex = 0;
+    if (currentMatchIndex < 0) currentMatchIndex = searchMatches.length - 1;
+
+    highlightCurrentMatch();
+    updateMatchCountUI();
+}
+
+function replaceCurrentMatch() {
+    const editor = document.getElementById("codeEditor");
+    const searchInput = document.getElementById("codeSearchInput");
+    const replaceInput = document.getElementById("codeReplaceInput");
+
+    if (!editor || !searchInput || !replaceInput || currentMatchIndex < 0 || currentMatchIndex >= searchMatches.length) return;
+
+    const query = searchInput.value;
+    const replacement = replaceInput.value;
+    const start = searchMatches[currentMatchIndex];
+
+    const val = editor.value;
+    editor.value = val.substring(0, start) + replacement + val.substring(start + query.length);
+
+    if (typeof saveCurrentFile === "function") saveCurrentFile();
+    if (typeof updateLineCounter === "function") updateLineCounter();
+    if (typeof updatePreview === "function") updatePreview();
+
+    performCodeSearch();
+}
+
+function replaceAllMatches() {
+    const editor = document.getElementById("codeEditor");
+    const searchInput = document.getElementById("codeSearchInput");
+    const replaceInput = document.getElementById("codeReplaceInput");
+
+    if (!editor || !searchInput || !replaceInput) return;
+
+    const query = searchInput.value;
+    if (!query) return;
+
+    const replacement = replaceInput.value;
+    const regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+
+    const totalReplaced = searchMatches.length;
+    editor.value = editor.value.replace(regex, replacement);
+
+    if (typeof saveCurrentFile === "function") saveCurrentFile();
+    if (typeof updateLineCounter === "function") updateLineCounter();
+    if (typeof updatePreview === "function") updatePreview();
+
+    performCodeSearch();
+    if (typeof showTopNotification === "function") {
+        showTopNotification(`✏️ Se reemplazaron ${totalReplaced} coincidencias`, null, 2500);
+    }
+}
