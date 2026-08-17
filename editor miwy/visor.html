@@ -13,6 +13,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
 <link rel="stylesheet" href="styler.css">  
+<link rel="stylesheet" href="galería.css">  
 </head>  
   
   
@@ -73,8 +74,26 @@
 </header>  
   
   
+<!-- GALERÍA DE PROYECTOS (VISTA INICIAL DE BIENVENIDA) -->
+<div id="galleryContainer" class="miwy-gallery" style="display:block; padding:30px 18px;">
+    <div class="miwy-preview">
+        <div class="miwy-preview-content">
+            <h2 class="miwy-preview-title">MIWY CODE STUDIO</h2>
+            <p class="miwy-preview-subtitle">Selecciona o crea un proyecto para iniciar</p>
+        </div>
+    </div>
+
+    <div class="miwy-projects-header">
+        <h3 class="miwy-projects-title">MIS PROYECTOS</h3>
+        <button class="miwy-create-project" onclick="openCreateProject()">+ CREAR PROYECTO</button>
+    </div>
+
+    <div id="galleryProjectsList" class="miwy-projects-list">
+    </div>
+</div>
+
 <!-- WORKSPACE -->  
-<main class="workspace" id="workspace">  
+<main class="workspace" id="workspace" style="display:none;">  
   
   
 <!-- LEFT PANEL (CÓDIGO / MIWY / PROYECTOS) -->  
@@ -100,13 +119,6 @@
                     onclick="switchMainTab('ai')"> 
                     🕷️ Miwy 
                 </button> 
-
-                <button  
-                    id="tabProjectsBtn"  
-                    class="main-tab-btn" 
-                    onclick="switchMainTab('projects')"> 
-                    📁 Proyectos 
-                </button> 
             </div> 
   
             <button  
@@ -128,6 +140,27 @@
   
     <!-- TAB CONTENT: CÓDIGO -->
     <div id="codeView" style="display:flex; flex-direction:column; flex:1; min-height:0;">
+
+        <!-- BUSCADOR Y REEMPLAZO DE CÓDIGO -->
+        <div id="codeSearchContainer" style="display:none; padding:6px 10px; background:#0e0e0e; border-bottom:1px solid #222; flex-wrap:wrap; gap:8px; align-items:center; flex-shrink:0;">
+            <div style="display:flex; align-items:center; gap:5px; flex:1; min-width:180px;">
+                <span style="font-size:11px; color:#aaa;">🔍</span>
+                <input id="codeSearchInput" type="text" placeholder="Buscar en código..." style="flex:1; height:26px; background:#141414; border:1px solid #333; border-radius:4px; color:#fff; padding:0 8px; font-size:11px; outline:none;">
+            </div>
+            <div style="display:flex; align-items:center; gap:5px; flex:1; min-width:180px;">
+                <span style="font-size:11px; color:#aaa;">✏️</span>
+                <input id="codeReplaceInput" type="text" placeholder="Reemplazar con..." style="flex:1; height:26px; background:#141414; border:1px solid #333; border-radius:4px; color:#fff; padding:0 8px; font-size:11px; outline:none;">
+            </div>
+            <div style="display:flex; align-items:center; gap:4px;">
+                <span id="codeSearchMatchCount" style="font-size:10px; color:#888; min-width:45px; text-align:center;">0 / 0</span>
+                <button id="codeSearchPrevBtn" class="preview-button" style="height:26px; padding:0 6px; font-size:10px;" title="Anterior (Shift+Enter)">▲</button>
+                <button id="codeSearchNextBtn" class="preview-button" style="height:26px; padding:0 6px; font-size:10px;" title="Siguiente (Enter)">▼</button>
+                <button id="codeReplaceBtn" class="preview-button" style="height:26px; padding:0 8px; font-size:10px; color:var(--orange);" title="Reemplazar coincidencia actual">Reemplazar</button>
+                <button id="codeReplaceAllBtn" class="preview-button" style="height:26px; padding:0 8px; font-size:10px; color:var(--orange);" title="Reemplazar todo">Todo</button>
+                <button id="codeSearchCloseBtn" class="preview-button" style="height:26px; padding:0 6px; font-size:12px; color:#888;" title="Cerrar buscador">×</button>
+            </div>
+        </div>
+
         <div  
             id="fileBar"  
             class="file-bar">  
@@ -140,6 +173,10 @@
                 spellcheck="false"  
                 disabled  
                 placeholder="Crea un archivo para comenzar..."></textarea>  
+
+            <!-- POPUP DE AUTO-COMPLETADO (INTELLISENSE) -->
+            <div id="autocompletePopup" style="display:none; position:absolute; bottom:30px; left:20px; z-index:100; background:#141414; border:1px solid #333; border-radius:6px; box-shadow:0 10px 25px rgba(0,0,0,0.6); max-height:180px; width:220px; overflow-y:auto; padding:4px 0;">
+            </div>
   
             <div  
                 id="emptyEditor"  
@@ -605,6 +642,7 @@
                     ›  
 
                 </button>  
+
   
                 <button  
                     id="visualEditorSettingsBtn"  
@@ -621,7 +659,7 @@
                                 Editor Visual  
                             </strong>  
                             <small>  
-                                Orientación y posición de controles  
+                                Orientación de controles flotantes  
                             </small>  
                         </div>  
   
@@ -735,16 +773,22 @@
                 Controles de Editor Visual  
             </div>  
   
-            <label class="repo-label">Orientación de Controles</label>
+            <label class="repo-label">Orientación de Controles Flotantes</label>
             <div style="display:flex; gap:8px; margin-bottom:16px;">
                 <button id="dockOrientHorizontalBtn" class="version-action" style="flex:1; height:36px; font-weight:bold;">↔️ Horizontal</button>
                 <button id="dockOrientVerticalBtn" class="version-action" style="flex:1; height:36px; font-weight:bold;">↕️ Vertical</button>
             </div>
 
-            <label class="repo-label">Modo de Posición</label>
-            <div style="display:flex; gap:8px; margin-bottom:16px;">
-                <button id="dockModeFloatingBtn" class="version-action" style="flex:1; height:36px; font-weight:bold;">✨ Flotante</button>
-                <button id="dockModeStaticBtn" class="version-action" style="flex:1; height:36px; font-weight:bold;">📌 Estático</button>
+            <label class="repo-label" style="margin-top:12px;">Herramientas del Editor</label>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <button id="toggleSearchSettingBtn" class="version-action" style="height:36px; text-align:left; padding:0 12px; font-weight:bold; display:flex; align-items:center; justify-content:space-between;">
+                    <span>🔍 Buscador de Código</span>
+                    <span style="font-size:10px; color:var(--orange);">Abrir (Ctrl+F)</span>
+                </button>
+                <button id="toggleAutocompleteSettingBtn" class="version-action" style="height:36px; text-align:left; padding:0 12px; font-weight:bold; display:flex; align-items:center; justify-content:space-between;">
+                    <span>💡 Auto-Completado</span>
+                    <span id="autocompleteSettingStatus" style="font-size:10px; color:var(--green);">Activado</span>
+                </button>
             </div>
         </div>  
   
@@ -1314,17 +1358,32 @@ function setEditorLocked(locked){
 ===================================================== */  
   
 function renderFiles(){  
-  
-    fileBar.innerHTML = "";  
-  
-    const project =  
-        getCurrentProject();  
-  
+    const project = getCurrentProject();  
     if(!project) return;  
  
-    const names =  
-        Object.keys(project.files);  
-  
+    const names = Object.keys(project.files);  
+
+    // Fast path: if tabs already exist and filenames haven't changed, just toggle active class
+    const existingTabs = fileBar.querySelectorAll(".file-tab");
+    if (existingTabs.length === names.length) {
+        let sameNames = true;
+        existingTabs.forEach((tab, idx) => {
+            if (tab.getAttribute("data-filename") !== names[idx]) sameNames = false;
+        });
+        if (sameNames) {
+            existingTabs.forEach(tab => {
+                if (tab.getAttribute("data-filename") === currentFileName) {
+                    tab.classList.add("active");
+                } else {
+                    tab.classList.remove("active");
+                }
+            });
+            return;
+        }
+    }
+
+    fileBar.innerHTML = "";  
+
     if(names.length === 0){  
         currentFileName = null;  
         if(currentActiveTab === "code") {
@@ -1336,67 +1395,32 @@ function renderFiles(){
         updatePreview();  
         return;  
     }  
-  
+
     names.forEach(filename => {  
-  
-        const tab =  
-            document.createElement("div");  
-  
-        tab.className =  
-            "file-tab";  
-  
-        if(filename === currentFileName)  
-            tab.classList.add("active");  
-  
-  
-        const openButton =  
-            document.createElement("button");  
-  
-        openButton.className =  
-            "file-open";  
-  
-        openButton.innerHTML = `  
-            <span>${getFileIcon(filename)}</span>  
-            <span>${escapeHTML(filename)}</span>  
-        `;  
-  
-        openButton.addEventListener(  
-            "click",  
-            () => selectFile(filename)  
-        );  
-  
-  
-        const deleteButton =  
-            document.createElement("button");  
-  
-        deleteButton.className =  
-            "file-delete";  
-  
+        const tab = document.createElement("div");  
+        tab.className = "file-tab";  
+        tab.setAttribute("data-filename", filename);
+
+        if(filename === currentFileName) tab.classList.add("active");  
+
+        const openButton = document.createElement("button");  
+        openButton.className = "file-open";  
+        openButton.innerHTML = `<span>${getFileIcon(filename)}</span><span>${escapeHTML(filename)}</span>`;  
+        openButton.addEventListener("click", () => selectFile(filename));  
+
+        const deleteButton = document.createElement("button");  
+        deleteButton.className = "file-delete";  
         deleteButton.textContent = "×";  
-  
-        deleteButton.title =  
-            "Eliminar archivo";  
-  
-  
-        deleteButton.addEventListener(  
-            "click",  
-            event => {  
-  
-                event.stopPropagation();  
-  
-                deleteFile(filename);  
-  
-            }  
-        );  
-  
-  
+        deleteButton.title = "Eliminar archivo";  
+        deleteButton.addEventListener("click", event => {  
+            event.stopPropagation();  
+            deleteFile(filename);  
+        });  
+
         tab.appendChild(openButton);  
         tab.appendChild(deleteButton);  
-  
         fileBar.appendChild(tab);  
-  
     });  
-  
 }  
   
   
@@ -1476,13 +1500,27 @@ function createFile(){
         return;  
     }  
 
-    project.files[name] = "";  
-    saveProjects();  
-    selectFile(name);  
-    fileDialog.classList.remove("open");  
-    if (typeof showTopNotification === "function") {
-        showTopNotification(`📄 Archivo "${name}" creado correctamente`, null, 2500);
-    }
+    showCustomDialog({
+        title: "Crear Archivo",
+        description: `¿Deseas guardar y confirmar la creación del archivo "${name}" en el dispositivo?`,
+        confirmText: "Aceptar",
+        cancelText: "Rechazar",
+        onConfirm: () => {
+            project.files[name] = "";  
+            saveProjects();  
+            selectFile(name);  
+            fileDialog.classList.remove("open");  
+            if (typeof showTopNotification === "function") {
+                showTopNotification(`📄 Archivo "${name}" creado y guardado en almacenamiento`, null, 3000);
+            }
+        },
+        onCancel: () => {
+            fileDialog.classList.remove("open");
+            if (typeof showTopNotification === "function") {
+                showTopNotification("❌ Creación de archivo cancelada", null, 2500);
+            }
+        }
+    });
 }  
   
   
@@ -1491,30 +1529,25 @@ function createFile(){
 ===================================================== */  
   
 function selectFile(filename){  
-  
+    if (currentFileName === filename && !codeEditor.disabled) return;
+
     saveCurrentFile();  
   
-    const project =  
-        getCurrentProject();  
-  
+    const project = getCurrentProject();  
     if(!project) return;  
   
-    currentFileName =  
-        filename;  
+    currentFileName = filename;  
  
     codeEditor.style.display = "block"; 
- 
     setEditorLocked(false);  
  
-    codeEditor.value =  
-        project.files[filename] || "";  
+    codeEditor.value = project.files[filename] || "";  
  
     if(currentActiveTab === "code") {
         currentFileHeader.textContent = filename;  
     }
   
-    fileFooterName.textContent =  
-        filename;  
+    fileFooterName.textContent = filename;  
  
     renderFiles();  
     updateLineCounter();  
@@ -1715,6 +1748,8 @@ const panelProjectList =
 function renderProjects(){  
     if(projectList) projectList.innerHTML = "";  
     if(panelProjectList) panelProjectList.innerHTML = "";
+    const galleryList = document.getElementById("galleryProjectsList");
+    if(galleryList) galleryList.innerHTML = "";
   
     const currentProj = getCurrentProject();
     const currentNameEl = document.getElementById("currentProjectNameInTab");
@@ -1722,7 +1757,59 @@ function renderProjects(){
         currentNameEl.textContent = currentProj.name;
     }
 
+    if(galleryList && projects.length === 0) {
+        galleryList.innerHTML = `<div class="miwy-empty-projects">No hay proyectos. ¡Crea uno para empezar!</div>`;
+    }
+
     projects.forEach(project => {  
+        // Build item for Gallery Landing View
+        if(galleryList) {
+            const card = document.createElement("div");
+            card.className = "miwy-project-card";
+
+            const info = document.createElement("div");
+            info.className = "miwy-project-info";
+
+            const name = document.createElement("h4");
+            name.className = "miwy-project-name";
+            name.textContent = project.name;
+
+            const desc = document.createElement("p");
+            desc.className = "miwy-project-description";
+            desc.textContent = `${Object.keys(project.files).length} archivos en el proyecto`;
+
+            info.appendChild(name);
+            info.appendChild(desc);
+
+            const icon = document.createElement("div");
+            icon.className = "miwy-project-icon";
+            icon.textContent = "⚡";
+
+            const actions = document.createElement("div");
+            actions.className = "miwy-project-actions";
+
+            const openBtn = document.createElement("button");
+            openBtn.className = "miwy-open-btn";
+            openBtn.textContent = "ABRIR";
+            openBtn.onclick = () => openProjectFromGallery(project.id);
+
+            const delBtn = document.createElement("button");
+            delBtn.className = "miwy-delete-btn";
+            delBtn.textContent = "🗑";
+            delBtn.onclick = (e) => {
+                e.stopPropagation();
+                deleteProject(project.id);
+            };
+
+            actions.appendChild(openBtn);
+            actions.appendChild(delBtn);
+
+            card.appendChild(icon);
+            card.appendChild(info);
+            card.appendChild(actions);
+
+            galleryList.appendChild(card);
+        }
         const buildItem = () => {
             const item = document.createElement("div");  
             item.className = "project-item";  
@@ -1806,6 +1893,14 @@ function switchProject(id){
     closeProjectMenu();  
   
 }  
+
+function openProjectFromGallery(id){
+    switchProject(id);
+    const galleryContainer = document.getElementById("galleryContainer");
+    const workspace = document.getElementById("workspace");
+    if(galleryContainer) galleryContainer.style.display = "none";
+    if(workspace) workspace.style.display = "flex";
+}
   
   
 /* =====================================================  
@@ -2061,6 +2156,8 @@ function saveProjectDialog(){
         loadProject();  
   
         closeProjectMenu(); 
+
+        openProjectFromGallery(project.id);
  
     }else{  
   
@@ -3157,6 +3254,13 @@ window.addEventListener("keydown", function(event) {
         } 
     } 
  
+    // Ctrl + F: Buscar y Reemplazar
+    if (isCtrl && key === 'f') {
+        event.preventDefault();
+        toggleCodeSearch();
+        showShortcutToast("Ctrl + F", "Buscador de código");
+    }
+
     // Ctrl + , (comma): Abrir configuración (Settings) 
     if (isCtrl && event.key === ',') { 
         event.preventDefault(); 
