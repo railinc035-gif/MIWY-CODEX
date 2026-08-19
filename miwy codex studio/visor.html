@@ -1,0 +1,3561 @@
+<!DOCTYPE html>  
+<html lang="es">  
+<head>  
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width, initial-scale=1.0">  
+<title>Miwy</title>  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script> 
+<script src="editor.js"></script>
+  
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<link rel="stylesheet" href="styler.css">  
+<link rel="stylesheet" href="galeria.css">  
+<link rel="stylesheet" href="animación.css">  
+<script src="animación.js"></script>
+</head>  
+  
+  
+<body>  
+  
+<div class="app">  
+ 
+<!-- SHORTCUT TOAST --> 
+<div id="shortcutToast" class="shortcut-toast"> 
+    <span id="shortcutKeys" class="key-cap"></span> 
+    <span id="shortcutDesc"></span> 
+</div> 
+  
+  
+<!-- TOPBAR -->  
+<header class="topbar">  
+  
+    <button class="logo-button" title="Miwy">  
+        <div class="spider">  
+  
+            <div class="spider-body"></div>  
+  
+            <div class="spider-eye left"></div>  
+            <div class="spider-eye right"></div>  
+  
+            <div class="leg l1"></div>  
+            <div class="leg l2"></div>  
+            <div class="leg l3"></div>  
+            <div class="leg l4"></div>  
+  
+            <div class="leg r1"></div>  
+            <div class="leg r2"></div>  
+            <div class="leg r3"></div>  
+            <div class="leg r4"></div>  
+  
+        </div>  
+    </button>  
+
+    <!-- ERROR BANNER IN TOPBAR --> 
+    <div id="previewErrorBanner" class="preview-error-banner"> 
+        <div class="error-title"> 
+            <span>⚠️ Error detectado</span> 
+        </div> 
+        <div id="previewErrorDesc" class="error-desc"></div> 
+        <div id="previewErrorFix" class="error-fix"></div> 
+        <div style="display:flex; gap:6px; align-items:center;">
+            <button id="applyFixBtn" style="background:#27c93f; color:#000; border:none; border-radius:5px; padding:3px 8px; font-size:10px; font-weight:bold; cursor:pointer;" title="Aplicar propuesta de código">✅ Aplicar solución</button>
+            <button class="error-close" onclick="document.getElementById('previewErrorBanner').style.display='none'" title="Ignorar">×</button> 
+        </div>
+    </div> 
+  
+    <button  
+        id="settingsButton"  
+        class="settings-button"
+        style="display:none;">  
+        ⚙  
+    </button>  
+  
+</header>  
+  
+  
+<!-- GALERÍA DE PROYECTOS (VISTA INICIAL DE BIENVENIDA CON CÓDIGO RETRO) -->
+<div id="galleryContainer" class="miwy-gallery" style="display:block;">
+
+    <!-- CAPA DE CÓDIGO RETRO COLORIDO FLOTANTE EN EL FONDO -->
+    <div class="retro-code-bg">
+        <div class="retro-code-snippet c1">&lt;html lang="es"&gt; &lt;script src="miwy.js"&gt;&lt;/script&gt;</div>
+        <div class="retro-code-snippet c2">const miwy = new SpiderAI({ mode: "retro" });</div>
+        <div class="retro-code-snippet c3">function render() { requestAnimationFrame(loop); }</div>
+        <div class="retro-code-snippet c4">body { background: #080808; color: #00ff66; }</div>
+        <div class="retro-code-snippet c5">&lt;div class="matrix-code"&gt;01001101 01001001 01010111 01011001&lt;/div&gt;</div>
+        <div class="retro-code-snippet c6">console.log("🚀 Miwy IDE Ready v2.0");</div>
+        <div class="retro-code-snippet c7">async function compile() { await buildZip(); }</div>
+    </div>
+
+    <div class="miwy-hero-header">
+        <div class="hero-code-watermark">
+            &lt;code&gt;<br>
+            import { Miwy } from 'spider-core';<br>
+            &lt;/code&gt;
+        </div>
+        <canvas id="miwyCanvas"></canvas>
+    </div>
+
+    <div class="miwy-gallery-grid">
+        <div class="miwy-gallery-main">
+            <div class="miwy-projects-header">
+                <h3 class="miwy-projects-title">MIS PROYECTOS</h3>
+                <button class="miwy-create-project" onclick="openCreateProject()">+ CREAR PROYECTO</button>
+            </div>
+
+            <div id="galleryProjectsList" class="miwy-projects-list">
+            </div>
+        </div>
+
+        <div class="miwy-gallery-side">
+            <div class="miwy-projects-header">
+                <h3 class="miwy-projects-title">MIWY ARCADE</h3>
+            </div>
+            <div id="miwyArcadePreview" class="miwy-arcade-widget"></div>
+        </div>
+    </div>
+</div>
+
+<!-- WORKSPACE -->  
+<main class="workspace" id="workspace" style="display:none;">  
+  
+  
+<!-- LEFT PANEL (CÓDIGO / MIWY / PROYECTOS) -->  
+<section  
+    class="code-panel"  
+    id="codePanel">  
+  
+    <div class="panel-header">  
+  
+        <div class="panel-left">  
+  
+            <div class="main-tabs"> 
+                <button  
+                    id="tabCodeBtn"  
+                    class="main-tab-btn active" 
+                    onclick="switchMainTab('code')"> 
+                    📄 Código 
+                </button> 
+ 
+                <button  
+                    id="tabAiBtn"  
+                    class="main-tab-btn" 
+                    onclick="switchMainTab('ai')"> 
+                    🕷️ Miwy 
+                </button> 
+            </div> 
+  
+            <button  
+                id="newFileButton"  
+                class="new-file-button"  
+                title="Crear archivo">  
+                +  
+            </button>  
+  
+        </div>  
+  
+        <div  
+            id="currentFileHeader"  
+            class="panel-name">  
+            Sin archivo  
+        </div>  
+  
+    </div>  
+  
+    <!-- TAB CONTENT: CÓDIGO -->
+    <div id="codeView" style="display:flex; flex-direction:column; flex:1; min-height:0;">
+
+        <!-- BUSCADOR Y REEMPLAZO DE CÓDIGO -->
+        <div id="codeSearchContainer" style="display:none; padding:6px 10px; background:#0e0e0e; border-bottom:1px solid #222; flex-wrap:wrap; gap:8px; align-items:center; flex-shrink:0;">
+            <div style="display:flex; align-items:center; gap:5px; flex:1; min-width:180px;">
+                <span style="font-size:11px; color:#aaa;">🔍</span>
+                <input id="codeSearchInput" type="text" placeholder="Buscar en código..." style="flex:1; height:26px; background:#141414; border:1px solid #333; border-radius:4px; color:#fff; padding:0 8px; font-size:11px; outline:none;">
+            </div>
+            <div style="display:flex; align-items:center; gap:5px; flex:1; min-width:180px;">
+                <span style="font-size:11px; color:#aaa;">✏️</span>
+                <input id="codeReplaceInput" type="text" placeholder="Reemplazar con..." style="flex:1; height:26px; background:#141414; border:1px solid #333; border-radius:4px; color:#fff; padding:0 8px; font-size:11px; outline:none;">
+            </div>
+            <div style="display:flex; align-items:center; gap:4px;">
+                <span id="codeSearchMatchCount" style="font-size:10px; color:#888; min-width:45px; text-align:center;">0 / 0</span>
+                <button id="codeSearchPrevBtn" class="preview-button" style="height:26px; padding:0 6px; font-size:10px;" title="Anterior (Shift+Enter)">▲</button>
+                <button id="codeSearchNextBtn" class="preview-button" style="height:26px; padding:0 6px; font-size:10px;" title="Siguiente (Enter)">▼</button>
+                <button id="codeReplaceBtn" class="preview-button" style="height:26px; padding:0 8px; font-size:10px; color:var(--orange);" title="Reemplazar coincidencia actual">Reemplazar</button>
+                <button id="codeReplaceAllBtn" class="preview-button" style="height:26px; padding:0 8px; font-size:10px; color:var(--orange);" title="Reemplazar todo">Todo</button>
+                <button id="codeSearchCloseBtn" class="preview-button" style="height:26px; padding:0 6px; font-size:12px; color:#888;" title="Cerrar buscador">×</button>
+            </div>
+        </div>
+
+        <div  
+            id="fileBar"  
+            class="file-bar">  
+        </div>  
+  
+        <div class="editor-wrapper">  
+            <textarea  
+                id="codeEditor"  
+                class="code-editor locked"  
+                spellcheck="false"  
+                disabled  
+                placeholder="Crea un archivo para comenzar..."></textarea>  
+
+            <!-- POPUP DE AUTO-COMPLETADO (INTELLISENSE) -->
+            <div id="autocompletePopup" style="display:none; position:absolute; bottom:30px; left:20px; z-index:100; background:#141414; border:1px solid #333; border-radius:6px; box-shadow:0 10px 25px rgba(0,0,0,0.6); max-height:180px; width:220px; overflow-y:auto; padding:4px 0;">
+            </div>
+  
+            <div  
+                id="emptyEditor"  
+                class="empty-editor">  
+                <span>  
+                    Crea un archivo para comenzar  
+                </span>  
+            </div>  
+        </div>  
+  
+        <div class="code-footer">  
+            <span id="fileFooterName">  
+                Sin archivo  
+            </span>  
+
+            <button id="copyCodeBtn" class="preview-button" style="height:22px; padding:0 8px; font-size:10px; color:#aaa; gap:4px;" title="Copiar código al portapapeles">
+                📋 Copiar
+            </button>
+  
+            <span  
+                id="lineCounter"  
+                class="line-counter">  
+                0 líneas  
+            </span>  
+        </div>  
+    </div>
+
+    <!-- TAB CONTENT: MIWY AI -->
+    <div id="aiView" class="ai-tab-container" style="display:none;">
+        <div id="aiMessages" class="ai-messages">
+            <div class="ai-message system">
+                ¡Hola! Soy Miwy, tu asistente virtual.
+            </div>
+        </div>
+
+        <div class="ai-input-row">
+            <input  
+                id="aiInput"  
+                class="ai-input"  
+                placeholder="Se integrará pronto"
+                disabled>  
+
+            <button  
+                id="aiSend"  
+                class="ai-send"
+                title="Enviar">  
+                ➜  
+            </button>  
+        </div>
+    </div>
+
+    <!-- TAB CONTENT: PROYECTOS -->
+    <div id="projectsView" class="projects-tab-container" style="display:none;">
+        <div class="projects-panel-header">
+            <span class="projects-panel-title">📁 Mis Proyectos</span>
+            <span id="currentProjectBadge" style="font-size:11px; color:var(--orange); background:#1b120c; padding:3px 8px; border-radius:6px; border:1px solid #ff6a0035;">
+                Activo: <strong id="currentProjectNameInTab">Nuevo proyecto</strong>
+            </span>
+        </div>
+
+        <div id="panelProjectList" class="project-list" style="flex:1; margin-bottom:12px;"></div>
+
+        <div style="display: flex; gap: 8px;"> 
+            <button  
+                id="panelCreateProjectBtn"  
+                class="create-project" 
+                style="flex: 1; margin-top: 0;">  
+                + Crear proyecto  
+            </button>  
+            <button  
+                id="panelImportProjectBtn"  
+                class="create-project" 
+                style="flex: 1; margin-top: 0; background: #1a251c; color: var(--green);">  
+                📥 Importar 
+            </button>  
+        </div> 
+    </div>
+
+</section>  
+  
+  
+<!-- RESIZER -->  
+<div  
+    id="workspaceResizer"  
+    class="workspace-resizer">  
+</div>  
+  
+  
+<!-- PREVIEW -->  
+<section  
+    class="preview-panel"  
+    id="previewPanel">  
+  
+    <div class="panel-header">  
+  
+        <div class="panel-name">  
+            <strong>  
+                Vista de aplicación  
+            </strong>  
+        </div>  
+  
+  
+        <div class="preview-controls">  
+  
+            <span class="panel-name">  
+                <span style="color:#42d66b;">●</span>  
+                Live  
+            </span>  
+ 
+            <button  
+                id="visualEditBtn"  
+                class="preview-button"  
+                title="Edición visual directa"  
+                onclick="toggleVisualEdit()">  
+                ✏️ Editar Visual  
+            </button>  
+  
+            <button  
+                id="desktopPreview"  
+                class="preview-button active"  
+                title="Vista laptop">  
+                Laptop  
+            </button>  
+  
+            <button  
+                id="mobilePreview"  
+                class="preview-button"  
+                title="Vista teléfono">  
+                Teléfono  
+            </button>  
+
+            <button  
+                id="mobileLandscapePreview"  
+                class="preview-button"  
+                title="Vista teléfono horizontal">  
+                📱 Horizontal  
+            </button>  
+  
+        </div>  
+  
+    </div>  
+  
+  
+    <div class="preview-wrapper-container"> 
+        <div class="preview-wrapper">  
+            <iframe  
+                id="previewFrame"  
+                class="preview-frame"  
+                sandbox="allow-scripts allow-forms allow-modals allow-popups allow-same-origin">  
+            </iframe>  
+        </div>  
+    </div> 
+</section>  
+  
+</main>  
+  
+  
+<!-- REVISIÓN DE CAMBIOS (DIFF OVERLAY) --> 
+<div id="diffOverlay" class="overlay"> 
+    <div class="dialog" style="width: 750px; max-width: calc(100vw - 20px);"> 
+        <div class="dialog-title" style="display: flex; justify-content: space-between; align-items: center;"> 
+            <span>👀 Revisión de cambios de Miwy</span> 
+            <span id="diffFileName" style="font-size: 11px; font-weight: normal; background: #222; padding: 4px 8px; border-radius: 4px; color: var(--orange);"></span> 
+        </div> 
+        <div class="dialog-description"> 
+            Compara el código actual (izquierda) con los cambios propuestos por Miwy (derecha). 
+        </div> 
+         
+        <div style="display: flex; gap: 10px; height: 300px; margin-bottom: 14px;"> 
+            <div style="flex: 1; display: flex; flex-direction: column;"> 
+                <div style="font-size: 10px; color: #777; margin-bottom: 4px; text-transform: uppercase;">Código Actual</div> 
+                <textarea id="diffOriginalCode" style="flex: 1; background: #070707; border: 1px solid #222; border-radius: 6px; padding: 10px; color: #888; font-family: monospace; font-size: 11px; resize: none;" readonly></textarea> 
+            </div> 
+            <div style="flex: 1; display: flex; flex-direction: column;"> 
+                <div style="font-size: 10px; color: var(--green); margin-bottom: 4px; text-transform: uppercase;">Código Propuesto</div> 
+                <textarea id="diffProposedCode" style="flex: 1; background: #070e09; border: 1px solid #1a3322; border-radius: 6px; padding: 10px; color: #bfdfc9; font-family: monospace; font-size: 11px; resize: none;" readonly></textarea> 
+            </div> 
+        </div> 
+ 
+        <div class="dialog-buttons"> 
+            <button id="rejectDiffBtn" class="dialog-cancel" style="background: #251010; color: var(--danger);"> 
+                ❌ Rechazar cambios 
+            </button> 
+            <button id="acceptDiffBtn" class="dialog-confirm" style="background: #112d19; color: var(--green); border: 1px solid #235d34;"> 
+                ✅ Aceptar cambios 
+            </button> 
+        </div> 
+    </div> 
+</div> 
+ 
+<!-- EXPORTAR PROYECTO DIALOG -->  
+<div  
+    id="exportDialog"  
+    class="overlay">  
+
+    <div class="dialog">  
+
+        <div class="dialog-title">  
+            Exportar proyecto  
+        </div>  
+
+        <div class="dialog-description">  
+            Descarga todo el código fuente de tu proyecto en un archivo comprimido (.zip).  
+        </div>  
+
+        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:14px;">
+            <label style="display:flex; align-items:center; gap:10px; background:#181818; padding:10px 12px; border-radius:8px; border:1px solid #333;">
+                <input type="radio" name="exportFormat" value="zip" checked style="accent-color:var(--orange);">
+                <div>
+                    <strong style="font-size:12px; color:#fff; display:block;">📦 Archivo ZIP (.zip)</strong>
+                    <small style="font-size:10px; color:#aaa;">Código fuente completo del proyecto</small>
+                </div>
+            </label>
+        </div>
+
+        <div class="dialog-buttons">  
+
+            <button  
+                id="cancelExport"  
+                class="dialog-cancel">  
+                Cancelar  
+            </button>  
+
+            <button  
+                id="confirmExport"  
+                class="dialog-confirm">  
+                Exportar  
+            </button>  
+
+        </div>  
+
+    </div>  
+</div>  
+
+<!-- CREAR ARCHIVO -->  
+<div  
+    id="fileDialog"  
+    class="overlay">  
+  
+    <div class="dialog">  
+  
+        <div class="dialog-title">  
+            Crear archivo  
+        </div>  
+  
+        <div class="dialog-description">  
+            Escribe el nombre incluyendo su extensión.  
+            Miwy reconocerá automáticamente el tipo.  
+        </div>  
+  
+        <input  
+            id="fileInput"  
+            class="dialog-input"  
+            placeholder="index.html">  
+  
+        <div class="dialog-buttons">  
+  
+            <button  
+                id="cancelFile"  
+                class="dialog-cancel">  
+                Cancelar  
+            </button>  
+  
+            <button  
+                id="confirmFile"  
+                class="dialog-confirm">  
+                Crear  
+            </button>  
+  
+        </div>  
+  
+    </div>  
+</div>  
+  
+  
+<!-- PROYECTOS MODAL (OPCIONAL/COMPATIBILIDAD) -->  
+<div  
+    id="projectOverlay"  
+    class="project-overlay">  
+  
+    <div  
+        id="projectMenu"  
+        class="project-menu">  
+  
+        <div class="project-menu-title">  
+            Proyectos  
+        </div>  
+  
+        <div  
+            id="projectList"  
+            class="project-list">  
+        </div>  
+  
+        <div style="display: flex; gap: 6px; margin-top: 7px;"> 
+            <button  
+                id="createProjectButton"  
+                class="create-project" 
+                style="flex: 1; margin-top: 0;">  
+                + Crear proyecto  
+            </button>  
+            <button  
+                id="importProjectBtn"  
+                class="create-project" 
+                style="flex: 1; margin-top: 0; background: #1a251c; color: var(--green);">  
+                📥 Importar 
+            </button>  
+        </div> 
+        <input type="file" id="importProjectInput" accept=".zip,.json,.html,.css,.js,.txt,.svg" multiple style="display: none;"> 
+  
+    </div>  
+  
+</div>  
+  
+  
+<!-- CREAR / RENOMBRAR PROYECTO -->  
+<div  
+    id="projectDialog"  
+    class="overlay">  
+  
+    <div class="dialog">  
+  
+        <div  
+            id="projectDialogTitle"  
+            class="dialog-title">  
+            Crear proyecto  
+        </div>  
+  
+        <div  
+            id="projectDialogDescription"  
+            class="dialog-description">  
+            El proyecto empezará completamente vacío.  
+        </div>  
+  
+        <input  
+            id="projectInput"  
+            class="dialog-input"  
+            placeholder="Nombre del proyecto">  
+  
+        <div class="dialog-buttons">  
+  
+            <button  
+                id="cancelProject"  
+                class="dialog-cancel">  
+                Cancelar  
+            </button>  
+  
+            <button  
+                id="confirmProject"  
+                class="dialog-confirm">  
+                Crear  
+            </button>  
+  
+        </div>  
+  
+    </div>  
+  
+</div>  
+ 
+ 
+<!-- DIALOGO PERSONALIZADO REUTILIZABLE --> 
+<div  
+    id="customDialog"  
+    class="overlay">  
+  
+    <div class="dialog">  
+  
+        <div  
+            id="customDialogTitle"  
+            class="dialog-title">  
+            Confirmar acción  
+        </div>  
+  
+        <div  
+            id="customDialogDescription"  
+            class="dialog-description">  
+            ¿Estás seguro de realizar esta acción?  
+        </div>  
+  
+        <input  
+            id="customDialogInput"  
+            class="dialog-input"  
+            style="display:none; margin-bottom:14px;" 
+            placeholder="...">  
+  
+        <div class="dialog-buttons">  
+  
+            <button  
+                id="customDialogCancel"  
+                class="dialog-cancel">  
+                Cancelar  
+            </button>  
+  
+            <button  
+                id="customDialogConfirm"  
+                class="dialog-confirm">  
+                Confirmar  
+            </button>  
+  
+        </div>  
+  
+    </div>  
+</div>  
+  
+  
+<!-- SETTINGS -->  
+<div  
+    id="settingsOverlay"  
+    class="settings-overlay">  
+  
+    <aside class="settings-panel">  
+  
+        <div id="settingsMain">  
+  
+            <div class="settings-header">  
+  
+                <div class="settings-title">  
+                    Configuración  
+                </div>  
+  
+                <button  
+                    id="closeSettings"  
+                    class="close-settings">  
+                    ×  
+                </button>  
+  
+            </div>  
+  
+  
+            <div class="settings-options">  
+ 
+                <button  
+                    id="exportProjectSettingsBtn"  
+                    class="settings-option" 
+                    style="color: #42d66b;">  
+
+                    <div class="settings-option-left">  
+
+                        <div class="option-icon" style="background: #1a251c;">  
+                            📦  
+                        </div>  
+
+                        <div>  
+
+                            <strong>  
+                                Exportar proyecto  
+                            </strong>  
+
+                            <small>  
+                                Descargar en formato ZIP  
+                            </small>  
+
+                        </div>  
+
+                    </div>  
+
+                    ›  
+
+                </button>  
+
+  
+                <button  
+                    id="visualEditorSettingsBtn"  
+                    class="settings-option">  
+  
+                    <div class="settings-option-left">  
+  
+                        <div class="option-icon">  
+                            ✏️  
+                        </div>  
+  
+                        <div>  
+                            <strong>  
+                                Editor Visual  
+                            </strong>  
+                            <small>  
+                                Orientación de controles flotantes  
+                            </small>  
+                        </div>  
+  
+                    </div>  
+  
+                    ›  
+  
+                </button>  
+  
+                <button  
+                    id="versionsButton"  
+                    class="settings-option">  
+  
+                    <div class="settings-option-left">  
+  
+                        <div class="option-icon">  
+                            ↶  
+                        </div>  
+  
+                        <div>  
+  
+                            <strong>  
+                                Versiones  
+                            </strong>  
+  
+                            <small>  
+                                Historial del proyecto  
+                            </small>  
+  
+                        </div>  
+  
+                    </div>  
+  
+                    ›  
+  
+                </button>  
+  
+  
+                <button  
+                    id="saveProjectSettingsBtn"  
+                    class="settings-option">  
+  
+                    <div class="settings-option-left">  
+  
+                        <div class="option-icon">  
+                            💾  
+                        </div>  
+  
+                        <div>  
+  
+                            <strong>  
+                                Guardar  
+                            </strong>  
+  
+                            <small>  
+                                Guardar proyecto en el dispositivo  
+                            </small>  
+  
+                        </div>  
+  
+                    </div>  
+  
+                    ›  
+  
+                </button>  
+  
+                <button  
+                    id="themeButton"  
+                    class="settings-option">  
+  
+                    <div class="settings-option-left">  
+  
+                        <div class="option-icon">  
+                            🎨  
+                        </div>  
+  
+                        <div>  
+  
+                            <strong>  
+                                Temas  
+                            </strong>  
+  
+                            <small>  
+                                Seleccionar tema de interfaz  
+                            </small>  
+  
+                        </div>  
+  
+                    </div>  
+  
+                    ›  
+  
+                </button>  
+
+                <button  
+                    id="shortcutsButton"  
+                    class="settings-option">  
+
+                    <div class="settings-option-left">  
+
+                        <div class="option-icon">  
+                            ⌨️  
+                        </div>  
+
+                        <div>  
+
+                            <strong>  
+                                Atajos de teclado  
+                            </strong>  
+
+                            <small>  
+                                Lista de combinaciones de teclas  
+                            </small>  
+
+                        </div>  
+
+                    </div>  
+
+                    ›  
+
+                </button>  
+
+                <div style="padding: 10px 4px 4px;">
+                    <button  
+                        id="exitToGalleryBtn"  
+                        class="connect-repo"
+                        style="background: #251010; color: var(--danger); border: 1px solid #ff4d4d33; display: flex; align-items: center; justify-content: center; gap: 8px;">  
+                        🚪 Salir a la Galería  
+                    </button>  
+                </div>
+
+            </div>  
+
+        </div>  
+
+        <!-- ATAJOS DE TECLADO SETTINGS -->  
+        <div  
+            id="shortcutsSection"  
+            class="settings-section">  
+  
+            <button  
+                class="section-back"  
+                data-back>  
+                ← Volver  
+            </button>  
+  
+            <div class="section-title">  
+                Atajos de Teclado  
+            </div>  
+
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#151515; padding:8px 12px; border-radius:6px; border:1px solid #222;">
+                    <span style="font-size:11px; color:#aaa;">Guardar archivo actual</span>
+                    <span class="key-cap" style="background:#222; border:1px solid #333; padding:2px 6px; border-radius:4px; font-size:10px; color:var(--orange);">Ctrl + S</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#151515; padding:8px 12px; border-radius:6px; border:1px solid #222;">
+                    <span style="font-size:11px; color:#aaa;">Buscador de código</span>
+                    <span class="key-cap" style="background:#222; border:1px solid #333; padding:2px 6px; border-radius:4px; font-size:10px; color:var(--orange);">Ctrl + F</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#151515; padding:8px 12px; border-radius:6px; border:1px solid #222;">
+                    <span style="font-size:11px; color:#aaa;">Crear nuevo archivo</span>
+                    <span class="key-cap" style="background:#222; border:1px solid #333; padding:2px 6px; border-radius:4px; font-size:10px; color:var(--orange);">Alt + N</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#151515; padding:8px 12px; border-radius:6px; border:1px solid #222;">
+                    <span style="font-size:11px; color:#aaa;">Exportar proyecto (ZIP)</span>
+                    <span class="key-cap" style="background:#222; border:1px solid #333; padding:2px 6px; border-radius:4px; font-size:10px; color:var(--orange);">Ctrl + E</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#151515; padding:8px 12px; border-radius:6px; border:1px solid #222;">
+                    <span style="font-size:11px; color:#aaa;">Alternar vista Laptop/Teléfono</span>
+                    <span class="key-cap" style="background:#222; border:1px solid #333; padding:2px 6px; border-radius:4px; font-size:10px; color:var(--orange);">Ctrl + P</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#151515; padding:8px 12px; border-radius:6px; border:1px solid #222;">
+                    <span style="font-size:11px; color:#aaa;">Abrir Configuración</span>
+                    <span class="key-cap" style="background:#222; border:1px solid #333; padding:2px 6px; border-radius:4px; font-size:10px; color:var(--orange);">Ctrl + ,</span>
+                </div>
+            </div>
+        </div>  
+
+        <!-- EDITOR VISUAL SETTINGS -->  
+        <div  
+            id="visualEditorSection"  
+            class="settings-section">  
+  
+            <button  
+                class="section-back"  
+                data-back>  
+                ← Volver  
+            </button>  
+  
+            <div class="section-title">  
+                Controles de Editor Visual  
+            </div>  
+  
+            <label class="repo-label">Orientación de Controles Flotantes</label>
+            <div style="display:flex; gap:8px; margin-bottom:16px;">
+                <button id="dockOrientHorizontalBtn" class="version-action" style="flex:1; height:36px; font-weight:bold;">↔️ Horizontal</button>
+                <button id="dockOrientVerticalBtn" class="version-action" style="flex:1; height:36px; font-weight:bold;">↕️ Vertical</button>
+            </div>
+
+            <label class="repo-label" style="margin-top:12px;">Herramientas del Editor</label>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <button id="toggleSearchSettingBtn" class="version-action" style="height:36px; text-align:left; padding:0 12px; font-weight:bold; display:flex; align-items:center; justify-content:space-between;">
+                    <span>🔍 Buscador de Código</span>
+                    <span style="font-size:10px; color:var(--orange);">Abrir (Ctrl+F)</span>
+                </button>
+                <button id="toggleAutocompleteSettingBtn" class="version-action" style="height:36px; text-align:left; padding:0 12px; font-weight:bold; display:flex; align-items:center; justify-content:space-between;">
+                    <span>💡 Auto-Completado</span>
+                    <span id="autocompleteSettingStatus" style="font-size:10px; color:var(--green);">Activado</span>
+                </button>
+            </div>
+        </div>  
+  
+  
+        <!-- TEMAS -->  
+        <div  
+            id="themeSection"  
+            class="settings-section">  
+  
+            <button  
+                class="section-back"  
+                data-back>  
+                ← Volver  
+            </button>  
+  
+            <div class="section-title">  
+                Seleccionar Tema  
+            </div>  
+  
+            <div class="version-list"> 
+                <button class="settings-option theme-option-btn" data-theme="oscuro"> 
+                    <div class="settings-option-left"> 
+                        <div class="option-icon" style="background:#111; border: 1px solid #444; width: 24px; height: 24px;"></div> 
+                        <div> 
+                            <strong>Oscuro</strong> 
+                            <small>Fondo oscuro original (predeterminado)</small> 
+                        </div> 
+                    </div> 
+                </button> 
+                <button class="settings-option theme-option-btn" data-theme="claro"> 
+                    <div class="settings-option-left"> 
+                        <div class="option-icon" style="background:#eee; border: 1px solid #ccc; width: 24px; height: 24px;"></div> 
+                        <div> 
+                            <strong>Claro</strong> 
+                            <small>Interfaz brillante y limpia</small> 
+                        </div> 
+                    </div> 
+                </button> 
+            </div> 
+        </div>  
+ 
+ 
+        <!-- VERSIONES -->  
+        <div  
+            id="versionsSection"  
+            class="settings-section">  
+  
+            <button  
+                class="section-back"  
+                data-back>  
+                ← Volver  
+            </button>  
+  
+            <div class="section-title">  
+                Versiones  
+            </div>  
+  
+            <div  
+                id="versionList"  
+                class="version-list">  
+            </div>  
+  
+        </div>  
+  
+  
+        <!-- GUARDAR EN DISPOSITIVO -->  
+        <div  
+            id="saveDeviceSection"  
+            class="settings-section">  
+  
+            <button  
+                class="section-back"  
+                data-back>  
+                ← Volver  
+            </button>  
+  
+            <div class="section-title">  
+                Guardar en Dispositivo  
+            </div>  
+
+            <p style="font-size: 11px; color: #aaa; margin-bottom: 12px; line-height: 1.5;">
+                Guarda los archivos del proyecto directamente en el almacenamiento de tu dispositivo.
+            </p>
+  
+            <button  
+                id="saveToDeviceNowBtn"  
+                class="connect-repo"
+                style="background: var(--orange); color: #000; font-weight: bold;">  
+                💾 Guardar Proyecto Ahora  
+            </button>  
+  
+            <div class="repo-note" style="margin-top: 14px; color: var(--green);">  
+                💡 El proyecto también se guardará automáticamente en el dispositivo cada 15 minutos.  
+            </div>  
+  
+        </div>  
+  
+    </aside>  
+</div>  
+  
+  
+<script>  
+  
+/* =====================================================  
+   DATOS  
+===================================================== */  
+  
+let projects =  
+    JSON.parse(  
+        localStorage.getItem("miwy_projects") || "[]"  
+    );  
+  
+let currentProjectId =  
+    localStorage.getItem("miwy_current_project");  
+  
+let currentFileName = null;  
+let currentActiveTab = "code"; // code, ai, projects
+  
+  
+/* =====================================================  
+   ELEMENTOS  
+===================================================== */  
+  
+const codeEditor =  
+    document.getElementById("codeEditor");  
+  
+const emptyEditor =  
+    document.getElementById("emptyEditor");  
+  
+const fileBar =  
+    document.getElementById("fileBar");  
+  
+const currentFileHeader =  
+    document.getElementById("currentFileHeader");  
+  
+const fileFooterName =  
+    document.getElementById("fileFooterName");  
+  
+const lineCounter =  
+    document.getElementById("lineCounter");  
+  
+const previewFrame =  
+    document.getElementById("previewFrame");  
+  
+  
+/* =====================================================  
+   UTILIDADES  
+===================================================== */  
+  
+function getTime(){  
+  
+    return new Date().toLocaleTimeString(  
+        "es-DO",  
+        {  
+            hour:"2-digit",  
+            minute:"2-digit"  
+        }  
+    );  
+}  
+  
+  
+function saveProjects(){  
+  
+    localStorage.setItem(  
+        "miwy_projects",  
+        JSON.stringify(projects)  
+    );  
+  
+    localStorage.setItem(  
+        "miwy_current_project",  
+        currentProjectId  
+    );  
+}  
+  
+  
+function getCurrentProject(){  
+  
+    return projects.find(  
+        project =>  
+            project.id === currentProjectId  
+    );  
+}  
+  
+  
+function escapeHTML(text){  
+  
+    const div =  
+        document.createElement("div");  
+  
+    div.textContent = text;  
+  
+    return div.innerHTML;  
+}  
+ 
+ 
+/* =====================================================  
+   SISTEMA DE DIÁLOGOS PERSONALIZADOS REUTILIZABLES  
+===================================================== */  
+let customDialogCallback = null; 
+let customDialogCancelCallback = null; 
+ 
+// Reemplazo de alert nativo por el diálogo personalizado 
+window.alert = function(message) { 
+    showCustomDialog({ 
+        title: "Miwy", 
+        description: message, 
+        confirmText: "Aceptar", 
+        cancelText: null 
+    }); 
+}; 
+ 
+function showCustomDialog({ 
+    title = "Confirmar", 
+    description = "", 
+    confirmText = "Aceptar", 
+    cancelText = "Cancelar", 
+    placeholder = "", 
+    showInput = false, 
+    inputValue = "", 
+    isDanger = false, 
+    onConfirm = null, 
+    onCancel = null 
+}) { 
+    const dialog = document.getElementById("customDialog"); 
+    const titleEl = document.getElementById("customDialogTitle"); 
+    const descEl = document.getElementById("customDialogDescription"); 
+    const inputEl = document.getElementById("customDialogInput"); 
+    const cancelBtn = document.getElementById("customDialogCancel"); 
+    const confirmBtn = document.getElementById("customDialogConfirm"); 
+ 
+    titleEl.textContent = title; 
+    descEl.textContent = description; 
+ 
+    if (showInput) { 
+        inputEl.style.display = "block"; 
+        inputEl.value = inputValue; 
+        inputEl.placeholder = placeholder; 
+    } else { 
+        inputEl.style.display = "none"; 
+    } 
+ 
+    if (cancelText) { 
+        cancelBtn.style.display = "block"; 
+        cancelBtn.textContent = cancelText; 
+    } else { 
+        cancelBtn.style.display = "none"; 
+    } 
+ 
+    confirmBtn.textContent = confirmText; 
+    if (isDanger) { 
+        confirmBtn.style.background = "var(--danger)"; 
+        confirmBtn.style.color = "white"; 
+    } else { 
+        confirmBtn.style.background = "var(--orange)"; 
+        confirmBtn.style.color = "#000"; 
+    } 
+ 
+    customDialogCallback = onConfirm; 
+    customDialogCancelCallback = onCancel; 
+ 
+    dialog.classList.add("open"); 
+ 
+    if (showInput) { 
+        setTimeout(() => { 
+            inputEl.focus(); 
+            inputEl.select(); 
+        }, 50); 
+    } 
+} 
+ 
+function closeCustomDialog() { 
+    document.getElementById("customDialog").classList.remove("open"); 
+} 
+ 
+document.addEventListener("DOMContentLoaded", () => { 
+    const confirmBtn = document.getElementById("customDialogConfirm"); 
+    const cancelBtn = document.getElementById("customDialogCancel"); 
+    const inputEl = document.getElementById("customDialogInput"); 
+ 
+    if (confirmBtn) { 
+        confirmBtn.addEventListener("click", () => { 
+            const val = inputEl.value; 
+            closeCustomDialog(); 
+            if (customDialogCallback) { 
+                customDialogCallback(val); 
+            } 
+        }); 
+    } 
+ 
+    if (cancelBtn) { 
+        cancelBtn.addEventListener("click", () => { 
+            closeCustomDialog(); 
+            if (customDialogCancelCallback) { 
+                customDialogCancelCallback(); 
+            } 
+        }); 
+    } 
+ 
+    if (inputEl) { 
+        inputEl.addEventListener("keydown", (event) => { 
+            if (event.key === "Enter") { 
+                if (confirmBtn) confirmBtn.click(); 
+            } 
+        }); 
+    } 
+}); 
+ 
+ 
+/* =====================================================  
+   CAMBIO DE PESTAÑAS PRINCIPALES (CÓDIGO / MIWY / PROYECTOS)
+===================================================== */  
+
+function switchMainTab(tab){
+    currentActiveTab = tab;
+
+    const codeBtn = document.getElementById("tabCodeBtn");
+    const aiBtn = document.getElementById("tabAiBtn");
+
+    const codeView = document.getElementById("codeView");
+    const aiView = document.getElementById("aiView");
+
+    const newFileBtn = document.getElementById("newFileButton");
+
+    if (codeBtn) codeBtn.classList.remove("active");
+    if (aiBtn) aiBtn.classList.remove("active");
+
+    if (codeView) codeView.style.display = "none";
+    if (aiView) aiView.style.display = "none";
+
+    if(tab === "code"){
+        if (codeBtn) codeBtn.classList.add("active");
+        if (codeView) codeView.style.display = "flex";
+        if (newFileBtn) newFileBtn.style.display = "flex";
+        if (currentFileHeader) currentFileHeader.textContent = currentFileName || "Sin archivo";
+    } else if(tab === "ai"){
+        if (aiBtn) aiBtn.classList.add("active");
+        if (aiView) aiView.style.display = "flex";
+        if (newFileBtn) newFileBtn.style.display = "none";
+        if (currentFileHeader) currentFileHeader.textContent = "Miwy AI";
+    }
+}
+
+
+/* =====================================================  
+   CREAR PROYECTO INICIAL  
+===================================================== */  
+  
+if(projects.length === 0){  
+  
+    const defaultHtml = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Aplicación</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: system-ui, -apple-system, sans-serif;
+        background: #0f172a;
+        color: #f8fafc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+    }
+    .container {
+        text-align: center;
+        padding: 40px;
+        background: #1e293b;
+        border-radius: 16px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+        max-width: 400px;
+        border: 1px solid #334155;
+    }
+    h1 { color: #38bdf8; font-size: 24px; margin-bottom: 8px; }
+    p { color: #94a3b8; font-size: 14px; margin-bottom: 24px; }
+    .btn {
+        background: #38bdf8;
+        color: #0f172a;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .btn:hover { background: #7dd3fc; }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1>✨ Tu app o web se reflejará aquí</h1>
+        <p>Modifica este archivo para empezar a construir tu aplicación en tiempo real.</p>
+    </div>
+</body>
+</html>`;
+
+    const project = {  
+  
+        id:Date.now().toString(),  
+  
+        name:"Nuevo proyecto",  
+  
+        files:{"index.html": defaultHtml},  
+  
+        versions:[],  
+  
+        version:0,  
+  
+        messages:[],  
+  
+        repository:null, 
+ 
+        edited:false  
+  
+    };  
+  
+    projects.push(project);  
+  
+    currentProjectId =  
+        project.id;  
+  
+    saveProjects();  
+}  
+  
+  
+if(  
+    !projects.some(  
+        p => p.id === currentProjectId  
+    )  
+){  
+  
+    currentProjectId =  
+        projects[0].id;  
+  
+}  
+  
+  
+projects.forEach(project => {  
+  
+    if(!project.files)  
+        project.files = {};  
+  
+    if(!project.versions)  
+        project.versions = [];  
+  
+    if(!project.messages)  
+        project.messages = [];  
+  
+    if(typeof project.version !== "number")  
+        project.version = 0;  
+  
+});  
+  
+  
+/* =====================================================  
+   TIPO DE ARCHIVO  
+===================================================== */  
+  
+function getFileType(filename){  
+  
+    const ext =  
+        filename  
+            .split(".")  
+            .pop()  
+            .toLowerCase();  
+  
+    if(ext === "html" || ext === "htm")  
+        return "html";  
+  
+    if(ext === "js" || ext === "mjs")  
+        return "js";  
+  
+    if(ext === "css")  
+        return "css";  
+  
+    if(ext === "json")  
+        return "json";  
+  
+    if(ext === "svg")  
+        return "svg";  
+  
+    if(ext === "txt")  
+        return "text";  
+  
+    return "file";  
+}  
+  
+  
+function getFileIcon(filename){  
+  
+    const type =  
+        getFileType(filename);  
+  
+    if(type === "html") return "📄";  
+    if(type === "css") return "🎨";  
+    if(type === "js") return "⚡";  
+    if(type === "json") return "🧩";  
+    if(type === "svg") return "◇";  
+  
+    return "📄";  
+}  
+  
+  
+/* =====================================================  
+   EDITOR BLOQUEADO / DESBLOQUEADO  
+===================================================== */  
+  
+function setEditorLocked(locked){  
+  
+    codeEditor.disabled = locked;  
+  
+    codeEditor.classList.toggle(  
+        "locked",  
+        locked  
+    );  
+  
+    emptyEditor.style.display =  
+        locked ? "flex" : "none";  
+  
+    if(locked){  
+  
+        codeEditor.value = "";  
+  
+        codeEditor.placeholder =  
+            "";  
+  
+    }else{  
+  
+        codeEditor.placeholder =  
+            "";  
+  
+    }  
+  
+}  
+  
+  
+/* =====================================================  
+   RENDER ARCHIVOS  
+===================================================== */  
+  
+function renderFiles(){  
+    const project = getCurrentProject();  
+    if(!project) return;  
+ 
+    const names = Object.keys(project.files);  
+
+    // Fast path: if tabs already exist and filenames haven't changed, just toggle active class
+    const existingTabs = fileBar.querySelectorAll(".file-tab");
+    if (existingTabs.length === names.length) {
+        let sameNames = true;
+        existingTabs.forEach((tab, idx) => {
+            if (tab.getAttribute("data-filename") !== names[idx]) sameNames = false;
+        });
+        if (sameNames) {
+            existingTabs.forEach(tab => {
+                if (tab.getAttribute("data-filename") === currentFileName) {
+                    tab.classList.add("active");
+                } else {
+                    tab.classList.remove("active");
+                }
+            });
+            return;
+        }
+    }
+
+    fileBar.innerHTML = "";  
+
+    if(names.length === 0){  
+        currentFileName = null;  
+        if(currentActiveTab === "code") {
+            currentFileHeader.textContent = "Sin archivo";  
+        }
+        fileFooterName.textContent = "Sin archivo";  
+        setEditorLocked(true);  
+        updateLineCounter();  
+        updatePreview();  
+        return;  
+    }  
+
+    names.forEach(filename => {  
+        const tab = document.createElement("div");  
+        tab.className = "file-tab";  
+        tab.setAttribute("data-filename", filename);
+
+        if(filename === currentFileName) tab.classList.add("active");  
+
+        const openButton = document.createElement("button");  
+        openButton.className = "file-open";  
+        openButton.innerHTML = `<span>${getFileIcon(filename)}</span><span>${escapeHTML(filename)}</span>`;  
+        openButton.addEventListener("click", () => selectFile(filename));  
+
+        const deleteButton = document.createElement("button");  
+        deleteButton.className = "file-delete";  
+        deleteButton.textContent = "×";  
+        deleteButton.title = "Eliminar archivo";  
+        deleteButton.addEventListener("click", event => {  
+            event.stopPropagation();  
+            deleteFile(filename);  
+        });  
+
+        tab.appendChild(openButton);  
+        tab.appendChild(deleteButton);  
+        fileBar.appendChild(tab);  
+    });  
+}  
+  
+  
+/* =====================================================  
+   CREAR ARCHIVO  
+===================================================== */  
+  
+const fileDialog =  
+    document.getElementById("fileDialog");  
+  
+const fileInput =  
+    document.getElementById("fileInput");  
+  
+  
+document  
+    .getElementById("newFileButton")  
+    .addEventListener("click", () => {  
+  
+        fileInput.value = "";  
+  
+        fileDialog.classList.add("open");  
+  
+        setTimeout(  
+            () => fileInput.focus(),  
+            50  
+        );  
+  
+    });  
+  
+  
+document  
+    .getElementById("cancelFile")  
+    .addEventListener("click", () => {  
+  
+        fileDialog.classList.remove("open");  
+  
+    });  
+  
+  
+document  
+    .getElementById("confirmFile")  
+    .addEventListener(  
+        "click",  
+        createFile  
+    );  
+  
+  
+fileInput.addEventListener(  
+    "keydown",  
+    event => {  
+  
+        if(event.key === "Enter")  
+            createFile();  
+  
+    }  
+);  
+  
+  
+function createFile(){  
+    const name = fileInput.value.trim();  
+
+    if(!name){  
+        fileInput.focus();  
+        return;  
+    }  
+
+    if(!name.includes(".")){  
+        alert("El archivo debe tener una extensión o nombre de carpeta/archivo, por ejemplo images/foto.png o script.js.");  
+        return;  
+    }  
+
+    const project = getCurrentProject();  
+    if(!project) return;  
+
+    if(Object.prototype.hasOwnProperty.call(project.files, name)){  
+        alert("Ese archivo o ruta ya existe.");  
+        return;  
+    }  
+
+    showCustomDialog({
+        title: "Crear Archivo",
+        description: `¿Deseas guardar y confirmar la creación del archivo "${name}" en el dispositivo?`,
+        confirmText: "Aceptar",
+        cancelText: "Rechazar",
+        onConfirm: () => {
+            project.files[name] = "";  
+            saveProjects();  
+            selectFile(name);  
+            fileDialog.classList.remove("open");  
+            if (typeof showTopNotification === "function") {
+                showTopNotification(`📄 Archivo "${name}" creado y guardado en almacenamiento`, null, 3000);
+            }
+        },
+        onCancel: () => {
+            fileDialog.classList.remove("open");
+            if (typeof showTopNotification === "function") {
+                showTopNotification("❌ Creación de archivo cancelada", null, 2500);
+            }
+        }
+    });
+}  
+  
+  
+/* =====================================================  
+   SELECCIONAR ARCHIVO  
+===================================================== */  
+  
+function selectFile(filename){  
+    if (currentFileName === filename && !codeEditor.disabled) return;
+
+    saveCurrentFile();  
+  
+    const project = getCurrentProject();  
+    if(!project) return;  
+  
+    currentFileName = filename;  
+ 
+    codeEditor.style.display = "block"; 
+    setEditorLocked(false);  
+ 
+    codeEditor.value = project.files[filename] || "";  
+ 
+    if(currentActiveTab === "code") {
+        currentFileHeader.textContent = filename;  
+    }
+  
+    fileFooterName.textContent = filename;  
+ 
+    renderFiles();  
+    updateLineCounter();  
+    updatePreview();  
+}  
+  
+  
+/* =====================================================  
+   GUARDAR ARCHIVO  
+===================================================== */  
+  
+function saveCurrentFile(){  
+  
+    if(!currentFileName)  
+        return;  
+  
+    const project =  
+        getCurrentProject();  
+  
+    if(!project)  
+        return;  
+  
+    if(  
+        !Object.prototype.hasOwnProperty.call(  
+            project.files,  
+            currentFileName  
+        )  
+    )  
+        return;  
+  
+  
+    project.files[currentFileName] =  
+        codeEditor.value;  
+  
+    saveProjects();  
+}  
+  
+  
+/* =====================================================  
+   EDITOR  
+===================================================== */  
+  
+codeEditor.addEventListener(  
+    "input",  
+    () => {  
+  
+        if(  
+            !currentFileName ||  
+            codeEditor.disabled  
+        )  
+            return;  
+  
+        const project = getCurrentProject(); 
+        if (project) { 
+            project.edited = true; 
+        } 
+ 
+        saveCurrentFile();  
+  
+        updateLineCounter();  
+  
+        updatePreview();  
+  
+    }  
+);  
+  
+  
+/* =====================================================  
+   CONTADOR DE LÍNEAS REALES  
+===================================================== */  
+  
+function updateLineCounter(){  
+  
+    if(  
+        !currentFileName ||  
+        codeEditor.disabled  
+    ){  
+  
+        lineCounter.textContent =  
+            "0 líneas";  
+  
+        return;  
+    }  
+  
+  
+    const lines =  
+        codeEditor.value  
+            .split("\n")  
+            .filter(  
+                line =>  
+                    line.trim().length > 0  
+            );  
+  
+  
+    const count =  
+        lines.length;  
+  
+  
+    lineCounter.textContent =  
+        count +  
+        (  
+            count === 1  
+                ? " línea"  
+                : " líneas"  
+        );  
+  
+}  
+  
+  
+/* =====================================================  
+   ELIMINAR ARCHIVO  
+===================================================== */  
+  
+function deleteFile(filename){  
+  
+    const project =  
+        getCurrentProject();  
+  
+    if(!project)  
+        return;  
+  
+    showCustomDialog({ 
+        title: "Eliminar archivo", 
+        description: `¿Seguro que deseas eliminar el archivo "${filename}"? Esta acción no se puede deshacer.`, 
+        confirmText: "Eliminar", 
+        isDanger: true, 
+        onConfirm: () => { 
+            delete project.files[filename];  
+  
+            if(  
+                currentFileName === filename  
+            ){  
+  
+                const remaining =  
+                    Object.keys(project.files);  
+  
+                if(remaining.length > 0){  
+  
+                    currentFileName = null;  
+  
+                    selectFile(  
+                        remaining[0]  
+                    );  
+  
+                }else{  
+  
+                    currentFileName = null;  
+  
+                    setEditorLocked(true);  
+  
+                    if(currentActiveTab === "code") {
+                        currentFileHeader.textContent = "Sin archivo";  
+                    }
+  
+                    fileFooterName.textContent =  
+                        "Sin archivo";  
+  
+                    updateLineCounter();  
+  
+                    updatePreview();  
+  
+                }  
+  
+            }  
+  
+            saveProjects();  
+            renderFiles();  
+        } 
+    }); 
+}  
+  
+  
+/* =====================================================  
+   PROYECTOS  
+===================================================== */  
+  
+const projectOverlay =  
+    document.getElementById(  
+        "projectOverlay"  
+    );  
+  
+const projectMenu =  
+    document.getElementById(  
+        "projectMenu"  
+    );  
+  
+const projectList =  
+    document.getElementById(  
+        "projectList"  
+    );  
+
+const panelProjectList = 
+    document.getElementById(
+        "panelProjectList"
+    );
+  
+  
+function renderProjects(){  
+    if(projectList) projectList.innerHTML = "";  
+    if(panelProjectList) panelProjectList.innerHTML = "";
+    const galleryList = document.getElementById("galleryProjectsList");
+    if(galleryList) galleryList.innerHTML = "";
+  
+    const currentProj = getCurrentProject();
+    const currentNameEl = document.getElementById("currentProjectNameInTab");
+    if(currentNameEl && currentProj) {
+        currentNameEl.textContent = currentProj.name;
+    }
+
+    if(galleryList && projects.length === 0) {
+        galleryList.innerHTML = `<div class="miwy-empty-projects">No hay proyectos. ¡Crea uno para empezar!</div>`;
+    }
+
+    projects.forEach(project => {  
+        // Build item for Gallery Landing View
+        if(galleryList) {
+            const card = document.createElement("div");
+            card.className = "miwy-project-card";
+
+            const header = document.createElement("div");
+            header.className = "miwy-project-card-header";
+
+            const icon = document.createElement("div");
+            icon.className = "miwy-project-icon";
+            icon.textContent = "⚡";
+
+            const info = document.createElement("div");
+            info.className = "miwy-project-info";
+
+            const name = document.createElement("h4");
+            name.className = "miwy-project-name";
+            name.textContent = project.name;
+
+            const desc = document.createElement("p");
+            desc.className = "miwy-project-description";
+            desc.textContent = `${Object.keys(project.files).length} archivo(s)`;
+
+            // Retro colorful code tags
+            const tags = document.createElement("div");
+            tags.className = "miwy-card-code-tags";
+            tags.innerHTML = `
+                <span class="retro-code-tag html">&lt;html&gt;</span>
+                <span class="retro-code-tag css">#style</span>
+                <span class="retro-code-tag js">js()</span>
+            `;
+
+            info.appendChild(name);
+            info.appendChild(desc);
+            info.appendChild(tags);
+
+            header.appendChild(icon);
+            header.appendChild(info);
+
+            const actions = document.createElement("div");
+            actions.className = "miwy-project-actions";
+
+            const openBtn = document.createElement("button");
+            openBtn.className = "miwy-open-btn";
+            openBtn.textContent = "ABRIR";
+            openBtn.onclick = () => openProjectFromGallery(project.id);
+
+            const delBtn = document.createElement("button");
+            delBtn.className = "miwy-delete-btn";
+            delBtn.textContent = "🗑";
+            delBtn.onclick = (e) => {
+                e.stopPropagation();
+                deleteProject(project.id);
+            };
+
+            actions.appendChild(openBtn);
+            actions.appendChild(delBtn);
+
+            card.appendChild(header);
+            card.appendChild(actions);
+
+            galleryList.appendChild(card);
+        }
+        const buildItem = () => {
+            const item = document.createElement("div");  
+            item.className = "project-item";  
+            if(project.id === currentProjectId){  
+                item.classList.add("active");  
+            }  
+
+            const info = document.createElement("div");  
+            info.className = "project-info";  
+
+            const name = document.createElement("span");  
+            name.className = "project-name";  
+            name.textContent = project.name;  
+
+            const meta = document.createElement("span");  
+            meta.className = "project-meta";  
+            meta.textContent = `${Object.keys(project.files).length} archivos`;  
+
+            info.appendChild(name);  
+            info.appendChild(meta);  
+
+            info.addEventListener("click", () => {  
+                switchProject(project.id);  
+            });  
+
+            const actions = document.createElement("div");  
+            actions.className = "project-actions";  
+
+            const rename = document.createElement("button");  
+            rename.className = "project-action";  
+            rename.textContent = "✎";  
+            rename.title = "Renombrar";  
+
+            rename.addEventListener("click", event => {  
+                event.stopPropagation();  
+                openRenameProject(project.id);  
+            });  
+
+            const remove = document.createElement("button");  
+            remove.className = "project-action delete";  
+            remove.textContent = "×";  
+            remove.title = "Eliminar";  
+
+            remove.addEventListener("click", event => {  
+                event.stopPropagation();  
+                deleteProject(project.id);  
+            });  
+
+            actions.appendChild(rename);  
+            actions.appendChild(remove);  
+
+            item.appendChild(info);  
+            item.appendChild(actions);  
+
+            return item;
+        };
+
+        if(projectList) projectList.appendChild(buildItem());
+        if(panelProjectList) panelProjectList.appendChild(buildItem());
+    });  
+}  
+  
+  
+/* =====================================================  
+   CAMBIAR PROYECTO  
+===================================================== */  
+  
+function switchProject(id){  
+  
+    saveCurrentFile();  
+  
+    currentProjectId =  
+        id;  
+  
+    currentFileName = null;  
+  
+    saveProjects();  
+  
+    const previewFrame = document.getElementById("previewFrame");
+    if (previewFrame) previewFrame.__lastHtml = null;
+
+    loadProject();  
+  
+    closeProjectMenu();  
+  
+}  
+
+function openProjectFromGallery(id){
+    switchProject(id);
+    const galleryContainer = document.getElementById("galleryContainer");
+    const workspace = document.getElementById("workspace");
+    const settingsBtn = document.getElementById("settingsButton");
+    if(galleryContainer) galleryContainer.style.display = "none";
+    if(workspace) workspace.style.display = "flex";
+    if(settingsBtn) settingsBtn.style.display = "flex";
+
+    const previewFrame = document.getElementById("previewFrame");
+    if (previewFrame) previewFrame.__lastHtml = null;
+    if (typeof updatePreview === "function") updatePreview();
+}
+  
+  
+/* =====================================================  
+   CARGAR PROYECTO  
+===================================================== */  
+  
+function loadProject(){  
+  
+    const project =  
+        getCurrentProject();  
+  
+    if(!project)  
+        return;  
+  
+    const files =  
+        Object.keys(project.files);  
+  
+    if(files.length > 0){  
+        selectFile(files[0]);  
+    }else{  
+        currentFileName = null;  
+        setEditorLocked(true);  
+        if(currentActiveTab === "code") {
+            currentFileHeader.textContent = "Sin archivo";  
+        }
+        fileFooterName.textContent = "Sin archivo";  
+        updateLineCounter();  
+        updatePreview();  
+    }  
+  
+    renderFiles();  
+    renderProjects();  
+    if (typeof loadVersions === "function") loadVersions();  
+}  
+  
+  
+/* =====================================================  
+   CREAR / RENOMBRAR PROYECTO  
+===================================================== */  
+  
+const projectDialog =  
+    document.getElementById(  
+        "projectDialog"  
+    );  
+  
+const projectInput =  
+    document.getElementById(  
+        "projectInput"  
+    );  
+  
+const projectDialogTitle =  
+    document.getElementById(  
+        "projectDialogTitle"  
+    );  
+  
+const projectDialogDescription =  
+    document.getElementById(  
+        "projectDialogDescription"  
+    );  
+  
+const confirmProject =  
+    document.getElementById(  
+        "confirmProject"  
+    );  
+  
+  
+let projectDialogMode =  
+    "create";  
+  
+let projectEditingId =  
+    null;  
+  
+  
+const createProjBtn = document.getElementById("createProjectButton"); 
+if (createProjBtn) { 
+    createProjBtn.addEventListener("click", event => {  
+        event.stopPropagation();  
+        openCreateProject();  
+    });  
+} 
+
+const panelCreateProjBtn = document.getElementById("panelCreateProjectBtn");
+if (panelCreateProjBtn) {
+    panelCreateProjBtn.addEventListener("click", event => {
+        event.stopPropagation();
+        openCreateProject();
+    });
+}
+
+const panelImportProjBtn = document.getElementById("panelImportProjectBtn");
+if (panelImportProjBtn) {
+    panelImportProjBtn.addEventListener("click", () => {
+        const importInput = document.getElementById("importProjectInput");
+        if(importInput) importInput.click();
+    });
+}
+  
+  
+function openCreateProject(){  
+  
+    projectDialogMode =  
+        "create";  
+  
+    projectEditingId = null;  
+  
+    projectDialogTitle.textContent =  
+        "Crear proyecto";  
+  
+    projectDialogDescription.textContent =  
+        "El proyecto empezará completamente vacío.";  
+  
+    confirmProject.textContent =  
+        "Crear";  
+  
+    projectInput.value = "";  
+  
+    projectDialog.classList.add("open");  
+  
+    setTimeout(  
+        () => projectInput.focus(),  
+        50  
+    );  
+  
+}  
+  
+  
+function openRenameProject(id){  
+  
+    const project =  
+        projects.find(  
+            p => p.id === id  
+        );  
+  
+    if(!project)  
+        return;  
+  
+  
+    projectDialogMode =  
+        "rename";  
+  
+    projectEditingId =  
+        id;  
+  
+    projectDialogTitle.textContent =  
+        "Cambiar nombre";  
+  
+    projectDialogDescription.textContent =  
+        "Cambia el nombre de este proyecto.";  
+  
+    confirmProject.textContent =  
+        "Guardar";  
+  
+    projectInput.value =  
+        project.name;  
+  
+    projectDialog.classList.add("open");  
+  
+    setTimeout(  
+        () => {  
+  
+            projectInput.focus();  
+  
+            projectInput.select();  
+  
+        },  
+        50  
+    );  
+  
+}  
+  
+  
+document  
+    .getElementById("cancelProject")  
+    .addEventListener(  
+        "click",  
+        () => {  
+  
+            projectDialog.classList.remove(  
+                "open"  
+            );  
+  
+        }  
+    );  
+  
+  
+confirmProject.addEventListener(  
+    "click",  
+    saveProjectDialog  
+);  
+  
+  
+projectInput.addEventListener(  
+    "keydown",  
+    event => {  
+  
+        if(event.key === "Enter")  
+            saveProjectDialog();  
+  
+    }  
+);  
+  
+  
+function saveProjectDialog(){  
+  
+    const name =  
+        projectInput.value.trim();  
+  
+  
+    if(!name){  
+  
+        projectInput.focus();  
+  
+        return;  
+  
+    }  
+  
+  
+    if(projectDialogMode === "create"){  
+  
+        saveCurrentFile();  
+  
+  
+        const project = {  
+  
+            id:Date.now().toString(),  
+  
+            name:name,  
+  
+            files:{},  
+  
+            versions:[],  
+  
+            version:0,  
+  
+            messages:[],  
+  
+            repository:null, 
+ 
+            edited:false  
+  
+        };  
+  
+  
+        projects.push(project);  
+  
+        currentProjectId =  
+            project.id;  
+  
+        currentFileName = null;  
+  
+        saveProjects();  
+  
+        loadProject();  
+  
+        closeProjectMenu(); 
+
+        openProjectFromGallery(project.id);
+ 
+    }else{  
+  
+        const project =  
+            projects.find(  
+                p => p.id === projectEditingId  
+            );  
+  
+  
+        if(project){  
+  
+            project.name =  
+                name;  
+  
+            saveProjects();  
+
+            renderProjects();  
+  
+        }  
+  
+    }  
+  
+  
+    projectDialog.classList.remove(  
+        "open"  
+    );  
+  
+}  
+  
+  
+/* =====================================================  
+   ELIMINAR PROYECTO  
+===================================================== */  
+  
+function deleteProject(id){  
+  
+    if(projects.length === 1){  
+        showCustomDialog({ 
+            title: "Acción no permitida", 
+            description: "No puedes eliminar el último proyecto.", 
+            confirmText: "Aceptar", 
+            cancelText: null 
+        }); 
+        return;  
+    }  
+  
+    const project =  
+        projects.find(  
+            p => p.id === id  
+        );  
+  
+    if(!project)  
+        return;  
+  
+    showCustomDialog({ 
+        title: "Eliminar proyecto", 
+        description: `¿Eliminar el proyecto "${project.name}"? Esta acción no se puede deshacer.`, 
+        confirmText: "Eliminar", 
+        isDanger: true, 
+        onConfirm: () => { 
+            projects =  
+                projects.filter(  
+                    p => p.id !== id  
+                );  
+  
+            if(  
+                currentProjectId === id  
+            ){  
+  
+                currentProjectId =  
+                    projects[0].id;  
+  
+                currentFileName = null;  
+  
+            }  
+  
+            saveProjects();  
+            loadProject();  
+            renderProjects();  
+        } 
+    }); 
+}  
+  
+  
+function closeProjectMenu(){  
+    if(projectOverlay) {
+        projectOverlay.classList.remove("open");  
+    }
+}  
+  
+  
+/* =====================================================  
+   VERSIONES  
+===================================================== */  
+  
+let versionTimer;  
+  
+  
+function createVersion(){  
+  
+    const project =  
+        getCurrentProject();  
+  
+    if(!project)  
+        return;  
+  
+    if (!project.edited) { 
+        return; 
+    } 
+  
+    const snapshot =  
+        JSON.stringify(  
+            project.files  
+        );  
+  
+  
+    const last =  
+        project.versions[  
+            project.versions.length - 1  
+        ];  
+  
+  
+    if(  
+        last &&  
+        last.snapshot === snapshot  
+    )  
+        return;  
+  
+  
+    project.version++;  
+  
+  
+    project.versions.push({  
+  
+        id:project.version,  
+  
+        name:  
+            `Versión ${project.version}`,  
+  
+        snapshot:snapshot,  
+  
+        time:getTime()  
+  
+    });  
+  
+  
+    if(  
+        project.versions.length > 50  
+    ){  
+  
+        project.versions.shift();  
+  
+    }  
+  
+  
+    saveProjects();  
+  
+    loadVersions();  
+  
+}  
+  
+  
+codeEditor.addEventListener(  
+    "input",  
+    () => {  
+  
+        clearTimeout(versionTimer);  
+  
+        versionTimer =  
+            setTimeout(  
+                createVersion,  
+                1500  
+            );  
+  
+    }  
+);  
+  
+  
+/* =====================================================  
+   VERSIONES UI  
+===================================================== */  
+  
+function loadVersions(){  
+  
+    const project =  
+        getCurrentProject();  
+  
+    const list =  
+        document.getElementById(  
+            "versionList"  
+        );  
+  
+  
+    if(!list)  
+        return;  
+  
+  
+    list.innerHTML = "";  
+  
+  
+    if(  
+        !project ||  
+        project.versions.length === 0  
+    ){  
+  
+        list.innerHTML = `  
+            <div style="  
+                color:#555;  
+                font-size:11px;  
+                padding:10px;  
+            ">  
+                Todavía no hay versiones.  
+            </div>  
+        `;  
+  
+        return;  
+  
+    }  
+  
+  
+    [  
+        ...project.versions  
+    ]  
+    .reverse()  
+    .forEach(version => {  
+  
+        const element =  
+            document.createElement("div");  
+  
+        element.className =  
+            "version";  
+  
+  
+        element.innerHTML = `  
+  
+            <div class="version-top">  
+  
+                <span class="version-number">  
+                    v${version.id}  
+                </span>  
+  
+                <span class="version-time">  
+                    ${version.time}  
+                </span>  
+  
+            </div>  
+  
+            <div class="version-description">  
+                ${escapeHTML(version.name)}  
+            </div>  
+  
+            <div class="version-actions">  
+  
+                <button  
+                    class="version-action restore">  
+                    Restaurar  
+                </button>  
+  
+                <button  
+                    class="version-action rename">  
+                    ✎  
+                </button>  
+  
+                <button  
+                    class="version-action delete">  
+                    🗑  
+                </button>  
+  
+            </div>  
+  
+        `;  
+  
+  
+        element  
+            .querySelector(".restore")  
+            .addEventListener(  
+                "click",  
+                () => restoreVersion(version.id)  
+            );  
+  
+  
+        element  
+            .querySelector(".rename")  
+            .addEventListener(  
+                "click",  
+                () => renameVersion(version.id)  
+            );  
+  
+  
+        element  
+            .querySelector(".delete")  
+            .addEventListener(  
+                "click",  
+                () => deleteVersion(version.id)  
+            );  
+  
+  
+        list.appendChild(element);  
+  
+    });  
+  
+}  
+  
+  
+/* =====================================================  
+   RESTAURAR VERSION  
+===================================================== */  
+  
+function restoreVersion(id){  
+  
+    const project =  
+        getCurrentProject();  
+  
+    const version =  
+        project.versions.find(  
+            item => item.id === id  
+        );  
+  
+    if(!version)  
+        return;  
+  
+    showCustomDialog({ 
+        title: "Restaurar versión", 
+        description: `¿Estás seguro de que deseas restaurar "${version.name}"? Los cambios actuales no guardados se perderán.`, 
+        confirmText: "Restaurar", 
+        onConfirm: () => { 
+            project.files =  
+                JSON.parse(  
+                    version.snapshot  
+                );  
+  
+            saveProjects();  
+            currentFileName = null;  
+            loadProject();  
+        } 
+    }); 
+}  
+  
+  
+/* =====================================================  
+   RENOMBRAR VERSION  
+===================================================== */  
+  
+function renameVersion(id){  
+  
+    const project =  
+        getCurrentProject();  
+  
+    const version =  
+        project.versions.find(  
+            item => item.id === id  
+        );  
+  
+    if(!version)  
+        return;  
+  
+    showCustomDialog({ 
+        title: "Renombrar versión", 
+        description: "Ingresa el nuevo nombre para esta versión:", 
+        confirmText: "Guardar", 
+        showInput: true, 
+        inputValue: version.name, 
+        onConfirm: (newName) => { 
+            if (newName && newName.trim()) { 
+                version.name = newName.trim();  
+                saveProjects();  
+                loadVersions();  
+            } 
+        } 
+    }); 
+}  
+  
+  
+/* =====================================================  
+   ELIMINAR VERSION  
+===================================================== */  
+  
+function deleteVersion(id){  
+  
+    const project =  
+        getCurrentProject();  
+  
+    const version =  
+        project.versions.find(  
+            item => item.id === id  
+        );  
+  
+    if(!version)  
+        return;  
+  
+    showCustomDialog({ 
+        title: "Eliminar versión", 
+        description: `¿Estás seguro de que deseas eliminar la versión "${version.name}"?`, 
+        confirmText: "Eliminar", 
+        isDanger: true, 
+        onConfirm: () => { 
+            project.versions =  
+                project.versions.filter(  
+                    item => item.id !== id  
+                );  
+  
+            saveProjects();  
+            loadVersions();  
+        } 
+    }); 
+}  
+  
+  
+/* =====================================================  
+   SETTINGS  
+===================================================== */  
+  
+const settingsOverlay =  
+    document.getElementById(  
+        "settingsOverlay"  
+    );  
+  
+const settingsMain =  
+    document.getElementById(  
+        "settingsMain"  
+    );  
+  
+const versionsSection =  
+    document.getElementById(  
+        "versionsSection"  
+    );  
+  
+const repositorySection =  
+    document.getElementById(  
+        "repositorySection"  
+    );  
+ 
+const themeSection =  
+    document.getElementById(  
+        "themeSection"  
+    );  
+  
+  
+document  
+    .getElementById("settingsButton")  
+    .addEventListener(  
+        "click",  
+        () => {  
+  
+            settingsOverlay.classList.add(  
+                "open"  
+            );  
+  
+            showSettingsMain();  
+  
+        }  
+    );  
+  
+  
+document  
+    .getElementById("closeSettings")  
+    .addEventListener(  
+        "click",  
+        () => {  
+  
+            settingsOverlay.classList.remove(  
+                "open"  
+            );  
+  
+        }  
+    );  
+  
+  
+function showSettingsMain(){  
+  
+    settingsMain.style.display =  
+        "block";  
+  
+    versionsSection.classList.remove(  
+        "active"  
+    );  
+  
+    const saveDevSection = document.getElementById("saveDeviceSection");
+    if (saveDevSection) {
+        saveDevSection.classList.remove("active");
+    }
+ 
+    if (themeSection) { 
+        themeSection.classList.remove(  
+            "active"  
+        );  
+    } 
+
+    const visSection = document.getElementById("visualEditorSection");
+    if (visSection) {
+        visSection.classList.remove("active");
+    }
+
+    const shortcutsSection = document.getElementById("shortcutsSection");
+    if (shortcutsSection) {
+        shortcutsSection.classList.remove("active");
+    }
+}  
+
+function exitToGallery() {
+    const settingsOverlay = document.getElementById("settingsOverlay");
+    const workspace = document.getElementById("workspace");
+    const galleryContainer = document.getElementById("galleryContainer");
+    const settingsBtn = document.getElementById("settingsButton");
+
+    if (settingsOverlay) settingsOverlay.classList.remove("open");
+    if (workspace) workspace.style.display = "none";
+    if (galleryContainer) galleryContainer.style.display = "block";
+    if (settingsBtn) settingsBtn.style.display = "none";
+
+    renderProjects();
+}
+
+const exitGalleryBtn = document.getElementById("exitToGalleryBtn");
+if (exitGalleryBtn) {
+    exitGalleryBtn.addEventListener("click", exitToGallery);
+}
+
+const shortcutsBtn = document.getElementById("shortcutsButton");
+if (shortcutsBtn) {
+    shortcutsBtn.addEventListener("click", () => {
+        settingsMain.style.display = "none";
+        const shortcutsSection = document.getElementById("shortcutsSection");
+        if (shortcutsSection) shortcutsSection.classList.add("active");
+    });
+}
+  
+  
+document  
+    .getElementById("versionsButton")  
+    .addEventListener(  
+        "click",  
+        () => {  
+  
+            loadVersions();  
+  
+            settingsMain.style.display =  
+                "none";  
+  
+            versionsSection.classList.add(  
+                "active"  
+            );  
+  
+        }  
+    );  
+  
+  
+const saveProjSettingsBtn = document.getElementById("saveProjectSettingsBtn");
+if (saveProjSettingsBtn) {
+    saveProjSettingsBtn.addEventListener("click", () => {
+        settingsMain.style.display = "none";
+        const saveDevSection = document.getElementById("saveDeviceSection");
+        if (saveDevSection) saveDevSection.classList.add("active");
+    });
+}
+
+function triggerSaveToDevice() {
+    saveCurrentFile();
+    saveProjects();
+
+    const current = getCurrentProject();
+    const projName = current ? current.name : "Proyecto";
+    const savedPath = localStorage.getItem("miwy_save_folder") || "Almacenamiento Local (Dispositivo > MiwyProjects)";
+
+    if (!localStorage.getItem("miwy_save_folder")) {
+        showCustomDialog({
+            title: "💾 Guardar en Dispositivo",
+            description: `El proyecto "${projName}" se guardará localmente en tu dispositivo.\n\nCarpeta asignada: ${savedPath}\n\n¿Deseas confirmar la ubicación y guardar?`,
+            confirmText: "Guardar",
+            cancelText: "Cancelar",
+            onConfirm: () => {
+                localStorage.setItem("miwy_save_folder", savedPath);
+                if (typeof showTopNotification === "function") {
+                    showTopNotification(`💾 Proyecto "${projName}" guardado en ${savedPath}`, null, 3500);
+                } else {
+                    alert(`💾 Proyecto "${projName}" guardado con éxito en: ${savedPath}`);
+                }
+            }
+        });
+    } else {
+        if (typeof showTopNotification === "function") {
+            showTopNotification(`💾 Proyecto "${projName}" guardado en ${savedPath}`, null, 3000);
+        } else {
+            alert(`💾 Proyecto "${projName}" guardado con éxito.`);
+        }
+    }
+}
+
+const saveNowBtn = document.getElementById("saveToDeviceNowBtn");
+if (saveNowBtn) {
+    saveNowBtn.addEventListener("click", triggerSaveToDevice);
+}
+
+/* Auto-save cada 15 minutos (900,000 ms) */
+setInterval(() => {
+    saveCurrentFile();
+    saveProjects();
+    const current = getCurrentProject();
+    if (current) {
+        if (typeof showTopNotification === "function") {
+            showTopNotification(`💾 Guardado automático: "${current.name}" guardado`, null, 3000);
+        }
+    }
+}, 15 * 60 * 1000);
+ 
+ 
+/* =====================================================  
+   TEMAS DE INTERFAZ (LOGIC)  
+===================================================== */  
+function applyTheme(themeName) { 
+    if (themeName !== "oscuro" && themeName !== "claro") themeName = "oscuro";
+    document.body.classList.remove("theme-oscuro", "theme-claro"); 
+    document.body.classList.add("theme-" + themeName); 
+    localStorage.setItem("miwy_theme", themeName); 
+    document.querySelectorAll(".theme-option-btn").forEach(btn => { 
+        if (btn.getAttribute("data-theme") === themeName) { 
+            btn.classList.add("active"); 
+            btn.style.borderColor = "var(--orange)"; 
+        } else { 
+            btn.classList.remove("active"); 
+            btn.style.borderColor = ""; 
+        } 
+    }); 
+} 
+
+const exportProjSettingsBtn = document.getElementById("exportProjectSettingsBtn");
+const exportDialog = document.getElementById("exportDialog");
+const cancelExportBtn = document.getElementById("cancelExport");
+const confirmExportBtn = document.getElementById("confirmExport");
+
+if (exportProjSettingsBtn && exportDialog) {
+    exportProjSettingsBtn.addEventListener("click", () => {
+        const settingsOverlay = document.getElementById("settingsOverlay");
+        if (settingsOverlay) settingsOverlay.classList.remove("open");
+        exportDialog.classList.add("open");
+    });
+}
+
+if (cancelExportBtn && exportDialog) {
+    cancelExportBtn.addEventListener("click", () => {
+        exportDialog.classList.remove("open");
+    });
+}
+
+if (confirmExportBtn && exportDialog) {
+    confirmExportBtn.addEventListener("click", () => {
+        exportDialog.classList.remove("open");
+        const current = getCurrentProject();
+        if (!current) return;
+        exportProjectAsZip(current.id);
+    });
+}
+ 
+/* =====================================================  
+   IMPORTAR PROYECTO (ZIP / JSON / ARCHIVOS WEB) 
+===================================================== */  
+const importProjectBtn = document.getElementById("importProjectBtn"); 
+const importProjectInput = document.getElementById("importProjectInput"); 
+const panelImportBtn = document.getElementById("panelImportProjectBtn");
+
+if (importProjectInput) { 
+    if (importProjectBtn) { 
+        importProjectBtn.addEventListener("click", () => importProjectInput.click()); 
+    } 
+    if (panelImportBtn) {
+        panelImportBtn.addEventListener("click", () => importProjectInput.click());
+    }
+
+    importProjectInput.addEventListener("change", async (event) => { 
+        const files = Array.from(event.target.files); 
+        if (!files || files.length === 0) return; 
+
+        const importedFiles = {}; 
+        let projName = "Proyecto Importado";
+
+        // Helper to extract base name without extension
+        function getBaseName(filename) {
+            return filename.replace(/\.[^/.]+$/, "");
+        }
+
+        if (files.length === 1 && files[0].name.endsWith(".json")) { 
+            const file = files[0];
+            projName = getBaseName(file.name);
+            try {
+                const text = await file.text();
+                const data = JSON.parse(text); 
+                if (data && data.files) {
+                    Object.assign(importedFiles, data.files);
+                    if (data.name) projName = data.name;
+                } else {
+                    importedFiles[file.name] = text;
+                }
+            } catch (err) { 
+                alert("Error al importar archivo JSON: " + err.message); 
+                importProjectInput.value = "";
+                return;
+            } 
+        } else if (files.length === 1 && files[0].name.endsWith(".zip")) { 
+            const file = files[0];
+            projName = getBaseName(file.name);
+            try {
+                const zip = await JSZip.loadAsync(file);
+                const filePromises = []; 
+
+                zip.forEach((relativePath, zipEntry) => { 
+                    if (!zipEntry.dir) { 
+                        const cleanName = relativePath.split("/").pop(); 
+                        if (cleanName && !relativePath.startsWith("__MACOSX") && !cleanName.startsWith(".")) { 
+                            filePromises.push( 
+                                zipEntry.async("text").then((text) => { 
+                                    importedFiles[cleanName] = text; 
+                                }) 
+                            ); 
+                        } 
+                    } 
+                }); 
+
+                await Promise.all(filePromises); 
+            } catch (err) {
+                alert("Error al descomprimir el archivo ZIP: " + err.message);
+                importProjectInput.value = "";
+                return;
+            }
+        } else {
+            // Web files (.html, .css, .js, etc.) or single non-zip file
+            projName = getBaseName(files[0].name) || "Proyecto Importado";
+
+            for (const file of files) {
+                const text = await file.text();
+                let fileName = file.name;
+
+                // If file is HTML or text, ensure it lands as html or proper extension
+                if (!fileName.includes(".")) {
+                    if (text.includes("<html") || text.includes("<body") || text.includes("<div") || text.includes("<!DOCTYPE")) {
+                        fileName += ".html";
+                    } else {
+                        fileName += ".txt";
+                    }
+                }
+                importedFiles[fileName] = text;
+            }
+        }
+
+        // Ensure index.html exists if any html file was uploaded
+        const fileNames = Object.keys(importedFiles);
+        if (!importedFiles["index.html"]) {
+            const htmlFile = fileNames.find(f => f.endsWith(".html") || f.endsWith(".htm"));
+            if (htmlFile) {
+                importedFiles["index.html"] = importedFiles[htmlFile];
+            } else if (fileNames.length > 0) {
+                // Wrap content or create default index.html
+                const firstContent = importedFiles[fileNames[0]] || "";
+                if (firstContent.includes("<") && firstContent.includes(">")) {
+                    importedFiles["index.html"] = firstContent;
+                }
+            }
+        }
+
+        const importedProj = { 
+            id: Date.now().toString(), 
+            name: projName, 
+            files: importedFiles, 
+            versions: [], 
+            version: 0, 
+            messages: [], 
+            repository: null, 
+            edited: true 
+        }; 
+
+        projects.push(importedProj); 
+        currentProjectId = importedProj.id; 
+        saveProjects(); 
+        loadProject(); 
+        closeProjectMenu(); 
+        switchMainTab("code");
+
+        alert(`¡Proyecto "${projName}" importado exitosamente con ${Object.keys(importedFiles).length} archivo(s)!`); 
+
+        importProjectInput.value = ""; 
+    }); 
+} 
+
+document.querySelectorAll(".theme-option-btn").forEach(btn => { 
+    btn.addEventListener("click", () => { 
+        const selected = btn.getAttribute("data-theme"); 
+        applyTheme(selected); 
+    }); 
+}); 
+
+const themeBtn = document.getElementById("themeButton"); 
+if (themeBtn) { 
+    themeBtn.addEventListener("click", () => { 
+        settingsMain.style.display = "none"; 
+        themeSection.classList.add("active"); 
+    }); 
+} 
+
+applyTheme(localStorage.getItem("miwy_theme") || "oscuro"); 
+
+document.querySelectorAll("[data-back]").forEach(button => { 
+    button.addEventListener("click", showSettingsMain); 
+}); 
+
+/* =====================================================  
+   EXPORTAR PROYECTO COMO ZIP  
+===================================================== */  
+function exportProjectAsZip(id) { 
+    const project = projects.find(p => p.id === id) || getCurrentProject(); 
+    if (!project) { 
+        alert("No hay proyecto activo para exportar."); 
+        return; 
+    } 
+ 
+    const zip = new JSZip(); 
+    const files = project.files || {}; 
+    const fileNames = Object.keys(files); 
+ 
+    if (fileNames.length === 0) { 
+        alert("El proyecto no tiene archivos para exportar."); 
+        return; 
+    } 
+ 
+    fileNames.forEach(name => { 
+        zip.file(name, files[name] || ""); 
+    }); 
+ 
+    zip.generateAsync({ type: "blob" }).then(function(content) { 
+        const link = document.createElement("a"); 
+        link.href = URL.createObjectURL(content); 
+        link.download = `${project.name.replace(/\s+/g, "_")}.zip`; 
+        document.body.appendChild(link); 
+        link.click(); 
+        document.body.removeChild(link); 
+    }).catch(function(err) { 
+        alert("Error al generar el ZIP: " + err.message); 
+    }); 
+} 
+ 
+const settingsExportBtn = document.getElementById("exportZipBtn"); 
+if (settingsExportBtn) { 
+    settingsExportBtn.addEventListener("click", () => { 
+        const current = getCurrentProject(); 
+        if (current) { 
+            exportProjectAsZip(current.id); 
+            // close settings overlay 
+            const settingsOverlay = document.getElementById("settingsOverlay"); 
+            if(settingsOverlay) settingsOverlay.classList.remove("open"); 
+        } 
+    }); 
+} 
+ 
+ 
+/* =====================================================  
+   SOPORTE PARA CONECTAR UN REPOSITORIO (DESHABILITADO)
+===================================================== */  
+const connectRepoBtn = document.getElementById("connectRepository");
+if (connectRepoBtn) {
+    connectRepoBtn.addEventListener("click", (e) => {  
+        e.preventDefault();
+        alert("Se integrará pronto");  
+    });
+}
+ 
+</script> 
+<script> 
+
+/* =====================================================  
+   DESHABILITAR IA Y MOSTRAR "SE INTEGRARÁ PRONTO"
+===================================================== */  
+const aiInput = document.getElementById("aiInput");
+const aiSend = document.getElementById("aiSend");
+
+function notifyAiDisabled(e) {
+    if(e) e.preventDefault();
+    alert("Se integrará pronto");
+}
+
+if (aiInput) {
+    aiInput.addEventListener("click", notifyAiDisabled);
+    aiInput.addEventListener("keydown", notifyAiDisabled);
+    aiInput.addEventListener("input", notifyAiDisabled);
+}
+
+if (aiSend) {
+    aiSend.addEventListener("click", notifyAiDisabled);
+}
+
+  
+/* =====================================================  
+   RESIZER CODE / PREVIEW  
+===================================================== */  
+  
+const workspace =  
+    document.getElementById(  
+        "workspace"  
+    );  
+  
+const codePanel =  
+    document.getElementById(  
+        "codePanel"  
+    );  
+  
+const workspaceResizer =  
+    document.getElementById(  
+        "workspaceResizer"  
+    );  
+  
+  
+let resizingWorkspace = false;  
+  
+  
+workspaceResizer.addEventListener(  
+    "mousedown",  
+    () => {  
+  
+        resizingWorkspace = true;  
+  
+        workspaceResizer.classList.add(  
+            "dragging"  
+        );  
+  
+        document.body.style.userSelect =  
+            "none";  
+  
+    }  
+);  
+  
+  
+document.addEventListener(  
+    "mousemove",  
+    event => {  
+  
+        if(!resizingWorkspace)  
+            return;  
+  
+  
+        const rect =  
+            workspace.getBoundingClientRect();  
+  
+  
+        let percentage =  
+            (  
+                (  
+                    event.clientX -  
+                    rect.left  
+                )  
+                /  
+                rect.width  
+            ) * 100;  
+  
+  
+        percentage =  
+            Math.max(  
+                25,  
+                Math.min(  
+                    75,  
+                    percentage  
+                )  
+            );  
+  
+  
+        codePanel.style.width =  
+            percentage + "%";  
+  
+    }  
+);  
+  
+  
+document.addEventListener(  
+    "mouseup",  
+    () => {  
+  
+        resizingWorkspace = false;  
+  
+        workspaceResizer.classList.remove(  
+            "dragging"  
+        );  
+  
+        document.body.style.userSelect =  
+            "";  
+  
+    }  
+);  
+  
+  
+/* =====================================================  
+   VISTA MÓVIL / LAPTOP / MÓVIL HORIZONTAL  
+===================================================== */  
+  
+const desktopPreview = document.getElementById("desktopPreview");  
+const mobilePreview = document.getElementById("mobilePreview");  
+const mobileLandscapePreview = document.getElementById("mobileLandscapePreview");
+
+if (desktopPreview) {
+    desktopPreview.addEventListener("click", () => {  
+        previewFrame.className = "preview-frame";
+        desktopPreview.classList.add("active");  
+        if (mobilePreview) mobilePreview.classList.remove("active");  
+        if (mobileLandscapePreview) mobileLandscapePreview.classList.remove("active");  
+    });  
+}
+
+if (mobilePreview) {
+    mobilePreview.addEventListener("click", () => {  
+        previewFrame.className = "preview-frame mobile";
+        mobilePreview.classList.add("active");  
+        if (desktopPreview) desktopPreview.classList.remove("active");  
+        if (mobileLandscapePreview) mobileLandscapePreview.classList.remove("active");  
+    });  
+}
+
+if (mobileLandscapePreview) {
+    mobileLandscapePreview.addEventListener("click", () => {  
+        previewFrame.className = "preview-frame mobile-horizontal";
+        mobileLandscapePreview.classList.add("active");  
+        if (desktopPreview) desktopPreview.classList.remove("active");  
+        if (mobilePreview) mobilePreview.classList.remove("active");  
+    });  
+}
+  
+  
+/* =====================================================  
+   COPIAR CÓDIGO  
+===================================================== */  
+const copyCodeBtn = document.getElementById("copyCodeBtn");
+if (copyCodeBtn) {
+    copyCodeBtn.addEventListener("click", () => {
+        if (codeEditor && codeEditor.value) {
+            navigator.clipboard.writeText(codeEditor.value).then(() => {
+                showShortcutToast("📋 Copiado", "Código copiado al portapapeles");
+            }).catch(err => {
+                alert("Error al copiar: " + err.message);
+            });
+        } else {
+            alert("No hay código para copiar.");
+        }
+    });
+}
+
+/* =====================================================  
+   ATAJOS DE TECLADO  
+===================================================== */  
+function showShortcutToast(keysText, actionDesc) { 
+    const toast = document.getElementById("shortcutToast"); 
+    const keys = document.getElementById("shortcutKeys"); 
+    const desc = document.getElementById("shortcutDesc"); 
+    if (toast && keys && desc) { 
+        keys.textContent = keysText; 
+        desc.textContent = actionDesc; 
+        toast.style.display = "flex"; 
+         
+        clearTimeout(window.shortcutToastTimeout); 
+        window.shortcutToastTimeout = setTimeout(() => { 
+            toast.style.display = "none"; 
+        }, 1500); 
+    } 
+} 
+ 
+window.addEventListener("keydown", function(event) { 
+    // Determine active keys 
+    const isCtrl = event.ctrlKey || event.metaKey; 
+    const isAlt = event.altKey; 
+    const key = event.key.toLowerCase(); 
+ 
+    // Alt + N: Crear nuevo archivo 
+    if (isAlt && key === 'n') { 
+        event.preventDefault(); 
+        const newFileBtn = document.getElementById("newFileButton"); 
+        if (newFileBtn && currentActiveTab === "code") { 
+            newFileBtn.click(); 
+            showShortcutToast("Alt + N", "Abriendo creador de archivo"); 
+        } 
+    } 
+ 
+    // Ctrl + S: Guardar 
+    if (isCtrl && key === 's') { 
+        event.preventDefault(); 
+        saveCurrentFile(); 
+        updatePreview(); 
+        showShortcutToast("Ctrl + S", "Archivo guardado"); 
+    } 
+ 
+ 
+    // Ctrl + E: Exportar ZIP 
+    if (isCtrl && key === 'e') { 
+        event.preventDefault(); 
+        const current = getCurrentProject(); 
+        if (current) { 
+            exportProjectAsZip(current.id); 
+            showShortcutToast("Ctrl + E", "Exportando proyecto como ZIP"); 
+        } 
+    } 
+ 
+    // Ctrl + P: Toggle Vista laptop/teléfono 
+    if (isCtrl && key === 'p') { 
+        event.preventDefault(); 
+        const desktopBtn = document.getElementById("desktopPreview"); 
+        const mobileBtn = document.getElementById("mobilePreview"); 
+        if (desktopBtn && mobileBtn) { 
+            if (mobileBtn.classList.contains("active")) { 
+                desktopBtn.click(); 
+                showShortcutToast("Ctrl + P", "Vista laptop activada"); 
+            } else { 
+                mobileBtn.click(); 
+                showShortcutToast("Ctrl + P", "Vista teléfono activada"); 
+            } 
+        } 
+    } 
+ 
+    // Ctrl + F: Buscar y Reemplazar
+    if (isCtrl && key === 'f') {
+        event.preventDefault();
+        toggleCodeSearch();
+        showShortcutToast("Ctrl + F", "Buscador de código");
+    }
+
+    // Ctrl + , (comma): Abrir configuración (Settings) 
+    if (isCtrl && event.key === ',') { 
+        event.preventDefault(); 
+        const settingsBtn = document.getElementById("settingsButton"); 
+        if (settingsBtn) { 
+            settingsBtn.click(); 
+            showShortcutToast("Ctrl + ,", "Configuración abierta"); 
+        } 
+    } 
+}); 
+ 
+ 
+ 
+/* =====================================================  
+   POSTMESSAGE ERROR HANDLER Y EDICIÓN VISUAL 
+==================================================== */  
+window.addEventListener("message", function(event) { 
+    if (!event.data) return; 
+ 
+    if (event.data.type === 'preview-visual-edit' && event.data.html) { 
+        const project = getCurrentProject(); 
+        if (!project) return; 
+ 
+        project.files['index.html'] = event.data.html; 
+        project.edited = true; 
+ 
+        if (currentFileName === 'index.html') { 
+            codeEditor.value = event.data.html; 
+            updateLineCounter(); 
+        } 
+ 
+        saveProjects(); 
+        return; 
+    } 
+ 
+    if (event.data && event.data.type === 'iframe-error') { 
+        const data = event.data; 
+        const banner = document.getElementById("previewErrorBanner"); 
+        const desc = document.getElementById("previewErrorDesc"); 
+        const fix = document.getElementById("previewErrorFix"); 
+ 
+        if (banner && desc && fix) { 
+            let errorText = data.message; 
+            if (data.lineno) { 
+                errorText += ` (Línea ${data.lineno}`; 
+                if (data.colno) { 
+                    errorText += `, Columna ${data.colno}`; 
+                } 
+                errorText += `)`; 
+            } 
+            desc.textContent = errorText; 
+ 
+            // Simple heuristics for corrections 
+            let fixText = "Sugerencia: Revisa la sintaxis, declaración de variables, o importaciones de scripts."; 
+            const msgLower = data.message.toLowerCase(); 
+            if (msgLower.includes("is not defined")) { 
+                const matches = data.message.match(/([a-zA-Z_$][a-zA-Z0-9_$]*)\s+is not defined/); 
+                const varName = matches ? matches[1] : "la variable/función"; 
+                fixText = `Sugerencia: Declara o inicializa la variable/función "${varName}" antes de usarla (ej. let ${varName} = ...).`; 
+            } else if (msgLower.includes("cannot read properties of null") || msgLower.includes("null is not an object")) { 
+                fixText = "Sugerencia: Asegúrate de que el elemento DOM existe usando document.getElementById u otros selectores antes de acceder a sus propiedades."; 
+            } else if (msgLower.includes("cannot read properties of undefined")) { 
+                fixText = "Sugerencia: Verifica que el objeto esté bien definido antes de acceder a sus propiedades o usa encadenamiento opcional (?.)."; 
+            } else if (msgLower.includes("syntaxerror")) { 
+                fixText = "Sugerencia: Revisa si faltan paréntesis, llaves, comillas, o si hay un error tipográfico en tu código JavaScript."; 
+            } 
+ 
+            fix.innerHTML = `💡 <span>${fixText}</span>`; 
+            banner.style.display = "flex"; 
+        } 
+    } 
+}); 
+ 
+ 
+/* =====================================================  
+   INICIO  
+===================================================== */  
+  
+loadProject();  
+renderProjects();  
+updateLineCounter();  
+  
+
+/* =====================================================  
+   SIMULADOR REAL EXTERNO HANDLERS  
+===================================================== */  
+const realPhoneBtn = document.getElementById("realPhoneSimBtn");
+const realPhoneModal = document.getElementById("realPhoneModal");
+const closeRealPhoneBtn = document.getElementById("closeRealPhone");
+const realPhoneFrame = document.getElementById("realPhoneFrame");
+const realPhoneReload = document.getElementById("realPhoneReload");
+
+if (realPhoneBtn && realPhoneModal) {
+    realPhoneBtn.addEventListener("click", () => {
+        if (previewFrame && realPhoneFrame) {
+            realPhoneFrame.srcdoc = previewFrame.srcdoc;
+        }
+        realPhoneModal.classList.add("open");
+    });
+}
+
+if (closeRealPhoneBtn && realPhoneModal) {
+    closeRealPhoneBtn.addEventListener("click", () => {
+        realPhoneModal.classList.remove("open");
+    });
+}
+
+if (realPhoneReload && realPhoneFrame && previewFrame) {
+    realPhoneReload.addEventListener("click", () => {
+        realPhoneFrame.srcdoc = previewFrame.srcdoc;
+    });
+}
+
+function openRealPhoneModal() {
+    const modal = document.getElementById("realPhoneModal");
+    const pFrame = document.getElementById("previewFrame");
+    const rFrame = document.getElementById("realPhoneFrame");
+    if (pFrame && rFrame) {
+        rFrame.srcdoc = pFrame.srcdoc;
+    }
+    if (modal) {
+        modal.classList.add("open");
+    }
+}
+
+function closeRealPhoneModal() {
+    const modal = document.getElementById("realPhoneModal");
+    if (modal) {
+        modal.classList.remove("open");
+    }
+}
+
+function reloadRealPhoneFrame() {
+    const pFrame = document.getElementById("previewFrame");
+    const rFrame = document.getElementById("realPhoneFrame");
+    if (pFrame && rFrame) {
+        rFrame.srcdoc = pFrame.srcdoc;
+    }
+}
+</script>  
+  
+
+
+<!-- DOCK FLOTANTE GLOBAL DE EDITOR VISUAL -->
+<div id="parentVisualDock" class="miwy-floating-dock" style="display:none; z-index:2147483647; position:fixed; bottom:20px; left:50%;">
+    <div class="miwy-dock-drag-handle" id="__parent_dockHandle" title="Arrastrar controles por toda la pantalla">
+        <span>⋮⋮</span>
+    </div>
+    <div class="miwy-dock-group">
+        <div class="miwy-tb-item"><button class="miwy-tb-btn" data-act="text" title="Editar texto">✏️</button><span class="miwy-tb-label">Texto</span></div>
+        <div class="miwy-tb-item">
+            <label class="miwy-chromatic-circle" title="Círculo Cromático (Color / Fondo)">
+                <input type="color" id="__parent_chromaticColor" value="#ff6a00">
+            </label>
+            <span class="miwy-tb-label">Color</span>
+        </div>
+    </div>
+    <div class="miwy-dock-group">
+        <div class="miwy-tb-item"><button class="miwy-tb-btn" data-act="font-plus" title="Aumentar fuente">A+</button><span class="miwy-tb-label">Aumentar</span></div>
+        <div class="miwy-tb-item"><button class="miwy-tb-btn" data-act="font-minus" title="Reducir fuente">A-</button><span class="miwy-tb-label">Reducir</span></div>
+        <div class="miwy-tb-item"><button class="miwy-tb-btn" data-act="bold" title="Negrita"><b>B</b></button><span class="miwy-tb-label">Negrita</span></div>
+        <div class="miwy-tb-item"><button class="miwy-tb-btn" data-act="align" title="Alinear texto">↔️</button><span class="miwy-tb-label">Alinear</span></div>
+        <div class="miwy-tb-item"><button class="miwy-tb-btn" data-act="radius" title="Redondear bordes">⭕</button><span class="miwy-tb-label">Borde</span></div>
+    </div>
+    <div class="miwy-dock-group">
+        <div class="miwy-tb-item"><button class="miwy-tb-btn" data-act="add-title" title="Agregar Título">H1</button><span class="miwy-tb-label">Título</span></div>
+        <div class="miwy-tb-item"><button class="miwy-tb-btn" data-act="add-btn" title="Agregar Botón">🔘</button><span class="miwy-tb-label">Botón</span></div>
+        <div class="miwy-tb-item"><button class="miwy-tb-btn" data-act="add-card" title="Agregar Tarjeta">🎴</button><span class="miwy-tb-label">Tarjeta</span></div>
+        <div class="miwy-tb-item"><button class="miwy-tb-btn" data-act="add-img" title="Imagen / Subir Foto">🖼️</button><span class="miwy-tb-label">Imagen</span></div>
+        <div class="miwy-tb-item"><button class="miwy-tb-btn" data-act="edit-attr" title="Editar Atributos (URL/Enlace)">⚙️</button><span class="miwy-tb-label">Atributo</span></div>
+    </div>
+    <div class="miwy-dock-group">
+        <div class="miwy-tb-item"><button class="miwy-tb-btn" data-act="up" title="Mover arriba">⬆️</button><span class="miwy-tb-label">Arriba</span></div>
+        <div class="miwy-tb-item"><button class="miwy-tb-btn" data-act="down" title="Mover abajo">⬇️</button><span class="miwy-tb-label">Abajo</span></div>
+        <div class="miwy-tb-item"><button class="miwy-tb-btn" data-act="dup" title="Duplicar">📋</button><span class="miwy-tb-label">Duplicar</span></div>
+        <div class="miwy-tb-item"><button class="miwy-tb-btn danger" data-act="del" title="Eliminar">🗑️</button><span class="miwy-tb-label">Borrar</span></div>
+    </div>
+    <input type="file" id="__parent_fileInput" accept="image/*" style="display:none;">
+</div>
+
+</div>  
+  
+
+</body>  
+</html>

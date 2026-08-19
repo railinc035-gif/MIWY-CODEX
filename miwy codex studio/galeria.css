@@ -1,0 +1,403 @@
+/* =========================================================
+   MIWY — GALERÍA DE PROYECTOS (RETRO COLORFUL CODE LAYOUT)
+   ========================================================= */
+
+:root {
+    --miwy-bg: #080808;
+    --miwy-panel: #0d0d0e;
+    --miwy-panel-2: #141417;
+    --miwy-border: #24242e;
+    --miwy-orange: #ff6a00;
+    --miwy-orange-soft: #ff8a32;
+    --miwy-neon-green: #00ff66;
+    --miwy-neon-cyan: #00e5ff;
+    --miwy-neon-pink: #ff007f;
+    --miwy-neon-yellow: #ffe600;
+    --miwy-neon-purple: #b537f2;
+    --miwy-text: #f2f2f2;
+    --miwy-muted: #7f8099;
+    --miwy-danger: #ff3b30;
+    --miwy-radius: 10px;
+}
+
+/* CONTENEDOR GENERAL CON SCANLINES RETRO Y FONDOS DE CÓDIGO */
+.miwy-gallery {
+    width: min(100%, 1120px);
+    margin: 0 auto;
+    padding: 24px 20px;
+    box-sizing: border-box;
+    color: var(--miwy-text);
+    font-family: Consolas, "SFMono-Regular", Monaco, monospace;
+    position: relative;
+    overflow: hidden;
+}
+
+/* CRT SCANLINE OVERLAY */
+.miwy-gallery::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%, 
+        rgba(0, 0, 0, 0.25) 50%
+    );
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 10;
+    opacity: 0.6;
+}
+
+/* CAPA DE CÓDIGO RETRO FLOTANTE COLORIDO EN EL FONDO */
+.retro-code-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    user-select: none;
+    overflow: hidden;
+    z-index: 0;
+    opacity: 0.18;
+    font-family: Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+.retro-code-snippet {
+    position: absolute;
+    white-space: nowrap;
+    animation: retroFloat 12s infinite ease-in-out alternate;
+}
+
+.retro-code-snippet.c1 { top: 3%; left: 2%; color: var(--miwy-neon-cyan); }
+.retro-code-snippet.c2 { top: 12%; right: 4%; color: var(--miwy-neon-pink); }
+.retro-code-snippet.c3 { top: 25%; left: 8%; color: var(--miwy-neon-green); }
+.retro-code-snippet.c4 { top: 40%; right: 10%; color: var(--miwy-neon-yellow); }
+.retro-code-snippet.c5 { top: 58%; left: 4%; color: var(--miwy-neon-purple); }
+.retro-code-snippet.c6 { top: 75%; right: 6%; color: var(--miwy-orange); }
+.retro-code-snippet.c7 { bottom: 5%; left: 12%; color: var(--miwy-neon-cyan); }
+
+@keyframes retroFloat {
+    0% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-8px) rotate(0.5deg); }
+    100% { transform: translateY(6px) rotate(-0.5deg); }
+}
+
+/* HERO HEADER CANVAS BANNER */
+.miwy-hero-header {
+    width: 100%;
+    height: 160px;
+    margin-bottom: 28px;
+    background: radial-gradient(circle at center, #150f1a 0%, #050508 100%);
+    border: 1px solid #3d224d;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.7), 0 0 15px rgba(255, 0, 127, 0.15);
+    z-index: 1;
+}
+
+.miwy-hero-header canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* DECORACIÓN CÓDIGO EN HERO BANNER */
+.hero-code-watermark {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 10px;
+    color: rgba(0, 229, 255, 0.4);
+    pointer-events: none;
+    text-align: right;
+    line-height: 1.4;
+}
+
+/* DASHBOARD LAYOUT GRID */
+.miwy-gallery-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 28px;
+    align-items: start;
+    position: relative;
+    z-index: 1;
+}
+
+.miwy-gallery-main {
+    min-width: 0;
+}
+
+.miwy-gallery-side {
+    min-width: 0;
+    position: sticky;
+    top: 20px;
+}
+
+/* CABECERA DE SECCIÓN RETRO */
+.miwy-projects-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 16px;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed rgba(255,255,255,0.1);
+}
+
+.miwy-projects-title {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--miwy-neon-green);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-shadow: 0 0 8px rgba(0, 255, 102, 0.3);
+}
+
+.miwy-projects-title::before {
+    content: ">_";
+    color: var(--miwy-orange);
+    font-weight: bold;
+}
+
+/* Botón CREAR PROYECTO */
+.miwy-create-project {
+    border: 1px solid var(--miwy-orange);
+    background: #110900;
+    color: var(--miwy-orange);
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    font-family: inherit;
+    letter-spacing: .5px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 10px rgba(255, 106, 0, 0.15);
+}
+
+.miwy-create-project:hover {
+    background: var(--miwy-orange);
+    color: #000;
+    box-shadow: 0 0 20px rgba(255, 106, 0, 0.5);
+}
+
+/* LISTA DE PROYECTOS (GRID TILES) */
+.miwy-projects-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
+}
+
+/* TARJETA / CARD DE PROYECTO CON ESTILO CÓDIGO RETRO */
+.miwy-project-card {
+    width: 100%;
+    min-height: 150px;
+    box-sizing: border-box;
+
+    background: var(--miwy-panel);
+    border: 1px solid #282838;
+    border-radius: var(--miwy-radius);
+
+    padding: 16px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    gap: 12px;
+    transition: all 0.2s ease-in-out;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+}
+
+.miwy-project-card::before {
+    content: "</>";
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    font-size: 10px;
+    color: rgba(255,255,255,0.08);
+    font-weight: bold;
+}
+
+.miwy-project-card:hover {
+    border-color: var(--miwy-neon-pink);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(255, 0, 127, 0.2);
+}
+
+.miwy-project-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.miwy-project-icon {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #3a1e4a;
+    border-radius: 8px;
+    background: #120a17;
+    font-size: 18px;
+    color: var(--miwy-neon-pink);
+    box-shadow: 0 0 10px rgba(255, 0, 127, 0.2);
+}
+
+.miwy-project-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.miwy-project-name {
+    margin: 0 0 4px;
+    font-size: 14px;
+    font-weight: 800;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.miwy-project-description {
+    margin: 0;
+    color: var(--miwy-muted);
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+/* RETRO CODE PREVIEW BADGES IN CARD */
+.miwy-card-code-tags {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+}
+
+.retro-code-tag {
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+    border: 1px solid transparent;
+}
+
+.retro-code-tag.html { color: #ff5555; background: #251010; border-color: #552020; }
+.retro-code-tag.css { color: #55ffff; background: #0a2525; border-color: #154545; }
+.retro-code-tag.js { color: #ffff55; background: #25250a; border-color: #454515; }
+
+/* BOTONES DE ACCIÓN */
+.miwy-project-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding-top: 10px;
+    margin-top: auto;
+}
+
+.miwy-open-btn {
+    flex: 1;
+    height: 32px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    font-family: inherit;
+    cursor: pointer;
+    border: 1px solid var(--miwy-neon-green);
+    background: #061f0d;
+    color: var(--miwy-neon-green);
+    letter-spacing: .5px;
+    transition: all 0.15s;
+    box-shadow: 0 0 10px rgba(0, 255, 102, 0.15);
+}
+
+.miwy-open-btn:hover {
+    background: var(--miwy-neon-green);
+    color: #000;
+    box-shadow: 0 0 18px rgba(0, 255, 102, 0.4);
+}
+
+.miwy-delete-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    border: 1px solid #332020;
+    background: #140a0a;
+    color: #aa6666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+
+.miwy-delete-btn:hover {
+    border-color: var(--miwy-danger);
+    color: var(--miwy-danger);
+    background: #280a0a;
+    box-shadow: 0 0 10px rgba(255, 59, 48, 0.3);
+}
+
+/* WIDGET ARCADE RETRO */
+.miwy-arcade-widget {
+    width: 100%;
+    height: 380px;
+    background: #030305;
+    border: 1px solid var(--miwy-neon-cyan);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.15), inset 0 0 0 1px #000;
+}
+
+/* ESTADO VACÍO */
+.miwy-empty-projects {
+    min-height: 140px;
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed var(--miwy-neon-purple);
+    border-radius: var(--miwy-radius);
+    color: var(--miwy-neon-cyan);
+    font-size: 12px;
+    text-align: center;
+    background: rgba(181, 55, 242, 0.03);
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .miwy-gallery-grid {
+        grid-template-columns: 1fr;
+    }
+    .miwy-gallery-side {
+        position: static;
+        margin-top: 16px;
+    }
+}
+
+@media (max-width: 520px) {
+    .miwy-gallery {
+        padding: 16px 12px;
+    }
+    .miwy-hero-header {
+        height: 120px;
+        margin-bottom: 20px;
+    }
+    .miwy-projects-list {
+        grid-template-columns: 1fr;
+    }
+}
