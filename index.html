@@ -1354,14 +1354,14 @@ button:not(.miwy-tb-btn):not(.settings-button):not(.new-file-button):not(.miwy-c
   
 .settings-option{  
     width:100%;  
-    min-height:58px;
+    height:64px;
     box-sizing:border-box;
   
     display:flex;  
     align-items:center;  
     justify-content:space-between;  
   
-    padding:10px 14px;  
+    padding:0 14px;  
   
     background:#141a1f;  
     color:#dfe7ee;  
@@ -1407,26 +1407,28 @@ button:not(.miwy-tb-btn):not(.settings-button):not(.new-file-button):not(.miwy-c
   
 .settings-option strong{  
     display:block;  
-    font-size:14px;  
+    font-size:13px;  
     font-weight:600;
     color:#f1f5f9;  
-    line-height:1.3;
+    line-height:1.2;
     margin:0;
+    text-align:left;
 }  
   
 .settings-option small{  
     display:block;  
     color:#8a99ad;  
     font-size:11px;  
-    line-height:1.35;
-    margin-top:2px;
+    line-height:1.2;
+    margin-top:3px;
+    text-align:left;
 }  
 
 .settings-option > :last-child {
     flex:0 0 auto;
     margin-left:10px;
     color:#7c8794;
-    font-size:20px;
+    font-size:18px;
     line-height:1;
 }  
 
@@ -2708,6 +2710,10 @@ function toggleVisualEdit() {
     if (typeof showShortcutToast === "function") {
         showShortcutToast("Edición Visual", isVisualEditing ? "Activada (Haz clic en elementos para editar)" : "Desactivada"); 
     }
+
+    const previewFrame = document.getElementById("previewFrame");
+    if (previewFrame) previewFrame.__lastHtml = null;
+
     updatePreview(); 
 } 
 
@@ -3240,6 +3246,7 @@ function updatePreviewImmediate(sequence = previewUpdateSequence){
 }  
 
 function sendDockCommand(action, value) {
+    if (!isVisualEditing) return;
     const previewFrame = document.getElementById("previewFrame");
     if (previewFrame && previewFrame.contentWindow) {
         previewFrame.contentWindow.postMessage({
@@ -4296,17 +4303,10 @@ function replaceAllMatches() {
                     onclick="toggleRecursosPlusMenu(event)">+</button>
                 
                 <div id="recursosPlusDropdown" style="display:none; position:absolute; top:32px; left:80px; z-index:1000; background:#10151c; border:1px solid #2b3a48; border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,0.5); padding:4px 0; min-width:140px;">
-                    <button onclick="document.getElementById('newFileButton').click(); toggleRecursosPlusMenu();" style="width:100%; padding:8px 12px; background:transparent; border:none; color:#edf2f7; text-align:left; font-size:11px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px;">📄 Crear archivo</button>
+                    <button onclick="openCreateFilePrompt(); toggleRecursosPlusMenu();" style="width:100%; padding:8px 12px; background:transparent; border:none; color:#edf2f7; text-align:left; font-size:11px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px;">📄 Crear archivo</button>
                     <button onclick="createNewFolderPrompt(); toggleRecursosPlusMenu();" style="width:100%; padding:8px 12px; background:transparent; border:none; color:#edf2f7; text-align:left; font-size:11px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px;">📁 Crear carpeta</button>
                 </div>
-            </div> 
-  
-            <button  
-                id="newFileButton"  
-                class="new-file-button"  
-                title="Crear archivo"
-                style="width:auto; flex:0 0 auto; padding:0 10px; font-size:11px; display:none;">  
-                Archivo</button>
+            </div>
 
             <input type="file" id="folderAssetInput" accept="*/*" multiple style="display:none;" onchange="handleAssetUpload(event)">
   
@@ -5430,11 +5430,9 @@ function switchMainTab(tab = "recursos"){
 
     const recursosBtn = document.getElementById("tabRecursosBtn");
     const folderView = document.getElementById("folderView");
-    const newFileBtn = document.getElementById("newFileButton");
 
     if (recursosBtn) recursosBtn.classList.add("active");
     if (folderView) folderView.style.display = "flex";
-    if (newFileBtn) newFileBtn.style.display = "flex";
     if (currentFileHeader) currentFileHeader.textContent = currentFileName ? `📁 Recursos / ${currentFileName}` : "📁 Recursos";
 
     renderFolderManager(currentFolderDirectory);
@@ -6059,7 +6057,7 @@ function renderFiles(){
         addButton.type = "button";
         addButton.textContent = "+";
         addButton.title = "Crear archivo";
-        addButton.addEventListener("click", () => document.getElementById("newFileButton").click());
+        addButton.addEventListener("click", openCreateFilePrompt);
         fileBar.appendChild(addButton);
         currentFileName = null;  
         if(currentActiveTab === "code") {
@@ -6103,7 +6101,7 @@ function renderFiles(){
     addButton.type = "button";
     addButton.textContent = "+";
     addButton.title = "Crear archivo";
-    addButton.addEventListener("click", () => document.getElementById("newFileButton").click());
+    addButton.addEventListener("click", openCreateFilePrompt);
     fileBar.appendChild(addButton);
 }  
   
@@ -6119,20 +6117,11 @@ const fileInput =
     document.getElementById("fileInput");  
   
   
-document  
-    .getElementById("newFileButton")  
-    .addEventListener("click", () => {  
-  
-        fileInput.value = "";  
-  
-        fileDialog.classList.add("open");  
-  
-        setTimeout(  
-            () => fileInput.focus(),  
-            50  
-        );  
-  
-    });  
+function openCreateFilePrompt() {
+    if (fileInput) fileInput.value = "";
+    if (fileDialog) fileDialog.classList.add("open");
+    setTimeout(() => { if (fileInput) fileInput.focus(); }, 50);
+}
   
   
 document  
@@ -8015,11 +8004,8 @@ window.addEventListener("keydown", function(event) {
     // Alt + N: Crear nuevo archivo 
     if (isAlt && key === 'n') { 
         event.preventDefault(); 
-        const newFileBtn = document.getElementById("newFileButton"); 
-        if (newFileBtn && currentActiveTab === "code") { 
-            newFileBtn.click(); 
-            showShortcutToast("Alt + N", "Abriendo creador de archivo"); 
-        } 
+        openCreateFilePrompt(); 
+        showShortcutToast("Alt + N", "Abriendo creador de archivo"); 
     } 
  
     // Ctrl + S: Guardar 
