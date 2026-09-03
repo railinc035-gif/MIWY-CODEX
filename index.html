@@ -5,28 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">  
 <title>Miwy</title>  
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script> 
-<!-- Sentry Browser Error Detection & Monitoring Library -->
-<script src="https://browser.sentry-cdn.com/7.114.0/bundle.min.js" crossorigin="anonymous"></script>
-<script>
-  (function initSentryErrorDetection() {
-    try {
-      if (typeof Sentry !== "undefined") {
-        Sentry.init({
-          dsn: "", // Configurable Sentry DSN for error monitoring
-          autoSessionTracking: false,
-          tracesSampleRate: 1.0,
-          beforeSend: function(event) {
-            console.log("[Sentry Error Detection Captured]", event);
-            return event;
-          }
-        });
-        window.__SentryInitialized = true;
-      }
-    } catch (e) {
-      console.warn("Sentry initialization skipped:", e);
-    }
-  })();
-</script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-beautify@1.15.1/js/lib/beautify.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-beautify@1.15.1/js/lib/beautify-html.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-beautify@1.15.1/js/lib/beautify-css.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jshint/2.13.6/jshint.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/htmlhint@1.1.4/dist/htmlhint.js"></script>
 
   
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
@@ -341,8 +325,8 @@ button{border:0;cursor:pointer}
   
     padding:4px 8px;  
   
-    background:#0b0b0b;  
-    border-bottom:1px solid #1c1c1c;  
+    background:#10151c;  
+    border-bottom:1px solid #2b3846;  
   
     overflow-x:auto;  
     flex-shrink:0;  
@@ -357,9 +341,9 @@ button{border:0;cursor:pointer}
   
     padding:0 8px;  
   
-    background:#111;  
-    border:1px solid #202020;  
-    border-radius:6px;  
+    background:#182028;  
+    border:1px solid #2b3a48;  
+    border-radius:5px;  
   
     color:#777;  
     white-space:nowrap;  
@@ -367,9 +351,9 @@ button{border:0;cursor:pointer}
 }  
   
 .file-tab.active{  
-    background:#19130f;  
-    color:#ddd;  
-    border-color:#4b2917;  
+    background:#2b180d;  
+    color:#f1f5f9;  
+    border-color:#ff6a0050;  
 }  
   
 .file-open{  
@@ -402,6 +386,25 @@ button{border:0;cursor:pointer}
     background:#251010;  
     color:var(--danger);  
 }  
+
+.file-bar-add {
+    flex:0 0 28px;
+    width:28px;
+    height:26px;
+    margin-left:auto;
+    border:1px solid #2b3a48;
+    border-radius:5px;
+    background:#182028;
+    color:#cbd5e1;
+    font-size:18px;
+    line-height:1;
+}
+
+.file-bar-add:hover {
+    color:var(--orange);
+    border-color:var(--orange);
+    background:#2b180d;
+}
   
   
 /* =========================  
@@ -412,8 +415,31 @@ button{border:0;cursor:pointer}
     flex:1;  
     min-height:0;  
     position:relative;  
-    overflow:hidden;  
+    overflow:hidden;
+    display:flex;
+    background:#0d1117;
 }  
+
+.line-gutter {
+    flex:0 0 54px;
+    overflow:hidden;
+    padding:22px 12px 22px 0;
+    background:#0b0f14;
+    border-right:1px solid #202b36;
+    color:#536170;
+    font:13px/1.7 Consolas,"SFMono-Regular","Courier New",monospace;
+    text-align:right;
+    user-select:none;
+    white-space:pre;
+}
+
+.editor-content {
+    flex:1;
+    min-width:0;
+    min-height:0;
+    position:relative;
+    overflow:hidden;
+}
   
 .code-editor{  
     width:100%;  
@@ -423,14 +449,14 @@ button{border:0;cursor:pointer}
     outline:none;  
     border:0;  
   
-    padding:18px 20px;  
+    padding:22px 24px;  
   
     background:#0d1117 !important;  
     color:#c9d1d9 !important;  
   
     font-family:Consolas,"SFMono-Regular","Courier New",monospace !important;  
-    font-size:14px;  
-    line-height:1.65;  
+    font-size:13px;  
+    line-height:1.7;  
   
     tab-size:4;  
   
@@ -492,7 +518,7 @@ button{border:0;cursor:pointer}
   
     display:flex;  
     align-items:center;  
-    justify-content:space-between;  
+    justify-content:flex-end;  
   
     padding:0 12px;  
   
@@ -504,6 +530,12 @@ button{border:0;cursor:pointer}
     color:#555;  
     font-size:10px;  
 }  
+
+.editor-position {
+    color:#c9d1d9;
+    font:12px Consolas,"SFMono-Regular","Courier New",monospace;
+    letter-spacing:.02em;
+}
   
 .line-counter{  
     color:var(--green);  
@@ -856,7 +888,7 @@ button{border:0;cursor:pointer}
 ========================= */  
   
 .overlay{
-    z-index: 20000 !important;
+    z-index: 20000;
     position:fixed;
     inset:0;
     display:flex;
@@ -865,15 +897,17 @@ button{border:0;cursor:pointer}
     background:rgba(0,0,0,.65);
     opacity:0;
     pointer-events:none;
-    z-index:20000;
 }  
   
 .overlay.open{
-    z-index: 20000 !important;
+    z-index: 20000;
     opacity:1;
     pointer-events:auto;
-    z-index:20000;
 }  
+
+#customDialog.open {
+    z-index: 30000 !important;
+}
   
 .dialog{  
     width:350px;  
@@ -1258,87 +1292,92 @@ button:not(.miwy-tb-btn):not(.settings-button):not(.new-file-button):not(.miwy-c
     position:absolute;  
   
     top:62px;  
-    right:12px;  
+    right:14px;  
   
-    width:330px;  
+    width:340px;  
     max-width:calc(100vw - 24px);  
   
     max-height:calc(100vh - 74px);  
   
     overflow-y:auto;  
   
-    background:#101010;  
+    background:#101113;  
+    border:1px solid rgba(255,255,255,0.08);  
+    border-radius:16px;  
   
-    border:1px solid #292929;  
-    border-radius:12px;  
-  
-    box-shadow:0 20px 60px rgba(0,0,0,.7);  
+    box-shadow:0 30px 80px rgba(0,0,0,.62);  
 }  
   
 .settings-header{  
-    height:48px;  
+    height:58px;  
   
     display:flex;  
     align-items:center;  
     justify-content:space-between;  
   
-    padding:0 14px;  
+    padding:0 16px;  
   
-    border-bottom:1px solid var(--border);  
+    border-bottom:1px solid rgba(255,255,255,0.06);  
 }  
   
 .settings-title{  
-    font-size:13px;  
+    font-size:15px;  
     font-weight:700;  
+    color:#f3f4f6;  
+    letter-spacing:0.01em;  
 }  
   
 .close-settings{  
-    width:28px;  
-    height:28px;  
+    width:32px;  
+    height:32px;  
   
     background:transparent;  
-    color:#777;  
-  
-    border-radius:6px;  
+    color:#7c8594;  
+    border:1px solid transparent;  
+    border-radius:8px;  
+    font-size:24px;  
+    line-height:1;  
 }  
   
 .close-settings:hover{  
-    background:#1c1c1c;  
+    background:#171d22;  
+    border-color:rgba(255,255,255,0.06);  
     color:white;  
 }  
   
 .settings-options{  
-    padding:8px;  
+    padding:12px;  
     display:flex;
     flex-direction:column;
-    gap:4px;
+    gap:8px;
 }  
   
 .settings-option{  
     width:100%;  
-    min-height:52px;
+    min-height:58px;
     box-sizing:border-box;
   
     display:flex;  
     align-items:center;  
     justify-content:space-between;  
   
-    padding:8px 12px;  
+    padding:10px 14px;  
   
-    background:linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0.1) 100%);  
-    color:#cbd5e1;  
+    background:#141a1f;  
+    color:#dfe7ee;  
   
-    border:1px solid rgba(255,255,255,0.05);
-    border-radius:8px;  
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:12px;  
   
     text-align:left;  
     transition:all 0.2s ease;
 }  
   
 .settings-option:hover{  
-    background:linear-gradient(180deg, #222933 0%, #161c24 100%);  
-    border-color:rgba(255,122,26,0.3);
+    background:#1a232b;  
+    border-color:rgba(255,122,26,0.28);
     color:white;  
+    transform:translateY(-1px);
 }  
   
 .settings-option-left{  
@@ -1350,24 +1389,25 @@ button:not(.miwy-tb-btn):not(.settings-button):not(.new-file-button):not(.miwy-c
 }  
   
 .option-icon{  
-    width:32px;  
-    height:32px;  
-    flex:0 0 32px;
+    width:38px;  
+    height:38px;  
+    flex:0 0 38px;
   
     display:flex;  
     align-items:center;  
     justify-content:center;  
   
-    background:#161f28;  
-    border:1px solid #263442;
-    border-radius:7px;  
+    background:rgba(255,255,255,0.02);  
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:10px;  
     color:var(--orange);
-    font-size:14px;
+    font-size:16px;
+    line-height:1;
 }  
   
 .settings-option strong{  
     display:block;  
-    font-size:12px;  
+    font-size:14px;  
     font-weight:600;
     color:#f1f5f9;  
     line-height:1.3;
@@ -1377,9 +1417,42 @@ button:not(.miwy-tb-btn):not(.settings-button):not(.new-file-button):not(.miwy-c
 .settings-option small{  
     display:block;  
     color:#8a99ad;  
-    font-size:10px;  
-    line-height:1.3;
+    font-size:11px;  
+    line-height:1.35;
     margin-top:2px;
+}  
+
+.settings-option > :last-child {
+    flex:0 0 auto;
+    margin-left:10px;
+    color:#7c8794;
+    font-size:20px;
+    line-height:1;
+}  
+
+.settings-exit-button {
+    width:100%;
+    min-height:44px;
+    margin-top:8px;
+    padding:12px 14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    background:linear-gradient(180deg, rgba(80, 28, 28, 0.9), rgba(32, 15, 15, 0.95));
+    border:1px solid rgba(255, 88, 88, 0.28);
+    border-radius:12px;
+    color:#ff6a6a;
+    font-size:13px;
+    font-weight:700;
+    text-align:center;
+    transition:all 0.2s ease;
+}
+
+.settings-exit-button:hover {
+    background:linear-gradient(180deg, rgba(110, 34, 34, 0.9), rgba(38, 17, 17, 0.95));
+    border-color:rgba(255, 88, 88, 0.42);
+    transform:translateY(-1px);
 }  
   
 .settings-section{  
@@ -1727,85 +1800,12 @@ button:not(.miwy-tb-btn):not(.settings-button):not(.new-file-button):not(.miwy-c
     font-size: 16px;
 }
 
-/* =========================  
-   ERROR BANNER (TOPBAR) 
-========================= */  
 .preview-wrapper-container { 
     flex:1;  
     min-height:0;  
     position:relative;  
     display:flex;  
     flex-direction:column; 
-} 
- 
-.preview-error-banner { 
-    flex: 1;
-    margin: 0 16px;
-    height: 38px;
-    background: #1e0909; 
-    border: 1px dashed var(--danger); 
-    border-radius: 8px; 
-    padding: 4px 12px; 
-    font-size: 11px; 
-    color: #ffd0d0; 
-    display: none; /* hidden by default */ 
-    align-items: center; 
-    justify-content: space-between;
-    gap: 12px; 
-    animation: fadeIn 0.2s ease-in-out; 
-    overflow: hidden;
-} 
- 
-@keyframes fadeIn { 
-    from { opacity: 0; transform: translateY(-5px); } 
-    to { opacity: 1; transform: translateY(0); } 
-} 
- 
-.preview-error-banner .error-title { 
-    font-weight: bold; 
-    color: var(--danger); 
-    white-space: nowrap;
-    font-size: 11px;
-} 
- 
-.preview-error-banner .error-close { 
-    background: transparent; 
-    color: #ff9999; 
-    border: none; 
-    font-size: 16px; 
-    cursor: pointer; 
-    padding: 0 4px; 
-    line-height: 1;
-} 
- 
-.preview-error-banner .error-close:hover { 
-    color: white; 
-} 
- 
-.preview-error-banner .error-desc { 
-    font-family: Consolas, monospace; 
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    background: #100505; 
-    padding: 3px 8px; 
-    border-radius: 4px; 
-    border: 1px solid #ff4d4d33; 
-    color: #ffb3b3;
-    font-size: 10px;
-    max-width: 350px;
-} 
- 
-.preview-error-banner .error-fix { 
-    color: var(--green); 
-    font-weight: bold; 
-    display: flex; 
-    align-items: center; 
-    gap: 4px; 
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: 10px;
 } 
  
 /* =========================  
@@ -1876,8 +1876,6 @@ body.theme-claro .settings-option:hover,
 body.theme-claro .project-item:hover { background: #f0f0f0; color: #1a1a1a; } 
 body.theme-claro .option-icon { background: #f0f0f0; } 
 body.theme-claro .empty-editor span { background: #ffffff; border-color: #cccccc; color: #666; } 
-body.theme-claro .console-tab-container { background: #f8f8f8 !important; color: #222 !important; }
-body.theme-claro #consoleLogs { background: #ffffff !important; border: 1px solid #e0e0e0; }
  
 /* Cobalto */ 
 body.theme-cobalto { 
@@ -2303,6 +2301,136 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
     .settings-panel { top: 64px; right: 8px; max-width: calc(100vw - 16px); }
 }
 
+/* Galería: composición compacta tipo editor */
+.miwy-gallery {
+    width: min(100%, 1180px);
+    padding: 22px 28px 34px;
+    background: #090b0f;
+}
+
+.miwy-hero-header {
+    height: 168px;
+    margin-bottom: 26px;
+    border-radius: 8px;
+    border-color: #263442;
+    background: #0d141b;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.025), 0 14px 35px rgba(0,0,0,.28);
+}
+
+.miwy-projects-header {
+    margin-bottom: 12px;
+    padding: 0 2px;
+}
+
+.miwy-projects-title {
+    font-size: 13px;
+    letter-spacing: .08em;
+}
+
+.miwy-projects-title::before {
+    display: none;
+}
+
+.miwy-create-project {
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 6px;
+    font-size: 11px;
+}
+
+.miwy-projects-list {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.miwy-project-card {
+    width: min(100%, 360px);
+    min-height: 112px;
+    padding: 12px;
+    gap: 10px;
+    border-radius: 7px;
+    background: #10161c;
+    border-color: #263442;
+    box-shadow: none;
+}
+
+.miwy-project-card::before {
+    display: none;
+}
+
+.miwy-project-card:hover {
+    border-color: #ff7a1a;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(0,0,0,.22);
+}
+
+.miwy-project-card-header {
+    gap: 10px;
+}
+
+.miwy-project-icon {
+    display: none;
+}
+
+.miwy-project-name {
+    margin-bottom: 4px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.miwy-project-description {
+    color: #91a0ad;
+    font-size: 11px;
+}
+
+.miwy-project-actions {
+    justify-content: flex-start;
+    gap: 6px;
+    padding-top: 8px;
+}
+
+.miwy-open-btn,
+.miwy-delete-btn {
+    height: 28px;
+    border-radius: 5px;
+    font-size: 10px;
+}
+
+.miwy-open-btn {
+    flex: 0 0 76px;
+}
+
+.miwy-delete-btn {
+    width: auto;
+    min-width: 82px;
+    padding: 0 10px;
+    color: #aab4bd;
+    border-color: #263442;
+    background: #151d24;
+}
+
+.miwy-delete-btn::before,
+.miwy-delete-btn::after {
+    display: none !important;
+    content: none !important;
+}
+
+.miwy-project-card.sortable-ghost {
+    opacity: .35;
+}
+
+.miwy-project-card.sortable-chosen {
+    border-color: var(--miwy-orange);
+}
+
+@media (max-width: 750px) {
+    .miwy-gallery { padding: 16px 14px 28px; }
+    .miwy-hero-header { height: 132px; }
+    .miwy-project-card { width: 100%; }
+}
+
 /* Alineacion final de controles */
 button {
     position: relative;
@@ -2404,8 +2532,7 @@ button {
 .project-action,
 .miwy-delete-btn,
 .file-delete,
-.close-settings,
-.error-close {
+.close-settings {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -2445,7 +2572,6 @@ button {
 ===================================================== */  
 
 let isVisualEditing = false; 
-window.__pendingCodeFix = null;
 let updatePreviewTimer = null;
 let previewUpdateSequence = 0;
 let editorSyncTimer = null;
@@ -2652,128 +2778,6 @@ function updatePreviewImmediate(sequence = previewUpdateSequence){
         }
     });  
 
-/* =====================================================  
-   STATE DE CONSOLA Y FUNCIONES DE DETECCIÓN DE ERRORES 
-===================================================== */  
-let consoleLogsList = [];
-let consoleErrorCount = 0;
-
-function clearConsoleLogs() {
-    consoleLogsList = [];
-    consoleErrorCount = 0;
-    renderConsoleLogs();
-    const badge = document.getElementById("consoleBadge");
-    if (badge) {
-        badge.textContent = "0";
-        badge.style.display = "none";
-    }
-}
-
-function appendConsoleLog(entry) {
-    consoleLogsList.push(entry);
-    if (consoleLogsList.length > 200) consoleLogsList.shift();
-
-    if (entry.level === 'error') {
-        consoleErrorCount++;
-        const badge = document.getElementById("consoleBadge");
-        if (badge) {
-            badge.textContent = String(consoleErrorCount);
-            badge.style.display = "inline-block";
-        }
-    }
-
-    renderConsoleLogs();
-}
-
-function renderConsoleLogs() {
-    const container = document.getElementById("consoleLogs");
-    const countEl = document.getElementById("consoleLogCount");
-    if (!container) return;
-
-    if (countEl) {
-        countEl.textContent = `(${consoleLogsList.length} registros)`;
-    }
-
-    if (consoleLogsList.length === 0) {
-        container.innerHTML = `<div style="color:#666; font-style:italic; font-size:11px; text-align:center; margin-top:20px;">Sin registros en consola. Los errores y logs de tu aplicación aparecerán aquí en tiempo real.</div>`;
-        return;
-    }
-
-    container.innerHTML = consoleLogsList.map((item) => {
-        let color = '#ccc';
-        let bg = 'transparent';
-        let icon = '💬';
-
-        if (item.level === 'error') {
-            color = '#ff8080';
-            bg = '#200808';
-            icon = '❌';
-        } else if (item.level === 'warn') {
-            color = '#ffd166';
-            bg = '#1a1608';
-            icon = '⚠️';
-        } else if (item.level === 'info') {
-            color = '#79c0ff';
-            icon = 'ℹ️';
-        }
-
-        const lineBtn = item.line ? `<button onclick="jumpToLine(${item.line})" style="background:#2b1810; color:var(--orange); border:1px solid #ff6a0040; border-radius:4px; padding:1px 6px; font-size:9px; cursor:pointer; margin-left:8px;">(Ir a línea ${item.line})</button>` : '';
-
-        return `<div style="background:${bg}; border-bottom:1px solid #1c1c1c; padding:6px 8px; border-radius:4px; display:flex; align-items:flex-start; gap:8px;">
-            <span style="font-size:10px;">${icon}</span>
-            <span style="color:#666; font-size:10px; min-width:55px;">[${escapeHTML(item.time || '')}]</span>
-            <span style="color:${color}; flex:1; word-break:break-word; font-family:Consolas, monospace;">${escapeHTML(item.message)}</span>
-            ${lineBtn}
-        </div>`;
-    }).join('');
-
-    container.scrollTop = container.scrollHeight;
-}
-
-function validateCurrentCodeSyntax() {
-    if (!currentFileName || !codeEditor || codeEditor.disabled) return;
-    const code = codeEditor.value;
-    const fileType = typeof getFileType === "function" ? getFileType(currentFileName) : "";
-    const notice = document.getElementById("editorSyntaxNotice");
-    if (!notice) return;
-
-    if (fileType === "js") {
-        try {
-            new Function(code);
-            notice.style.display = "none";
-            notice.innerHTML = "";
-        } catch (err) {
-            let lineMatch = err.stack ? err.stack.match(/<anonymous>:(\d+):(\d+)/) : null;
-            let lineNum = lineMatch ? lineMatch[1] : null;
-            notice.style.display = "flex";
-            notice.innerHTML = `<span>⚠️ Sintaxis JS: <strong>${escapeHTML(err.message)}</strong></span> ${lineNum ? `<button onclick="jumpToLine(${lineNum})" style="background:#ff6a0020; color:var(--orange); border:1px solid #ff6a0040; border-radius:4px; padding:2px 8px; font-size:10px; cursor:pointer;">Ir a línea ${lineNum}</button>` : ''}`;
-        }
-    } else {
-        notice.style.display = "none";
-    }
-}
-
-function jumpToLine(lineNum) {
-    if (!codeEditor || codeEditor.disabled || !lineNum) return;
-    const line = parseInt(lineNum, 10);
-    if (isNaN(line) || line < 1) return;
-
-    if (typeof switchMainTab === "function" && currentActiveTab !== "code") {
-        switchMainTab("code");
-    }
-
-    const lines = codeEditor.value.split("\n");
-    let targetIndex = 0;
-    for (let i = 0; i < Math.min(line - 1, lines.length); i++) {
-        targetIndex += lines[i].length + 1;
-    }
-    const endLineIndex = targetIndex + (lines[line - 1] ? lines[line - 1].length : 0);
-    codeEditor.focus();
-    codeEditor.setSelectionRange(targetIndex, endLineIndex);
-    const lineHeight = 23;
-    codeEditor.scrollTop = Math.max(0, (line - 3) * lineHeight);
-}
-
     html = html.replace(/<link\b[^>]*href=["']([^"']+)["'][^>]*>/gi, (tag, href) => {
         const localName = href.replace(/^\.\//, "");
         return !/^(https?:|data:|\/\/|#)/i.test(href) && files[localName] === undefined ? "" : tag;
@@ -2842,63 +2846,8 @@ function jumpToLine(lineNum) {
         html += script;  
     }  
 
-    const errorBanner = document.getElementById("previewErrorBanner"); 
-    if(errorBanner && (!window.__pendingCodeFix || errorBanner.style.display !== "flex")) {
-        errorBanner.style.display = "none"; 
-    }
- 
-    const currentOrientation = getDockOrientation();
-
-    // Inject global error catcher and visual editor inside iframe
-    const errorCatcherScript = ` 
-<script id="__miwy_system_script__"> 
-(function() {
-    var _log = console.log, _err = console.error, _warn = console.warn, _info = console.info;
-    function fmt(arg) {
-        if (typeof arg === 'object') {
-            try { return JSON.stringify(arg); } catch(e) { return String(arg); }
-        }
-        return String(arg);
-    }
-    console.log = function() {
-        _log.apply(console, arguments);
-        window.parent.postMessage({ type: 'iframe-console', level: 'log', message: Array.prototype.slice.call(arguments).map(fmt).join(' '), time: new Date().toLocaleTimeString() }, '*');
-    };
-    console.error = function() {
-        _err.apply(console, arguments);
-        window.parent.postMessage({ type: 'iframe-console', level: 'error', message: Array.prototype.slice.call(arguments).map(fmt).join(' '), time: new Date().toLocaleTimeString() }, '*');
-    };
-    console.warn = function() {
-        _warn.apply(console, arguments);
-        window.parent.postMessage({ type: 'iframe-console', level: 'warn', message: Array.prototype.slice.call(arguments).map(fmt).join(' '), time: new Date().toLocaleTimeString() }, '*');
-    };
-    console.info = function() {
-        _info.apply(console, arguments);
-        window.parent.postMessage({ type: 'iframe-console', level: 'info', message: Array.prototype.slice.call(arguments).map(fmt).join(' '), time: new Date().toLocaleTimeString() }, '*');
-    };
-})();
-window.onerror = function(message, source, lineno, colno, error) { 
-    if (!message || message.includes("Script error")) return false;
-    window.parent.postMessage({ 
-        type: 'iframe-error', 
-        message: message, 
-        lineno: lineno, 
-        colno: colno, 
-        source: source 
-    }, '*'); 
-    return false; 
-}; 
-window.onunhandledrejection = function(event) { 
-    var reason = event.reason ? (event.reason.message || event.reason) : 'Unhandled rejection';
-    window.parent.postMessage({ 
-        type: 'iframe-error', 
-        message: reason, 
-        lineno: null, 
-        colno: null, 
-        source: null 
-    }, '*'); 
-}; 
- 
+    const visualEditorScript = `
+<script>
 (function() { 
     var isVisual = ${isVisualEditing ? 'true' : 'false'}; 
     if (!isVisual) return; 
@@ -3251,8 +3200,6 @@ window.onunhandledrejection = function(event) {
  
     function sendCleanHtml() { 
         var clone = document.documentElement.cloneNode(true); 
-        var sysScript = clone.querySelector('#__miwy_system_script__'); 
-        if (sysScript) sysScript.remove(); 
         var visStyle = clone.querySelector('#__miwy_visual_style__'); 
         if (visStyle) visStyle.remove(); 
  
@@ -3273,15 +3220,15 @@ window.onunhandledrejection = function(event) {
         }, '*'); 
     } 
 })(); 
-<\/script> 
+<\/script>
 `; 
 
     if(html.includes("<head>")){ 
-        html = html.replace("<head>", "<head>" + errorCatcherScript); 
+        html = html.replace("<head>", "<head>" + visualEditorScript); 
     } else { 
-        html = errorCatcherScript + html; 
-    } 
- 
+        html = visualEditorScript + html; 
+    }
+
     const previewFrame = document.getElementById("previewFrame");
     if (previewFrame) {
         if (sequence !== previewUpdateSequence) return;
@@ -3304,8 +3251,8 @@ function sendDockCommand(action, value) {
 }
 
 /* =====================================================  
-   POSTMESSAGE ERROR HANDLER Y EDICIÓN VISUAL 
-==================================================== */  
+    POSTMESSAGE DE EDICIÓN VISUAL 
+===================================================== */  
 window.addEventListener("message", function(event) { 
     if (!event.data) return; 
  
@@ -3317,40 +3264,6 @@ window.addEventListener("message", function(event) {
         return; 
     } 
  
-    if (event.data && event.data.type === 'iframe-console') {
-        if (typeof appendConsoleLog === "function") {
-            appendConsoleLog({
-                level: event.data.level || 'log',
-                message: event.data.message || '',
-                time: event.data.time || new Date().toLocaleTimeString(),
-                line: null
-            });
-        }
-        return;
-    }
-
-    if (event.data && event.data.type === 'iframe-error') { 
-        const data = event.data; 
-        let errorText = data.message; 
-        if (data.lineno) { 
-            errorText += ` (Línea ${data.lineno})`; 
-        } 
-
-        let fixText = "Revisa la declaración de variables o etiquetas HTML."; 
-        let proposedFixCode = null;
-        const msgLower = data.message.toLowerCase();
-
-        if (msgLower.includes("is not defined")) { 
-            const matches = data.message.match(/([a-zA-Z_$][a-zA-Z0-9_$]*)\s+is not defined/); 
-            const varName = matches ? matches[1] : "variable"; 
-            fixText = `Propuesta: Inicializar "${varName}" automáticamente.`; 
-            proposedFixCode = `\n<script>var ${varName} = ${varName} || function(){ console.log('${varName} inicializado'); };<\/script>`;
-        }
-
-        if (typeof showTopNotification === "function") {
-            showTopNotification(`⚠️ Error: ${errorText}`, proposedFixCode ? { text: fixText, code: proposedFixCode } : null);
-        }
-    } 
 }); 
 
 /* =====================================================  
@@ -3473,17 +3386,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 parentFileInput.value = "";
             });
         }
-    }
-
-    const applyFixBtn = document.getElementById("applyFixBtn");
-    if (applyFixBtn) {
-        applyFixBtn.addEventListener("click", () => {
-            if (typeof applyQueuedCodeFix === "function" && applyQueuedCodeFix()) {
-                if (typeof showTopNotification === "function") {
-                    showTopNotification("✅ Solución aplicada correctamente al código", null, 2500);
-                }
-            }
-        });
     }
 
     const visSettingsBtn = document.getElementById("visualEditorSettingsBtn");
@@ -3738,36 +3640,18 @@ function formatCurrentCode() {
     if (!editor || editor.disabled || !editor.value.trim()) return;
 
     const raw = editor.value;
+    const fileType = typeof getFileType === "function" ? getFileType(currentFileName) : "";
     let formatted = raw;
 
-    let indent = 0;
-    const indentStr = "  "; // 2 espacios
-    const lines = raw.split("\n");
+    if (fileType === "html" && typeof html_beautify === "function") {
+        formatted = html_beautify(raw, { indent_size: 2, wrap_line_length: 0 });
+    } else if (fileType === "css" && typeof css_beautify === "function") {
+        formatted = css_beautify(raw, { indent_size: 2 });
+    } else if (fileType === "js" && typeof js_beautify === "function") {
+        formatted = js_beautify(raw, { indent_size: 2, preserve_newlines: true });
+    }
 
-    const formattedLines = lines.map(line => {
-        let trimmed = line.trim();
-        if (!trimmed) return "";
-
-        // Si la línea empieza con etiqueta de cierre o }, reducir indentación antes
-        if (trimmed.startsWith("</") || trimmed.startsWith("}") || trimmed.startsWith("]")) {
-            indent = Math.max(0, indent - 1);
-        }
-
-        const currentLine = indentStr.repeat(indent) + trimmed;
-
-        // Calcular ajuste de indentación para la siguiente línea
-        const openTags = (trimmed.match(/<[a-zA-Z0-9]+(?:\s[^>]*)?>/g) || []).filter(tag => !tag.endsWith("/>") && !tag.startsWith("<!")).length;
-        const closeTags = (trimmed.match(/<\/[a-zA-Z0-9]+>/g) || []).length;
-        const openBrackets = (trimmed.match(/[\{\[]/g) || []).length;
-        const closeBrackets = (trimmed.match(/[\}\]]/g) || []).length;
-
-        indent += (openTags - closeTags) + (openBrackets - closeBrackets);
-        indent = Math.max(0, indent);
-
-        return currentLine;
-    });
-
-    editor.value = formattedLines.join("\n");
+    editor.value = formatted;
 
     if (typeof saveCurrentFile === "function") saveCurrentFile();
     if (typeof updateLineCounter === "function") updateLineCounter();
@@ -4351,46 +4235,15 @@ function replaceAllMatches() {
 <header class="topbar">  
   
     <div style="display:flex; align-items:center; gap:10px;">
-        <button class="logo-button" title="Miwy">  
-            <div class="spider">  
-      
-                <div class="spider-body"></div>  
-      
-                <div class="spider-eye left"></div>  
-                <div class="spider-eye right"></div>  
-      
-                <div class="leg l1"></div>  
-                <div class="leg l2"></div>  
-                <div class="leg l3"></div>  
-                <div class="leg l4"></div>  
-      
-                <div class="leg r1"></div>  
-                <div class="leg r2"></div>  
-                <div class="leg r3"></div>  
-                <div class="leg r4"></div>  
-      
-            </div>  
+        <button class="logo-button" title="Miwy" style="overflow:hidden; padding:0;">  
+            <img src="logo.png" alt="Miwy Logo" style="width:100%; height:100%; object-fit:contain;" onerror="this.style.display='none'">
         </button>
-        <span id="galleryBrandTitle" class="gallery-brand-title">Miwy Codex</span>
+        <span id="galleryBrandTitle" class="gallery-brand-title">MIWY</span>
     </div>
 
-    <!-- ERROR BANNER IN TOPBAR --> 
-    <div id="previewErrorBanner" class="preview-error-banner"> 
-        <div class="error-title"> 
-            <span>⚠️ Error detectado</span> 
-        </div> 
-        <div id="previewErrorDesc" class="error-desc"></div> 
-        <div id="previewErrorFix" class="error-fix"></div> 
-        <div style="display:flex; gap:6px; align-items:center;">
-            <button id="applyFixBtn" style="background:#27c93f; color:#000; border:none; border-radius:5px; padding:3px 8px; font-size:10px; font-weight:bold; cursor:pointer;" title="Aplicar propuesta de código">✅ Aplicar solución</button>
-            <button class="error-close" onclick="document.getElementById('previewErrorBanner').style.display='none'" title="Ignorar">×</button> 
-        </div>
-    </div> 
-  
     <button  
         id="settingsButton"  
-        class="settings-button"
-        style="display:none;">  
+        class="settings-button">  
         ⚙  
     </button>  
   
@@ -4425,30 +4278,46 @@ function replaceAllMatches() {
     class="code-panel"  
     id="codePanel">  
   
-    <div class="panel-header">  
+    <div class="panel-header" style="display:flex; align-items:center; justify-content:space-between; padding:0 12px;">  
   
         <div class="panel-left">  
   
-            <div class="main-tabs"> 
+            <div class="main-tabs" style="position:relative; display:flex; align-items:center; gap:4px;"> 
                 <button  
                     id="tabRecursosBtn"  
                     class="main-tab-btn active" 
                     onclick="switchMainTab('recursos')"> 
                     <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="display:inline-block; vertical-align:middle; margin-right:4px;"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.5 2.5A1.5 1.5 0 0 1 3 1h3.086a1.5 1.5 0 0 1 1.06.44l1.415 1.414A.5.5 0 0 0 8.914 3H13a1.5 1.5 0 0 1 1.5 1.5v8a1.5 1.5 0 0 1-1.5 1.5H3A1.5 1.5 0 0 1 1.5 12.5v-10zM3 2a.5.5 0 0 0-.5.5v10a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5v-8a.5.5 0 0 0-.5-.5H8.914a1.5 1.5 0 0 1-1.06-.44L6.439 1.646A.5.5 0 0 0 6.086 1.5H3z"/></svg>Recursos 
                 </button> 
+                <button 
+                    id="recursosPlusMenuBtn"
+                    style="width:26px; height:26px; background:#182028; border:1px solid #2b3a48; color:#cbd5e1; border-radius:5px; font-size:16px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center;"
+                    title="Añadir..."
+                    onclick="toggleRecursosPlusMenu(event)">+</button>
+                
+                <div id="recursosPlusDropdown" style="display:none; position:absolute; top:32px; left:80px; z-index:1000; background:#10151c; border:1px solid #2b3a48; border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,0.5); padding:4px 0; min-width:140px;">
+                    <button onclick="document.getElementById('newFileButton').click(); toggleRecursosPlusMenu();" style="width:100%; padding:8px 12px; background:transparent; border:none; color:#edf2f7; text-align:left; font-size:11px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px;">📄 Crear archivo</button>
+                    <button onclick="createNewFolderPrompt(); toggleRecursosPlusMenu();" style="width:100%; padding:8px 12px; background:transparent; border:none; color:#edf2f7; text-align:left; font-size:11px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px;">📁 Crear carpeta</button>
+                </div>
             </div> 
   
             <button  
                 id="newFileButton"  
                 class="new-file-button"  
-                title="Crear archivo">  
-                +</button>  
+                title="Crear archivo"
+                style="width:auto; flex:0 0 auto; padding:0 10px; font-size:11px; display:none;">  
+                Archivo</button>
+
+            <input type="file" id="folderAssetInput" accept="*/*" multiple style="display:none;" onchange="handleAssetUpload(event)">
   
         </div>  
   
+        <button onclick="triggerAssetUpload()" style="height:28px; background:var(--orange); color:#000; border:1px solid var(--orange); border-radius:6px; padding:0 12px; font-size:11px; cursor:pointer; font-weight:700;">Subir</button>
+
         <div  
             id="currentFileHeader"  
-            class="panel-name">  
+            class="panel-name"
+            style="display:none;">  
             Sin archivo  
         </div>  
   
@@ -4456,16 +4325,14 @@ function replaceAllMatches() {
   
     <!-- UNIFIED RECURSOS & CODE EDITOR SPACE -->
     <div id="folderView" class="folder-tab-container" style="display:flex; flex:1; min-height:0; flex-direction:column; background:#10151c; padding:12px; position:relative;">
-        <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:10px; border-bottom:1px solid #25323f; margin-bottom:10px;">
+        <div style="display:none; justify-content:space-between; align-items:center; padding-bottom:10px; border-bottom:1px solid #25323f; margin-bottom:10px;">
             <div style="font-size:12px; font-weight:bold; color:#edf2f7; display:flex; align-items:center; gap:8px;">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="var(--orange)"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.5 2.5A1.5 1.5 0 0 1 3 1h3.086a1.5 1.5 0 0 1 1.06.44l1.415 1.414A.5.5 0 0 0 8.914 3H13a1.5 1.5 0 0 1 1.5 1.5v8a1.5 1.5 0 0 1-1.5 1.5H3A1.5 1.5 0 0 1 1.5 12.5v-10z"/></svg>
                 <span>Recursos</span>
             </div>
             <div style="display:flex; gap:6px;">
-                <button onclick="document.getElementById('newFileButton').click()" style="background:#1b242e; color:#38bdf8; border:1px solid #324454; border-radius:6px; padding:4px 10px; font-size:11px; cursor:pointer; font-weight:600; display:flex; align-items:center; gap:4px;" title="Nuevo Archivo">+ 📄 Archivo</button>
                 <button onclick="createNewFolderPrompt()" style="background:#1b242e; color:#cbd5e1; border:1px solid #324454; border-radius:6px; padding:4px 10px; font-size:11px; cursor:pointer; font-weight:600; display:flex; align-items:center; gap:4px;" title="Nueva Carpeta">+ 📁 Carpeta</button>
                 <button onclick="triggerAssetUpload()" style="background:var(--orange); color:#000; border:none; border-radius:6px; padding:4px 10px; font-size:11px; cursor:pointer; font-weight:700; display:flex; align-items:center; gap:4px;" title="Subir Imagen/Archivo">+ 🖼️ Subir Archivo</button>
-                <input type="file" id="folderAssetInput" accept="*/*" multiple style="display:none;" onchange="handleAssetUpload(event)">
             </div>
         </div>
 
@@ -4482,18 +4349,10 @@ function replaceAllMatches() {
         </div>
 
         <!-- CODE EDITOR FLOATING MODAL DIALOG (OPENS ONLY ON 'EDITAR') -->
-        <div id="codeEditorModal" class="overlay">
-            <div class="dialog" style="width: 780px; max-width: calc(100vw - 24px); height: 520px; display: flex; flex-direction: column; padding: 12px; background: #0d1117; border: 1px solid #263442; border-radius: 12px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px; border-bottom: 1px solid #212e3b; margin-bottom: 8px;">
-                    <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: bold; color: #fff;">
-                        <span id="modalFileIcon">📄</span>
-                        <span id="modalFileName">Editar Archivo</span>
-                    </div>
-                    <button onclick="closeCodeEditorModal()" style="background: transparent; color: #888; border: none; font-size: 18px; cursor: pointer; padding: 0 4px;" title="Cerrar Editor">×</button>
-                </div>
-
+<div id="codeEditorModal" class="overlay" style="z-index: 10000;">
+            <div class="dialog" style="width: 820px; max-width: calc(100vw - 24px); height: 540px; display: flex; flex-direction: column; padding: 12px; background: #0d1117; border: 1px solid #263442; border-radius: 12px;">
                 <!-- INTEGRATED CODE EDITOR AREA INSIDE MODAL -->
-                <div id="codeView" style="display: flex; flex-direction: column; flex: 1; min-height: 0; background: #0d1117; position: relative; top: 85px; left: -154px;">
+                <div id="codeView" style="display: flex; flex-direction: column; flex: 1; min-height: 0; background: #0d1117;">
 
                     <!-- BUSCADOR Y REEMPLAZO DE CÓDIGO -->
                     <div id="codeSearchContainer" style="display:none; padding:6px 10px; background:#0e0e0e; border-bottom:1px solid #222; flex-wrap:wrap; gap:8px; align-items:center; flex-shrink:0;">
@@ -4515,9 +4374,14 @@ function replaceAllMatches() {
                         </div>
                     </div>
 
-                    <div id="fileBar" class="file-bar"></div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 4px; border-bottom: 1px solid #212e3b; margin-bottom: 4px;">
+                        <div id="fileBar" class="file-bar" style="border-bottom: none; flex: 1; margin-right: 10px;"></div>
+                        <button onclick="closeCodeEditorModal()" style="background: transparent; color: #888; border: none; font-size: 20px; cursor: pointer; padding: 0 6px; line-height: 1;" title="Cerrar Editor">×</button>
+                    </div>
 
-                    <div class="editor-wrapper">  
+                    <div class="editor-wrapper">
+                        <div id="lineGutter" class="line-gutter" aria-hidden="true">1</div>
+                        <div class="editor-content">
                         <textarea  
                             id="codeEditor"  
                             class="code-editor locked"  
@@ -4530,16 +4394,16 @@ function replaceAllMatches() {
               
                         <div id="emptyEditor" class="empty-editor">  
                             <span>Selecciona un archivo de Recursos para editar</span>  
-                        </div>  
+                        </div>
+                        </div>
 
-                        <!-- AVISO DE ERROR DE SINTAXIS REALTIME -->
-                        <div id="editorSyntaxNotice" style="display:none; position:absolute; bottom:0; left:0; right:0; z-index:90; padding:6px 12px; background:#200a0a; border-top:1px solid #ff4d4d; color:#ff9999; font-size:11px; font-family:Consolas, monospace; align-items:center; justify-content:space-between; flex-shrink:0;"></div>
                     </div>  
 
                     <div class="code-footer">  
-                        <span id="fileFooterName">Sin archivo</span>  
+                        <span id="fileFooterName" style="display:none;">Sin archivo</span>  
+                        <button id="autoCorrectBtn" class="preview-button" onclick="lintAndFixCurrentCode()" style="height:22px; padding:0 8px; font-size:10px; color:var(--orange); gap:4px;" title="Analizar y corregir errores de sintaxis y formato">✨ Corregir</button>
                         <button id="copyCodeBtn" class="preview-button" style="height:22px; padding:0 8px; font-size:10px; color:#aaa; gap:4px;" title="Copiar código al portapapeles">📋 Copiar</button>
-                        <span id="lineCounter" class="line-counter">0 líneas</span>  
+                        <span id="lineCounter" class="editor-position">Ln 1, Col 1</span>  
                     </div>  
                 </div>
             </div>
@@ -4858,7 +4722,8 @@ function replaceAllMatches() {
 <!-- DIALOGO PERSONALIZADO REUTILIZABLE --> 
 <div  
     id="customDialog"  
-    class="overlay">  
+    class="overlay"
+    style="z-index: 50000;">  
   
     <div class="dialog">  
   
@@ -5039,33 +4904,6 @@ function replaceAllMatches() {
                 </button>  
   
   
-                <button  
-                    id="saveProjectSettingsBtn"  
-                    class="settings-option">  
-  
-                    <div class="settings-option-left">  
-  
-                        <div class="option-icon icon-option-save">  
-                            <span class="miwy-icon icon-save" aria-hidden="true"></span>  
-                        </div>  
-  
-                        <div>  
-  
-                            <strong>  
-                                Guardar  
-                            </strong>  
-  
-                            <small>  
-                                Guardar proyecto en el dispositivo  
-                            </small>  
-  
-                        </div>  
-  
-                    </div>  
-  
-                    ›  
-  
-                </button>  
   
                 <button  
                     id="themeButton"  
@@ -5126,8 +4964,7 @@ function replaceAllMatches() {
                 <div style="padding: 10px 4px 4px;">
                     <button  
                         id="exitToGalleryBtn"  
-                        class="connect-repo"
-                        style="background: #251010; color: var(--danger); border: 1px solid #ff4d4d33; display: flex; align-items: center; justify-content: center; gap: 8px;">  
+                        class="settings-exit-button">  
                         🚪 Salir a la Galería  
                     </button>  
                 </div>
@@ -5275,62 +5112,8 @@ function replaceAllMatches() {
         </div>  
   
   
-        <!-- GUARDAR EN DISPOSITIVO -->  
-        <div  
-            id="saveDeviceSection"  
-            class="settings-section">  
-  
-            <button  
-                class="section-back"  
-                data-back>  
-                ← Volver  
-            </button>  
-  
-            <div class="section-title">  
-                Guardar en Dispositivo  
-            </div>  
-
-            <p style="font-size: 11px; color: #aaa; margin-bottom: 12px; line-height: 1.5;">
-                Guarda los archivos del proyecto directamente en el almacenamiento de tu dispositivo.
-            </p>
-  
-            <button  
-                id="saveToDeviceNowBtn"  
-                class="connect-repo"
-                style="background: var(--orange); color: #000; font-weight: bold;">  
-                💾 Guardar Proyecto Ahora  
-            </button>  
-  
-            <div class="repo-note" style="margin-top: 14px; color: var(--green);">  
-                💡 El proyecto también se guardará automáticamente en el dispositivo cada 15 minutos.  
-            </div>  
-  
-        </div>  
-  
     </aside>  
 </div>  
-
-<!-- GUARDAR PROYECTO DIALOG -->
-<div id="saveDialog" class="overlay">
-    <div class="dialog">
-        <div class="dialog-title">Guardar proyecto</div>
-        <div class="dialog-description">Elige el formato y selecciona dónde guardarlo en tu dispositivo.</div>
-        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:14px;">
-            <label class="format-option">
-                <input type="radio" name="saveFormat" value="json" checked>
-                <span><strong>Proyecto Miwy (.json)</strong><small>Conserva archivos, versión y estado del proyecto</small></span>
-            </label>
-            <label class="format-option">
-                <input type="radio" name="saveFormat" value="zip">
-                <span><strong>Código fuente (.zip)</strong><small>Archivos listos para abrir en cualquier editor</small></span>
-            </label>
-        </div>
-        <div class="dialog-buttons">
-            <button id="cancelSave" class="dialog-cancel">Cancelar</button>
-            <button id="confirmSave" class="dialog-confirm">Guardar</button>
-        </div>
-    </div>
-</div>
 
 <!-- IMPORTAR PROYECTO DIALOG -->  
 <div  
@@ -5621,6 +5404,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
 let currentFolderDirectory = "/";
 
+function toggleRecursosPlusMenu(event) {
+    if (event) event.stopPropagation();
+    const dropdown = document.getElementById("recursosPlusDropdown");
+    if (!dropdown) return;
+    if (dropdown.style.display === "block") {
+        dropdown.style.display = "none";
+    } else {
+        dropdown.style.display = "block";
+    }
+}
+
+document.addEventListener("click", (e) => {
+    const dropdown = document.getElementById("recursosPlusDropdown");
+    const btn = document.getElementById("recursosPlusMenuBtn");
+    if (dropdown && dropdown.style.display === "block") {
+        if (!e.target.closest("#recursosPlusDropdown") && e.target !== btn) {
+            dropdown.style.display = "none";
+        }
+    }
+});
+
 function switchMainTab(tab = "recursos"){
     currentActiveTab = "recursos";
 
@@ -5718,7 +5522,8 @@ function renderFolderManager(dirPath = "/"){
     const grid = document.getElementById("folderGrid");
     if(!grid) return;
 
-    if(breadcrumb){
+    const breadcrumbPath = document.getElementById("breadcrumbPath");
+    if(breadcrumbPath){
         const parts = dirPath.split("/").filter(Boolean);
         let accumulated = "/";
         let html = `<span style="color:var(--orange); cursor:pointer; font-weight:bold;" onclick="renderFolderManager('/')">📁 Inicio</span>`;
@@ -5727,7 +5532,7 @@ function renderFolderManager(dirPath = "/"){
             const target = accumulated;
             html += ` <span style="color:#627382;">/</span> <span style="color:#cbd5e1; cursor:pointer;" onclick="renderFolderManager('${target}')">${escapeHTML(part)}</span>`;
         });
-        breadcrumb.innerHTML = html;
+        breadcrumbPath.innerHTML = html;
     }
 
     grid.innerHTML = "";
@@ -5816,7 +5621,10 @@ function renderFolderManager(dirPath = "/"){
 
         if(isMatch){
             const content = project.files[filename];
-            const isImage = content && typeof content === "string" && content.startsWith("data:image");
+            const fileType = getFileType(filename);
+            const isImage = fileType === "image" || (content && typeof content === "string" && content.startsWith("data:image"));
+            const iconHtml = getFileIcon(filename);
+
             const item = document.createElement("div");
             item.draggable = true;
             item.style.cssText = "background:#151d26; border:1px solid #24323e; border-radius:8px; padding:8px; display:flex; flex-direction:column; align-items:center; gap:6px; position:relative; cursor:pointer; transition:all 0.2s;";
@@ -5832,22 +5640,32 @@ function renderFolderManager(dirPath = "/"){
             item.ondragend = () => { item.style.opacity = "1"; };
 
             item.onclick = () => {
-                selectFile(filename);
+                if (isImage) {
+                    openImagePreviewModal(filename, displayName);
+                } else {
+                    openCodeEditorModal(filename);
+                }
             };
 
-            const previewIcon = isImage 
-                ? `<img src="${content}" style="width:36px; height:36px; object-fit:cover; border-radius:4px; border:1px solid #334155;">` 
-                : `<div style="font-size:24px;">${typeof getFileIcon === "function" ? getFileIcon(filename) : "📄"}</div>`;
+            const lastDot = displayName.lastIndexOf(".");
+            const baseName = lastDot !== -1 ? displayName.slice(0, lastDot) : displayName;
+            const extName = lastDot !== -1 ? displayName.slice(lastDot) : "";
 
-            const isCodeFile = !isImage;
+            const actionButton = isImage 
+                ? `<button onclick="event.stopPropagation(); openImagePreviewModal('${filename}', '${escapeHTML(displayName)}')" style="background:#1e293b; color:#38bdf8; border:1px solid #334155; border-radius:4px; padding:3px 10px; font-size:10px; cursor:pointer; font-weight:600;" title="Abrir e inspeccionar imagen">Abrir</button>` 
+                : `<button onclick="event.stopPropagation(); openCodeEditorModal('${filename}')" style="background:#2b180d; color:var(--orange); border:1px solid #ff6a0040; border-radius:4px; padding:3px 10px; font-size:10px; cursor:pointer; font-weight:700;" title="Editar código">Editar</button>`;
 
             item.innerHTML = `
-                ${previewIcon}
-                <div style="font-size:10px; color:#cbd5e1; font-weight:500; text-align:center; word-break:break-all; max-width:100%; line-height:1.2;">${escapeHTML(displayName)}</div>
-                <div style="display:flex; gap:4px; margin-top:4px; width:100%; justify-content:center;">
-                    <button onclick="event.stopPropagation(); selectFile('${filename}')" style="background:#1e293b; color:#38bdf8; border:1px solid #334155; border-radius:4px; padding:2px 6px; font-size:9px; cursor:pointer; font-weight:600;" title="Abrir y vista previa">Abrir</button>
-                    ${isCodeFile ? `<button onclick="event.stopPropagation(); openCodeEditorModal('${filename}')" style="background:#2b180d; color:var(--orange); border:1px solid #ff6a0040; border-radius:4px; padding:2px 6px; font-size:9px; cursor:pointer; font-weight:700;" title="Editar código">Editar</button>` : ''}
-                    <button onclick="event.stopPropagation(); deleteFile('${filename}')" style="background:#251010; color:var(--danger); border:1px solid #ff4d4d33; border-radius:4px; padding:2px 5px; font-size:9px; cursor:pointer;" title="Eliminar archivo">🗑</button>
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%; font-size:11px; font-weight:600; color:#edf2f7;">
+                    <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:70%;" title="${escapeHTML(displayName)}">${escapeHTML(baseName)}</span>
+                    <span style="color:var(--orange); font-size:10px; font-weight:700;">${escapeHTML(extName)}</span>
+                </div>
+                <div style="flex:1; display:flex; align-items:center; justify-content:center; padding:6px 0; font-size:18px;">
+                    ${iconHtml}
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-top:auto;">
+                    ${actionButton}
+                    <button onclick="event.stopPropagation(); deleteFile('${filename}')" style="background:#251010; color:var(--danger); border:1px solid #ff4d4d33; border-radius:4px; padding:3px 8px; font-size:10px; cursor:pointer;" title="Eliminar archivo">🗑</button>
                 </div>
             `;
             grid.appendChild(item);
@@ -5944,24 +5762,7 @@ function processUploadedFiles(files){
     let loadedCount = 0;
     files.forEach(file => {
         const reader = new FileReader();
-        let targetFolder = prefix;
-
-        // Auto-organize by file type if uploading at root
-        if (!prefix) {
-            if (file.type.startsWith("image/")) {
-                targetFolder = "images/";
-            } else if (file.name.endsWith(".css")) {
-                targetFolder = "styles/";
-            } else if (file.name.endsWith(".js")) {
-                targetFolder = "scripts/";
-            }
-        }
-
-        if (targetFolder && !project.folders.includes(targetFolder)) {
-            project.folders.push(targetFolder);
-        }
-
-        const fullFilePath = targetFolder + file.name;
+        const fullFilePath = prefix + file.name;
 
         reader.onload = (e) => {
             project.files[fullFilePath] = e.target.result;
@@ -5971,7 +5772,7 @@ function processUploadedFiles(files){
                 renderFiles();
                 renderFolderManager(currentFolderDirectory || "/");
                 updatePreview();
-                showTopNotification(`✅ ${files.length} recurso(s) importado(s) y organizado(s)`, null, 2000);
+                showTopNotification(`✅ ${files.length} recurso(s) importado(s)`, null, 2000);
             }
         };
 
@@ -6253,6 +6054,13 @@ function renderFiles(){
     fileBar.innerHTML = "";  
 
     if(names.length === 0){  
+        const addButton = document.createElement("button");
+        addButton.className = "file-bar-add";
+        addButton.type = "button";
+        addButton.textContent = "+";
+        addButton.title = "Crear archivo";
+        addButton.addEventListener("click", () => document.getElementById("newFileButton").click());
+        fileBar.appendChild(addButton);
         currentFileName = null;  
         if(currentActiveTab === "code") {
             currentFileHeader.textContent = "Sin archivo";  
@@ -6289,6 +6097,14 @@ function renderFiles(){
         tab.appendChild(deleteButton);  
         fileBar.appendChild(tab);  
     });  
+
+    const addButton = document.createElement("button");
+    addButton.className = "file-bar-add";
+    addButton.type = "button";
+    addButton.textContent = "+";
+    addButton.title = "Crear archivo";
+    addButton.addEventListener("click", () => document.getElementById("newFileButton").click());
+    fileBar.appendChild(addButton);
 }  
   
   
@@ -6370,9 +6186,9 @@ function createFile(){
 
     project.files[name] = "";  
     saveProjects();  
-    selectFile(name);  
     renderFolderManager(currentFolderDirectory);
     fileDialog.classList.remove("open");  
+    openCodeEditorModal(name);
 }  
   
   
@@ -6380,9 +6196,32 @@ function createFile(){
    SELECCIONAR / EDITAR ARCHIVO DE CÓDIGO EN MODAL
 ===================================================== */  
 
+function openImagePreviewModal(filename, displayName) {
+    const project = getCurrentProject();
+    if (!project || !project.files[filename]) return;
+
+    const imgSrc = project.files[filename];
+    showCustomDialog({
+        title: `🖼️ ${displayName || filename}`,
+        description: `Visualizando archivo de imagen`,
+        confirmText: "Cerrar",
+        cancelText: null
+    });
+
+    const descEl = document.getElementById("customDialogDescription");
+    if (descEl) {
+        descEl.innerHTML = `<div style="text-align:center; margin-top:10px;"><img src="${imgSrc}" style="max-width:100%; max-height:300px; border-radius:8px; border:1px solid #333;" alt="${escapeHTML(filename)}"></div>`;
+    }
+}
+
 function openCodeEditorModal(filename) {
     if (!filename) return;
     saveCurrentFile();
+
+    if (getFileType(filename) === "image") {
+        openImagePreviewModal(filename, filename);
+        return;
+    }
 
     const project = getCurrentProject();
     if (!project || project.files[filename] === undefined) return;
@@ -6416,9 +6255,6 @@ function openCodeEditorModal(filename) {
 
     renderFiles();
     updateLineCounter();
-    if (typeof validateCurrentCodeSyntax === "function") {
-        validateCurrentCodeSyntax();
-    }
     updatePreview();
     saveProjects();
 }
@@ -6433,7 +6269,26 @@ function closeCodeEditorModal() {
 function selectFile(filename){  
     if (!filename) return;
     saveCurrentFile();  
-    currentFileName = filename;  
+    currentFileName = filename;
+
+    const project = getCurrentProject();
+    if (project && project.files && project.files[filename] !== undefined && codeEditor) {
+        if (getFileType(filename) === "image") {
+            openImagePreviewModal(filename, filename);
+            return;
+        }
+        setEditorLocked(false);
+        codeEditor.value = project.files[filename];
+        const nameEl = document.getElementById("modalFileName");
+        const iconEl = document.getElementById("modalFileIcon");
+        if (nameEl) nameEl.textContent = filename;
+        if (iconEl && typeof getFileIcon === "function") iconEl.innerHTML = getFileIcon(filename);
+        if (currentFileHeader) currentFileHeader.textContent = `📁 Recursos / ${filename}`;
+        if (fileFooterName) fileFooterName.textContent = filename;
+        updateLineCounter();
+    }
+
+    renderFiles();
     updatePreview();  
 }  
   
@@ -6486,14 +6341,18 @@ codeEditor.addEventListener(
   
         updateLineCounter();  
   
-        if (typeof validateCurrentCodeSyntax === "function") {
-            validateCurrentCodeSyntax();
-        }
-
         updatePreview();  
   
     }  
 );  
+
+codeEditor.addEventListener("click", updateLineCounter);
+codeEditor.addEventListener("keyup", updateLineCounter);
+codeEditor.addEventListener("select", updateLineCounter);
+codeEditor.addEventListener("scroll", () => {
+    const gutter = document.getElementById("lineGutter");
+    if (gutter) gutter.scrollTop = codeEditor.scrollTop;
+});
 
 function autoSaveProjectState(){
     try {
@@ -6512,39 +6371,31 @@ setInterval(autoSaveProjectState, 15000);
 ===================================================== */  
   
 function updateLineCounter(){  
-  
+    const gutter = document.getElementById("lineGutter");
+    const value = codeEditor && !codeEditor.disabled ? codeEditor.value : "";
+    const cursor = codeEditor && !codeEditor.disabled ? codeEditor.selectionStart : 0;
+    const beforeCursor = value.slice(0, cursor);
+    const line = beforeCursor.split("\n").length;
+    const column = beforeCursor.length - beforeCursor.lastIndexOf("\n");
+
+    if (gutter) {
+        const lineCount = Math.max(1, value.split("\n").length);
+        gutter.textContent = Array.from({ length: lineCount }, (_, index) => index + 1).join("\n");
+        gutter.scrollTop = codeEditor ? codeEditor.scrollTop : 0;
+    }
+
     if(  
         !currentFileName ||  
         codeEditor.disabled  
     ){  
   
-        lineCounter.textContent =  
-            "0 líneas";  
+        lineCounter.textContent = "Ln 1, Col 1";
   
         return;  
     }  
   
   
-    const lines =  
-        codeEditor.value  
-            .split("\n")  
-            .filter(  
-                line =>  
-                    line.trim().length > 0  
-            );  
-  
-  
-    const count =  
-        lines.length;  
-  
-  
-    lineCounter.textContent =  
-        count +  
-        (  
-            count === 1  
-                ? " línea"  
-                : " líneas"  
-        );  
+    lineCounter.textContent = `Ln ${line}, Col ${column}`;
   
 }  
   
@@ -6659,6 +6510,7 @@ function renderProjects(){
         if(galleryList) {
             const card = document.createElement("div");
             card.className = "miwy-project-card";
+            card.dataset.projectId = project.id;
 
             const header = document.createElement("div");
             header.className = "miwy-project-card-header";
@@ -6694,7 +6546,7 @@ function renderProjects(){
 
             const delBtn = document.createElement("button");
             delBtn.className = "miwy-delete-btn";
-            delBtn.textContent = "🗑";
+            delBtn.textContent = "Eliminar";
             delBtn.onclick = (e) => {
                 e.stopPropagation();
                 deleteProject(project.id);
@@ -6768,6 +6620,28 @@ function renderProjects(){
         if(projectList) projectList.appendChild(buildItem());
         if(panelProjectList) panelProjectList.appendChild(buildItem());
     });  
+
+    const gallerySorter = document.getElementById("galleryProjectsList");
+    if (gallerySorter && typeof Sortable !== "undefined") {
+        if (gallerySorter._sortable) gallerySorter._sortable.destroy();
+        gallerySorter._sortable = Sortable.create(gallerySorter, {
+            animation: 150,
+            draggable: ".miwy-project-card",
+            onEnd: () => {
+                const orderedIds = Array.from(gallerySorter.children)
+                    .map(card => card.dataset.projectId)
+                    .filter(Boolean);
+                const orderedProjects = orderedIds
+                    .map(id => projects.find(project => project.id === id))
+                    .filter(Boolean);
+                if (orderedProjects.length === projects.length) {
+                    projects = orderedProjects;
+                    saveProjects();
+                    renderProjects();
+                }
+            }
+        });
+    }
 }  
   
   
@@ -7463,53 +7337,7 @@ const settingsOverlay =
     );  
 
 function showTopNotification(message, details, duration = 2500) {
-    const banner = document.getElementById("previewErrorBanner");
-    const desc = document.getElementById("previewErrorDesc");
-    const fix = document.getElementById("previewErrorFix");
-
-    if (!banner || !desc || !fix) return;
-
-    desc.textContent = message;
-    banner.style.display = "flex";
-
-    if (details && details.code) {
-        fix.innerHTML = `💡 <span>${details.text || "Se recomienda aplicar esta corrección."}</span>`;
-        window.__pendingCodeFix = details.code;
-    } else {
-        fix.innerHTML = "";
-        window.__pendingCodeFix = null;
-    }
-
-    clearTimeout(window.__topNotificationTimer);
-    window.__topNotificationTimer = setTimeout(() => {
-        banner.style.display = "none";
-        window.__pendingCodeFix = null;
-    }, duration);
-}
-
-function applyQueuedCodeFix() {
-    if (!window.__pendingCodeFix) return false;
-
-    const project = getCurrentProject();
-    const targetFile = currentFileName || (project && project.files ? Object.keys(project.files)[0] : null) || "index.html";
-
-    if (!project) return false;
-    if (!project.files[targetFile]) project.files[targetFile] = "";
-
-    const nextValue = (project.files[targetFile] || "") + window.__pendingCodeFix;
-    project.files[targetFile] = nextValue;
-    project.edited = true;
-
-    if (typeof codeEditor !== "undefined") {
-        codeEditor.value = nextValue;
-    }
-
-    saveProjects();
-    saveCurrentFile();
-    updatePreview();
-    updateLineCounter();
-    window.__pendingCodeFix = null;
-    return true;
+    showShortcutToast("Miwy", message);
 }
   
 const settingsMain =  
@@ -7647,85 +7475,6 @@ document
     );  
   
   
-const saveProjSettingsBtn = document.getElementById("saveProjectSettingsBtn");
-const saveDialog = document.getElementById("saveDialog");
-const cancelSaveBtn = document.getElementById("cancelSave");
-const confirmSaveBtn = document.getElementById("confirmSave");
-if (saveProjSettingsBtn) {
-    saveProjSettingsBtn.addEventListener("click", () => {
-        if (settingsOverlay) settingsOverlay.classList.remove("open");
-        if (saveDialog) saveDialog.classList.add("open");
-    });
-}
-
-if (cancelSaveBtn && saveDialog) {
-    cancelSaveBtn.addEventListener("click", () => saveDialog.classList.remove("open"));
-}
-
-function triggerSaveToDevice(format = "json") {
-    saveCurrentFile();
-    saveProjects();
-
-    const current = getCurrentProject();
-    if (!current) return;
-
-    if (format === "zip") {
-        exportProjectAsZip(current.id);
-        return;
-    }
-
-    const payload = JSON.stringify({
-        name: current.name,
-        files: current.files,
-        version: current.version,
-        exportedAt: new Date().toISOString()
-    }, null, 2);
-
-    const blob = new Blob([payload], { type: "application/json" });
-
-    const downloadFallback = () => {
-        const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
-        link.href = url;
-        link.download = `${current.name.replace(/\s+/g, "_")}.json`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        showTopNotification("✅ Descarga iniciada", null, 2200);
-    };
-
-    if (window.showSaveFilePicker) {
-        window.showSaveFilePicker({
-            suggestedName: `${current.name.replace(/\s+/g, "_")}.json`,
-            types: [{ description: "Proyecto Miwy", accept: { "application/json": [".json"] } }]
-        }).then(async (handle) => {
-            const writable = await handle.createWritable();
-            await writable.write(blob);
-            await writable.close();
-            showTopNotification("✅ Proyecto guardado en el dispositivo", null, 2200);
-        }).catch(() => {
-            downloadFallback();
-        });
-        return;
-    }
-
-    downloadFallback();
-}
-
-if (confirmSaveBtn && saveDialog) {
-    confirmSaveBtn.addEventListener("click", () => {
-        const format = document.querySelector('input[name="saveFormat"]:checked')?.value || "json";
-        saveDialog.classList.remove("open");
-        triggerSaveToDevice(format);
-    });
-}
-
-const saveNowBtn = document.getElementById("saveToDeviceNowBtn");
-if (saveNowBtn) {
-    saveNowBtn.addEventListener("click", () => triggerSaveToDevice("json"));
-}
-
 /* Auto-save cada 15 minutos (900,000 ms) */
 setInterval(() => {
     saveCurrentFile();
@@ -7737,6 +7486,43 @@ setInterval(() => {
         }
     }
 }, 15 * 60 * 1000);
+
+function lintAndFixCurrentCode() {
+    const editor = document.getElementById("codeEditor");
+    if (!editor || editor.disabled || !editor.value.trim()) return;
+
+    formatCurrentCode();
+
+    const raw = editor.value;
+    const fileType = typeof getFileType === "function" ? getFileType(currentFileName) : "";
+    let issues = [];
+
+    if (fileType === "js" && typeof JSHint !== "undefined") {
+        JSHint(raw, { esversion: 11, undef: false, unused: false, asy: true });
+        const errors = JSHint.errors || [];
+        if (errors.length > 0) {
+            issues = errors.filter(Boolean).map(e => `Línea ${e.line}: ${e.reason}`);
+        }
+    } else if (fileType === "html" && typeof HTMLHint !== "undefined") {
+        const results = HTMLHint.verify(raw);
+        if (results && results.length > 0) {
+            issues = results.map(r => `Línea ${r.line}: ${r.message}`);
+        }
+    }
+
+    if (issues.length > 0) {
+        showCustomDialog({
+            title: "🔍 Análisis Sintáctico de Código",
+            description: `Se encontraron ${issues.length} advertencia(s) en ${currentFileName}:\n\n` + issues.slice(0, 6).join("\n"),
+            confirmText: "Aceptar",
+            cancelText: null
+        });
+    } else {
+        if (typeof showTopNotification === "function") {
+            showTopNotification("✅ Código analizado y sin errores sintácticos", null, 2500);
+        }
+    }
+}
  
  
 /* =====================================================  
@@ -8380,15 +8166,12 @@ function reloadRealPhoneFrame() {
         <div class="miwy-tb-item"><button class="miwy-tb-btn" data-act="font-plus" title="Aumentar fuente" style="font-weight:bold; font-size:11px;">A+</button><span class="miwy-tb-label">Aumentar</span></div>
         <div class="miwy-tb-item"><button class="miwy-tb-btn" data-act="font-minus" title="Reducir fuente" style="font-weight:bold; font-size:11px;">A-</button><span class="miwy-tb-label">Reducir</span></div>
         <div class="miwy-tb-item"><button class="miwy-tb-btn" data-act="bold" title="Negrita" style="font-weight:bold; font-size:12px;">B</button><span class="miwy-tb-label">Negrita</span></div>
-        <div class="miwy-tb-item"><button class="miwy-tb-btn" data-act="align" title="Alinear texto"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M2 3h12v1H2V3zm0 4h8v1H2V7zm0 4h12v1H2v-1z"/></svg></button><span class="miwy-tb-label">Alinear</span></div>
         <div class="miwy-tb-item"><button class="miwy-tb-btn" data-act="radius" title="Redondear bordes"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M3 3h4v1H4v3H3V3zm10 0h-4v1h3v3h1V3zM3 13h4v-1H4v-3H3v4zm10 0h-4v-1h3v-3h1v4z"/></svg></button><span class="miwy-tb-label">Borde</span></div>
     </div>
     <div class="miwy-dock-group">
-        <div class="miwy-tb-item"><button class="miwy-tb-btn" data-act="add-title" title="Agregar Título" style="font-weight:bold; font-size:10px;">H1</button><span class="miwy-tb-label">Título</span></div>
         <div class="miwy-tb-item"><button class="miwy-tb-btn" data-act="add-btn" title="Agregar Botón"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M2 4h12a1 1 0 011 1v6a1 1 0 01-1 1H2a1 1 0 01-1-1V5a1 1 0 011-1zm1 2v4h10V6H3z"/></svg></button><span class="miwy-tb-label">Botón</span></div>
         <div class="miwy-tb-item"><button class="miwy-tb-btn" data-act="add-card" title="Agregar Tarjeta"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M1 3a1 1 0 011-1h12a1 1 0 011 1v10a1 1 0 01-1 1H2a1 1 0 01-1-1V3zm2 1v2h10V4H3zm0 4v4h10V8H3z"/></svg></button><span class="miwy-tb-label">Tarjeta</span></div>
         <div class="miwy-tb-item"><button class="miwy-tb-btn" data-act="add-img" title="Imagen / Subir Foto"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2a1 1 0 00-1 1v10a1 1 0 001 1h12a1 1 0 001-1V3a1 1 0 00-1-1H2zm0 1h12v7.5l-3-3-2 2-3-3-4 4V3zm2 2a1 1 0 100 2 1 1 0 000-2z"/></svg></button><span class="miwy-tb-label">Imagen</span></div>
-        <div class="miwy-tb-item"><button class="miwy-tb-btn" data-act="edit-attr" title="Editar Atributos (URL/Enlace)"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M9.1 4.4L8.4 5.1 10.9 7.6 11.6 6.9C12.4 6.1 12.4 4.8 11.6 4C10.9 3.2 9.8 3.6 9.1 4.4ZM7.7 5.8L4 9.5V12H6.5L10.2 8.3 7.7 5.8Z"/></svg></button><span class="miwy-tb-label">Atributo</span></div>
     </div>
     <div class="miwy-dock-group">
         <div class="miwy-tb-item"><button class="miwy-tb-btn" data-act="up" title="Mover arriba"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 3.5l-5 5h3.5V13h3V8.5H13l-5-5z"/></svg></button><span class="miwy-tb-label">Arriba</span></div>
