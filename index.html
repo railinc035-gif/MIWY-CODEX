@@ -2103,6 +2103,8 @@ body.theme-monokai .empty-editor span { background: #272822; border-color: #4948
     transition: all 0.2s ease-in-out;
     position: relative;
     overflow: hidden;
+    transform: translateZ(0);
+    will-change: transform;
 }
 
 .miwy-project-card::before {
@@ -3335,24 +3337,24 @@ document.addEventListener("DOMContentLoaded", function() {
         });  
     }
 
-    // Parent Visual Dock Drag Handler Across Whole Screen
+    // Parent Visual Dock Drag Handler Across Whole Screen (Mouse & Mobile Touch)
     const parentDock = document.getElementById("parentVisualDock");
     const parentHandle = document.getElementById("__parent_dockHandle");
     if (parentDock && parentHandle) {
         let draggingParentDock = false;
         let pOffsetX = 0, pOffsetY = 0;
 
-        parentHandle.addEventListener("mousedown", (e) => {
+        function startDockDrag(clientX, clientY) {
             draggingParentDock = true;
             const rect = parentDock.getBoundingClientRect();
-            pOffsetX = e.clientX - rect.left;
-            pOffsetY = e.clientY - rect.top;
+            pOffsetX = clientX - rect.left;
+            pOffsetY = clientY - rect.top;
             parentDock.style.transform = "none";
             parentDock.style.bottom = "auto";
             parentDock.style.right = "auto";
-        });
+        }
 
-        document.addEventListener("mousemove", (e) => {
+        function moveDockDrag(clientX, clientY) {
             if (!draggingParentDock) return;
             const dockWidth = parentDock.offsetWidth || 300;
             const dockHeight = parentDock.offsetHeight || 50;
@@ -3360,8 +3362,8 @@ document.addEventListener("DOMContentLoaded", function() {
             const maxX = Math.max(10, window.innerWidth - dockWidth - 10);
             const maxY = Math.max(10, window.innerHeight - dockHeight - 10);
 
-            let rawX = e.clientX - pOffsetX;
-            let rawY = e.clientY - pOffsetY;
+            let rawX = clientX - pOffsetX;
+            let rawY = clientY - pOffsetY;
 
             // Constrain within screen bounds
             let clampedX = Math.max(10, Math.min(rawX, maxX));
@@ -3374,10 +3376,44 @@ document.addEventListener("DOMContentLoaded", function() {
             try {
                 localStorage.setItem("miwy_dock_pos", JSON.stringify(savedDockPosition));
             } catch (err) { /* ignore */ }
+        }
+
+        function endDockDrag() {
+            draggingParentDock = false;
+        }
+
+        // Mouse events
+        parentHandle.addEventListener("mousedown", (e) => {
+            startDockDrag(e.clientX, e.clientY);
+        });
+
+        document.addEventListener("mousemove", (e) => {
+            moveDockDrag(e.clientX, e.clientY);
         });
 
         document.addEventListener("mouseup", () => {
-            draggingParentDock = false;
+            endDockDrag();
+        });
+
+        // Mobile touch events
+        parentHandle.addEventListener("touchstart", (e) => {
+            if (e.touches && e.touches.length > 0) {
+                startDockDrag(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }, { passive: true });
+
+        document.addEventListener("touchmove", (e) => {
+            if (draggingParentDock && e.touches && e.touches.length > 0) {
+                if (e.cancelable) e.preventDefault();
+                moveDockDrag(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }, { passive: false });
+
+        document.addEventListener("touchend", () => {
+            endDockDrag();
+        });
+        document.addEventListener("touchcancel", () => {
+            endDockDrag();
         });
 
         window.addEventListener("resize", () => {
@@ -5129,6 +5165,24 @@ function replaceAllMatches() {
                         </div> 
                     </div> 
                 </button> 
+                <button class="settings-option theme-option-btn" data-theme="cobalto"> 
+                    <div class="settings-option-left"> 
+                        <div class="option-icon" style="background:#002240; border: 1px solid #00aaff; width: 24px; height: 24px;"></div> 
+                        <div> 
+                            <strong>Cobalto</strong> 
+                            <small>Azul profundo con acentos neón</small> 
+                        </div> 
+                    </div> 
+                </button> 
+                <button class="settings-option theme-option-btn" data-theme="monokai"> 
+                    <div class="settings-option-left"> 
+                        <div class="option-icon" style="background:#272822; border: 1px solid #f92672; width: 24px; height: 24px;"></div> 
+                        <div> 
+                            <strong>Monokai</strong> 
+                            <small>Estilo de contraste para código</small> 
+                        </div> 
+                    </div> 
+                </button> 
             </div> 
         </div>  
  
@@ -5665,7 +5719,12 @@ function renderFolderManager(dirPath = "/"){
             const content = project.files[filename];
             const fileType = getFileType(filename);
             const isImage = fileType === "image" || (content && typeof content === "string" && content.startsWith("data:image"));
-            const iconHtml = getFileIcon(filename);
+            const isVideo = fileType === "video" || (content && typeof content === "string" && content.startsWith("data:video"));
+            const isMedia = isImage || isVideo;
+            let iconHtml = getFileIcon(filename);
+            if (isImage && content && typeof content === "string" && (content.startsWith("data:image") || content.startsWith("http"))) {
+                iconHtml = `<img src="${content}" style="max-width:100%; max-height:48px; object-fit:cover; border-radius:4px; border:1px solid #324252;" alt="${escapeHTML(displayName)}" />`;
+            }
 
             const item = document.createElement("div");
             item.draggable = true;
@@ -5684,6 +5743,8 @@ function renderFolderManager(dirPath = "/"){
             item.onclick = () => {
                 if (isImage) {
                     openImagePreviewModal(filename, displayName);
+                } else if (isVideo) {
+                    openVideoPreviewModal(filename, displayName);
                 } else {
                     openCodeEditorModal(filename);
                 }
@@ -5693,9 +5754,16 @@ function renderFolderManager(dirPath = "/"){
             const baseName = lastDot !== -1 ? displayName.slice(0, lastDot) : displayName;
             const extName = lastDot !== -1 ? displayName.slice(lastDot) : "";
 
-            const actionButton = isImage 
-                ? `<button onclick="event.stopPropagation(); openImagePreviewModal('${filename}', '${escapeHTML(displayName)}')" style="background:#1e293b; color:#38bdf8; border:1px solid #334155; border-radius:4px; padding:3px 10px; font-size:10px; cursor:pointer; font-weight:600;" title="Abrir e inspeccionar imagen">Abrir</button>` 
-                : `<button onclick="event.stopPropagation(); openCodeEditorModal('${filename}')" style="background:#2b180d; color:var(--orange); border:1px solid #ff6a0040; border-radius:4px; padding:3px 10px; font-size:10px; cursor:pointer; font-weight:700;" title="Editar código">Editar</button>`;
+            let actionButton = "";
+            if (isImage) {
+                actionButton = `<button onclick="event.stopPropagation(); openImagePreviewModal('${filename}', '${escapeHTML(displayName)}')" style="background:#1e293b; color:#38bdf8; border:1px solid #334155; border-radius:4px; padding:3px 10px; font-size:10px; cursor:pointer; font-weight:600;" title="Abrir e inspeccionar imagen">Abrir</button>`;
+            } else if (isVideo) {
+                actionButton = `<button onclick="event.stopPropagation(); openVideoPreviewModal('${filename}', '${escapeHTML(displayName)}')" style="background:#1e293b; color:#38bdf8; border:1px solid #334155; border-radius:4px; padding:3px 10px; font-size:10px; cursor:pointer; font-weight:600;" title="Ver video">Ver</button>`;
+            } else {
+                actionButton = `<button onclick="event.stopPropagation(); openCodeEditorModal('${filename}')" style="background:#2b180d; color:var(--orange); border:1px solid #ff6a0040; border-radius:4px; padding:3px 10px; font-size:10px; cursor:pointer; font-weight:700;" title="Editar código">Editar</button>`;
+            }
+
+            const renameMediaBtnHtml = isMedia ? `<button onclick="event.stopPropagation(); renameMediaFilePrompt('${filename}', '${escapeHTML(displayName)}')" style="background:#1e293b; color:#cbd5e1; border:1px solid #334155; border-radius:4px; padding:3px 6px; font-size:10px; cursor:pointer;" title="Renombrar archivo">✎</button>` : "";
 
             item.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:center; width:100%; font-size:11px; font-weight:600; color:#edf2f7;">
@@ -5705,8 +5773,9 @@ function renderFolderManager(dirPath = "/"){
                 <div style="flex:1; display:flex; align-items:center; justify-content:center; padding:6px 0; font-size:18px;">
                     ${iconHtml}
                 </div>
-                <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-top:auto;">
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-top:auto; gap:4px;">
                     ${actionButton}
+                    ${renameMediaBtnHtml}
                     <button onclick="event.stopPropagation(); deleteFile('${filename}')" style="background:#251010; color:var(--danger); border:1px solid #ff4d4d33; border-radius:4px; padding:3px 8px; font-size:10px; cursor:pointer;" title="Eliminar archivo">🗑</button>
                 </div>
             `;
@@ -5818,7 +5887,10 @@ function processUploadedFiles(files){
             }
         };
 
-        if(file.type.startsWith("image/")){
+        const fileExt = file.name ? file.name.split(".").pop().toLowerCase() : "";
+        const isBinaryMedia = file.type.startsWith("image/") || file.type.startsWith("video/") || file.type.startsWith("audio/") || ["png", "jpg", "jpeg", "gif", "webp", "ico", "bmp", "mp4", "webm", "mkv", "avi", "mp3", "wav", "ogg", "m4a", "flac"].includes(fileExt);
+
+        if(isBinaryMedia){
             reader.readAsDataURL(file);
         } else {
             reader.readAsText(file);
@@ -5908,7 +5980,10 @@ function processDroppedFolderTree(fileEntries) {
             }
         };
 
-        if (file.type && file.type.startsWith("image/")) {
+        const fileExt = file.name ? file.name.split(".").pop().toLowerCase() : "";
+        const isBinaryMedia = (file.type && (file.type.startsWith("image/") || file.type.startsWith("video/") || file.type.startsWith("audio/"))) || ["png", "jpg", "jpeg", "gif", "webp", "ico", "bmp", "mp4", "webm", "mkv", "avi", "mp3", "wav", "ogg", "m4a", "flac"].includes(fileExt);
+
+        if (isBinaryMedia) {
             reader.readAsDataURL(file);
         } else {
             reader.readAsText(file);
@@ -6247,12 +6322,81 @@ function openImagePreviewModal(filename, displayName) {
     }
 }
 
+function openVideoPreviewModal(filename, displayName) {
+    const project = getCurrentProject();
+    if (!project || !project.files[filename]) return;
+
+    const videoSrc = project.files[filename];
+    showCustomDialog({
+        title: `🎬 ${displayName || filename}`,
+        description: `Reproduciendo archivo de video`,
+        confirmText: "Cerrar",
+        cancelText: null
+    });
+
+    const descEl = document.getElementById("customDialogDescription");
+    if (descEl) {
+        descEl.innerHTML = `<div style="text-align:center; margin-top:10px;"><video src="${videoSrc}" controls autoplay style="max-width:100%; max-height:300px; border-radius:8px; border:1px solid #333;"></video></div>`;
+    }
+}
+
+function renameMediaFilePrompt(oldFilename, currentDisplayName) {
+    const project = getCurrentProject();
+    if (!project || !project.files) return;
+
+    showCustomDialog({
+        title: "Renombrar Archivo Multimedia",
+        description: `Ingresa el nuevo nombre completo para "${currentDisplayName}" (incluida la extensión, ej: logo.jpg, video.webm):`,
+        showInput: true,
+        inputValue: currentDisplayName,
+        confirmText: "Guardar",
+        onConfirm: (newName) => {
+            if (!newName || !newName.trim() || newName.trim() === currentDisplayName) return;
+            const cleanNewName = newName.trim();
+
+            if (!cleanNewName.includes(".")) {
+                showCustomDialog({ title: "Renombrar Archivo", description: "El nombre de archivo debe incluir su extensión (ej: foto.jpg o video.mp4)." });
+                return;
+            }
+
+            // Determine directory prefix if inside a folder
+            const lastSlash = oldFilename.lastIndexOf("/");
+            const dirPrefix = lastSlash !== -1 ? oldFilename.slice(0, lastSlash + 1) : "";
+            const newFullPath = dirPrefix + cleanNewName;
+
+            if (Object.prototype.hasOwnProperty.call(project.files, newFullPath) && newFullPath !== oldFilename) {
+                showCustomDialog({ title: "Renombrar Archivo", description: "Ya existe un archivo con ese nombre en esta carpeta." });
+                return;
+            }
+
+            const fileContent = project.files[oldFilename];
+            project.files[newFullPath] = fileContent;
+            delete project.files[oldFilename];
+
+            if (currentFileName === oldFilename) {
+                currentFileName = newFullPath;
+            }
+
+            saveProjects();
+            renderFiles();
+            renderFolderManager(currentFolderDirectory);
+            updatePreview();
+            showTopNotification(`✏️ Archivo renombrado a "${cleanNewName}"`, null, 2200);
+        }
+    });
+}
+
 function openCodeEditorModal(filename) {
     if (!filename) return;
     saveCurrentFile();
 
-    if (getFileType(filename) === "image") {
+    const fileType = getFileType(filename);
+    if (fileType === "image") {
         openImagePreviewModal(filename, filename);
+        return;
+    }
+    if (fileType === "video") {
+        openVideoPreviewModal(filename, filename);
         return;
     }
 
@@ -6306,8 +6450,13 @@ function selectFile(filename){
 
     const project = getCurrentProject();
     if (project && project.files && project.files[filename] !== undefined && codeEditor) {
-        if (getFileType(filename) === "image") {
+        const fileType = getFileType(filename);
+        if (fileType === "image") {
             openImagePreviewModal(filename, filename);
+            return;
+        }
+        if (fileType === "video") {
+            openVideoPreviewModal(filename, filename);
             return;
         }
         setEditorLocked(false);
@@ -7562,8 +7711,9 @@ function lintAndFixCurrentCode() {
    TEMAS DE INTERFAZ (LOGIC)  
 ===================================================== */  
 function applyTheme(themeName) { 
-    if (themeName !== "oscuro" && themeName !== "claro") themeName = "oscuro";
-    document.body.classList.remove("theme-oscuro", "theme-claro"); 
+    const validThemes = ["oscuro", "claro", "cobalto", "monokai"];
+    if (!validThemes.includes(themeName)) themeName = "oscuro";
+    document.body.classList.remove("theme-oscuro", "theme-claro", "theme-cobalto", "theme-monokai"); 
     document.body.classList.add("theme-" + themeName); 
     localStorage.setItem("miwy_theme", themeName); 
     document.querySelectorAll(".theme-option-btn").forEach(btn => { 
