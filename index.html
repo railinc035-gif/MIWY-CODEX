@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">  
 <title>Miwy</title>  
 <link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23111820' stroke='%23ff6a00' stroke-width='6'/><circle cx='50' cy='40' r='16' fill='%23ffffff'/><circle cx='50' cy='68' r='22' fill='%23ffffff'/><circle cx='43' cy='38' r='4' fill='%23ff6a00'/><circle cx='57' cy='38' r='4' fill='%23ff6a00'/><path d='M34 38 Q15 25 10 40 M32 45 Q12 45 8 58 M32 55 Q12 65 10 78 M35 62 Q18 80 22 92 M66 38 Q85 25 90 40 M68 45 Q88 45 92 58 M68 55 Q88 65 90 78 M65 62 Q82 80 78 92' stroke='%23ffffff' stroke-width='5' stroke-linecap='round' fill='none'/></svg>">
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -147,7 +148,21 @@ button{border:0;cursor:pointer}
 .leg.r3{right:0;top:13px;transform:rotate(18deg)}  
 .leg.r4{right:0;top:17px;transform:rotate(35deg)}  
   
-.logo-button,  
+.logo-button{  
+    width:48px;  
+    height:48px;  
+    display:flex;  
+    align-items:center;  
+    justify-content:center;  
+    background: linear-gradient(180deg, #2a323d 0%, #182028 100%);  
+    color:#cbd5e1;  
+    border-radius:12px;  
+    border: 1px solid rgba(255, 122, 26, 0.25);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    padding: 3px;
+}  
+
 .settings-button{  
     width:36px;  
     height:36px;  
@@ -2564,15 +2579,18 @@ button {
 }
 
 @media (max-width: 750px) {
-    .topbar { gap: 8px; }
+    .topbar { gap: 8px; backdrop-filter: none !important; background: #090b0f !important; }
     .gallery-brand-title { max-width: 130px; overflow: hidden; text-overflow: ellipsis; }
     .panel-left { min-width: 0; }
-    .main-tab-btn { min-width: 72px; padding: 0 8px; }
+    .main-tab-btn { min-width: 72px; padding: 0 8px; touch-action: manipulation; }
     .preview-controls { gap: 3px; }
-    .preview-controls .preview-button { min-width: 0; padding: 0 7px; font-size: 10px; }
-    .miwy-floating-dock { max-width: calc(100vw - 16px); overflow-x: auto; }
+    .preview-controls .preview-button { min-width: 0; padding: 0 7px; font-size: 10px; touch-action: manipulation; }
+    .miwy-floating-dock { max-width: calc(100vw - 16px); overflow-x: auto; backdrop-filter: none !important; box-shadow: 0 6px 20px rgba(0,0,0,.6); }
     .dialog-buttons { flex-wrap: wrap; }
-    .dialog-buttons > button { min-width: 120px; }
+    .dialog-buttons > button { min-width: 120px; touch-action: manipulation; }
+    button, .miwy-project-card, .file-tab, .settings-option { touch-action: manipulation; }
+    .miwy-gallery, .code-editor, #folderGrid, .settings-panel { -webkit-overflow-scrolling: touch; }
+    .miwy-project-card, .dialog, .settings-panel { box-shadow: 0 6px 16px rgba(0,0,0,.4) !important; }
 }
 
 </style>  
@@ -3900,8 +3918,9 @@ function replaceAllMatches() {
       const rect = canvas.getBoundingClientRect();
       const w = rect.width || canvas.clientWidth || 800;
       const h = rect.height || canvas.clientHeight || 180;
-      canvas.width = Math.max(300, w) * (window.devicePixelRatio || 1);
-      canvas.height = Math.max(120, h) * (window.devicePixelRatio || 1);
+      const dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth <= 750 ? 1.25 : 1.5);
+      canvas.width = Math.max(300, w) * dpr;
+      canvas.height = Math.max(120, h) * dpr;
     }
     resize();
     window.addEventListener("resize", resize);
@@ -3914,14 +3933,17 @@ function replaceAllMatches() {
 
     function drawGiantBrickWall() {
       ctx.save();
+      const isMobile = window.innerWidth <= 750;
       const brickWidth = Math.max(160, W() * 0.15);
       const brickHeight = Math.max(70, H() * 0.12);
       const rows = Math.ceil(H() / brickHeight) + 1;
 
       ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
       ctx.lineWidth = 2.5;
-      ctx.shadowColor = "#ff0033";
-      ctx.shadowBlur = 6;
+      if (!isMobile) {
+        ctx.shadowColor = "#ff0033";
+        ctx.shadowBlur = 6;
+      }
 
       ctx.beginPath();
       for (let r = 0; r <= rows; r++) {
@@ -4180,6 +4202,12 @@ function replaceAllMatches() {
     shockwaves.trigger();
 
     function loop() {
+      const gallery = document.getElementById("galleryContainer");
+      if (document.hidden || (gallery && gallery.style.display === "none")) {
+        requestAnimationFrame(loop);
+        return;
+      }
+
       if (W() <= 0 || H() <= 0) resize();
 
       ctx.clearRect(0, 0, W(), H());
@@ -4250,8 +4278,16 @@ function replaceAllMatches() {
 <header class="topbar">  
   
     <div style="display:flex; align-items:center; gap:10px;">
-        <button class="logo-button" title="Miwy" style="overflow:hidden; padding:0;">  
-            <img src="logo.png" alt="Miwy Logo" style="width:100%; height:100%; object-fit:contain;" onerror="this.style.display='none'">
+        <button class="logo-button" title="Miwy">  
+            <img src="logo.png" alt="Miwy Logo" style="width:100%; height:100%; object-fit:contain;" onerror="this.onerror=null; this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='block';">
+            <svg class="logo-fallback-svg" viewBox="0 0 100 100" style="display:none; width:38px; height:38px;">
+                <circle cx="50" cy="50" r="46" fill="#111820" stroke="var(--orange)" stroke-width="6"/>
+                <circle cx="50" cy="40" r="16" fill="#ffffff"/>
+                <circle cx="50" cy="68" r="22" fill="#ffffff"/>
+                <circle cx="43" cy="38" r="4" fill="var(--orange)"/>
+                <circle cx="57" cy="38" r="4" fill="var(--orange)"/>
+                <path d="M34 38 Q15 25 10 40 M32 45 Q12 45 8 58 M32 55 Q12 65 10 78 M35 62 Q18 80 22 92 M66 38 Q85 25 90 40 M68 45 Q88 45 92 58 M68 55 Q88 65 90 78 M65 62 Q82 80 78 92" stroke="#ffffff" stroke-width="5" stroke-linecap="round" fill="none"/>
+            </svg>
         </button>
         <span id="galleryBrandTitle" class="gallery-brand-title">MIWY</span>
     </div>
