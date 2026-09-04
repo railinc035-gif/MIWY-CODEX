@@ -27,6 +27,8 @@ if ('serviceWorker' in navigator) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
   
   
 <style>
@@ -463,7 +465,23 @@ button{border:0;cursor:pointer}
     position:relative;
     overflow:hidden;
 }
-  
+
+.editor-highlight {
+    position:absolute;
+    inset:0;
+    margin:0;
+    padding:22px 24px;
+    font-family:Consolas,"SFMono-Regular","Courier New",monospace !important;
+    font-size:13px;
+    line-height:1.7;
+    white-space:pre;
+    overflow:hidden;
+    pointer-events:none;
+    box-sizing:border-box;
+    background:transparent;
+    color:#c9d1d9;
+}
+
 .code-editor{  
     width:100%;  
     height:100%;  
@@ -474,8 +492,9 @@ button{border:0;cursor:pointer}
   
     padding:22px 24px;  
   
-    background:#0d1117 !important;  
-    color:#c9d1d9 !important;  
+    background:transparent !important;  
+    color:transparent !important;  
+    caret-color:#ff6a00 !important;
   
     font-family:Consolas,"SFMono-Regular","Courier New",monospace !important;  
     font-size:13px;  
@@ -485,10 +504,13 @@ button{border:0;cursor:pointer}
   
     white-space:pre;  
     overflow:auto;  
+    position:relative;
+    z-index:2;
 }  
 
-/* GitHub Dark Syntax Highlighting Theme */
-.token.tag, .token.keyword { color: #ff7b72 !important; font-weight: bold; }
+/* Vivid Prism Tomorrow Syntax Highlighting Colors */
+.token.tag, .token.selector { color: #ff7b72 !important; font-weight: bold; }
+.token.keyword { color: #ff7b72 !important; font-weight: bold; }
 .token.attr-name, .token.property { color: #79c0ff !important; }
 .token.attr-value, .token.string { color: #a5d6ff !important; }
 .token.comment { color: #8b949e !important; font-style: italic; }
@@ -595,7 +617,7 @@ button{border:0;cursor:pointer}
     display: flex;  
     align-items: center;  
     justify-content: center;  
-    padding: 16px;  
+    padding: 10px;  
     overflow: hidden;  
     position: relative;
     box-sizing: border-box;
@@ -615,10 +637,11 @@ button{border:0;cursor:pointer}
 }  
 
 .preview-frame.mobile{
-    width: 380px;
-    max-width: 100%;
-    height: 680px;
+    height: 100%;
     max-height: 100%;
+    width: auto;
+    aspect-ratio: 9 / 18.5;
+    max-width: 100%;
     border-radius: 28px;
     border: 8px solid #1a1a1a;
     box-shadow: 0 15px 40px rgba(0,0,0,0.6);
@@ -2756,7 +2779,7 @@ function updatePreview() {
         syncEditorToProject();
         if (typeof saveProjects === "function") saveProjects();
         updatePreviewImmediate(sequence);
-    }, 120);
+    }, 250);
 }
 
 function updatePreviewImmediate(sequence = previewUpdateSequence){  
@@ -3130,15 +3153,15 @@ function updatePreviewImmediate(sequence = previewUpdateSequence){
             }
         });
 
-        function clearSelection() {
+        var clearSelection = function() {
             if (selectedTarget) {
                 selectedTarget.removeAttribute('data-miwy-selected');
                 document.querySelectorAll('.miwy-resize-corner, .miwy-move-handle').forEach(function(el) { el.remove(); });
                 selectedTarget = null;
             }
-        }
+        };
 
-        function selectElement(target) {
+        var selectElement = function(target) {
             clearSelection();
             if (!target || target.hasAttribute('data-miwy-system') || target.closest('.miwy-floating-dock')) return;
 
@@ -3156,15 +3179,15 @@ function updatePreviewImmediate(sequence = previewUpdateSequence){
                 var startX = e.clientX, startY = e.clientY;
                 var startW = selectedTarget.offsetWidth, startH = selectedTarget.offsetHeight;
 
-                function doResize(me) {
+                var doResize = function(me) {
                     selectedTarget.style.width = Math.max(20, startW + (me.clientX - startX)) + 'px';
                     selectedTarget.style.height = Math.max(20, startH + (me.clientY - startY)) + 'px';
-                }
-                function stopResize() {
+                };
+                var stopResize = function() {
                     window.removeEventListener('mousemove', doResize);
                     window.removeEventListener('mouseup', stopResize);
                     sendCleanHtml();
-                }
+                };
                 window.addEventListener('mousemove', doResize);
                 window.addEventListener('mouseup', stopResize);
             });
@@ -3184,25 +3207,25 @@ function updatePreviewImmediate(sequence = previewUpdateSequence){
                 var startLeft = parseFloat(selectedTarget.style.left) || 0;
                 var startTop = parseFloat(selectedTarget.style.top) || 0;
 
-                function doElemMove(me) {
+                var doElemMove = function(me) {
                     if (!draggingElem) return;
                     selectedTarget.style.left = (startLeft + (me.clientX - startX)) + 'px';
                     selectedTarget.style.top = (startTop + (me.clientY - startY)) + 'px';
-                }
+                };
 
-                function stopElemMove() {
+                var stopElemMove = function() {
                     draggingElem = false;
                     window.removeEventListener('mousemove', doElemMove);
                     window.removeEventListener('mouseup', stopElemMove);
                     sendCleanHtml();
-                }
+                };
 
                 window.addEventListener('mousemove', doElemMove);
                 window.addEventListener('mouseup', stopElemMove);
             });
         }
 
-        function attachElementEvents(el) {
+        var attachElementEvents = function(el) {
             if (el.tagName === 'BODY' || el.tagName === 'HTML' || el.tagName === 'SCRIPT' || el.tagName === 'STYLE' || el.hasAttribute('data-miwy-system') || el.closest('.miwy-floating-dock')) return;
 
             if (el.closest('.card') || el.closest('.container') || (el.textContent && (el.textContent.includes("Tu app o web se reflejará aquí") || el.textContent.includes("¡Bienvenido a Miwy!")))) {
@@ -3218,7 +3241,7 @@ function updatePreviewImmediate(sequence = previewUpdateSequence){
 
             el.addEventListener('input', sendCleanHtml);
             el.addEventListener('blur', sendCleanHtml);
-        }
+        };
 
         var elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, button, a, span, label, li, th, td, b, strong, i, em, div, img, section, article, header, footer, input, form'); 
         elements.forEach(function(el) { 
@@ -3344,7 +3367,7 @@ document.addEventListener("DOMContentLoaded", function() {
         let draggingParentDock = false;
         let pOffsetX = 0, pOffsetY = 0;
 
-        function startDockDrag(clientX, clientY) {
+        var startDockDrag = function(clientX, clientY) {
             draggingParentDock = true;
             const rect = parentDock.getBoundingClientRect();
             pOffsetX = clientX - rect.left;
@@ -3352,9 +3375,9 @@ document.addEventListener("DOMContentLoaded", function() {
             parentDock.style.transform = "none";
             parentDock.style.bottom = "auto";
             parentDock.style.right = "auto";
-        }
+        };
 
-        function moveDockDrag(clientX, clientY) {
+        var moveDockDrag = function(clientX, clientY) {
             if (!draggingParentDock) return;
             const dockWidth = parentDock.offsetWidth || 300;
             const dockHeight = parentDock.offsetHeight || 50;
@@ -3376,11 +3399,11 @@ document.addEventListener("DOMContentLoaded", function() {
             try {
                 localStorage.setItem("miwy_dock_pos", JSON.stringify(savedDockPosition));
             } catch (err) { /* ignore */ }
-        }
+        };
 
-        function endDockDrag() {
+        var endDockDrag = function() {
             draggingParentDock = false;
-        }
+        };
 
         // Mouse events
         parentHandle.addEventListener("mousedown", (e) => {
@@ -4462,6 +4485,7 @@ function replaceAllMatches() {
                     <div class="editor-wrapper">
                         <div id="lineGutter" class="line-gutter" aria-hidden="true">1</div>
                         <div class="editor-content">
+                        <pre id="editorHighlight" class="editor-highlight" aria-hidden="true"><code id="editorHighlightCode"></pre>
                         <textarea  
                             id="codeEditor"  
                             class="code-editor locked"  
@@ -6432,6 +6456,7 @@ function openCodeEditorModal(filename) {
 
     renderFiles();
     updateLineCounter();
+    renderSyntaxHighlighting();
     updatePreview();
     saveProjects();
 }
@@ -6468,6 +6493,7 @@ function selectFile(filename){
         if (currentFileHeader) currentFileHeader.textContent = `📁 Recursos / ${filename}`;
         if (fileFooterName) fileFooterName.textContent = filename;
         updateLineCounter();
+        renderSyntaxHighlighting();
     }
 
     renderFiles();
@@ -6505,26 +6531,65 @@ window.addEventListener("beforeunload", () => {
    EDITOR  
 ===================================================== */  
   
+function renderSyntaxHighlighting() {
+    const highlightCode = document.getElementById("editorHighlightCode");
+    const highlightPre = document.getElementById("editorHighlight");
+    if (!highlightCode || !codeEditor) return;
+
+    if (codeEditor.disabled || !currentFileName) {
+        highlightCode.innerHTML = "";
+        return;
+    }
+
+    const val = codeEditor.value;
+    const ext = typeof getFileType === "function" ? getFileType(currentFileName) : "html";
+
+    let grammarName = "markup";
+    if (ext === "css") grammarName = "css";
+    else if (ext === "js" || ext === "ts" || ext === "jsx" || ext === "tsx") grammarName = "javascript";
+    else if (ext === "json") grammarName = "json";
+    else if (ext === "python") grammarName = "python";
+
+    let highlighted = "";
+    if (typeof Prism !== "undefined" && Prism.languages[grammarName]) {
+        try {
+            highlighted = Prism.highlight(val, Prism.languages[grammarName], grammarName);
+        } catch (e) {
+            highlighted = escapeHTML(val);
+        }
+    } else {
+        highlighted = escapeHTML(val);
+    }
+
+    if (val.endsWith("\n")) highlighted += "\n";
+
+    highlightCode.innerHTML = highlighted;
+
+    if (highlightPre) {
+        highlightPre.scrollTop = codeEditor.scrollTop;
+        highlightPre.scrollLeft = codeEditor.scrollLeft;
+    }
+}
+
 codeEditor.addEventListener(  
     "input",  
     () => {  
-  
         if(  
             !currentFileName ||  
             codeEditor.disabled  
         )  
             return;  
   
+        renderSyntaxHighlighting();
+
         syncEditorToProject();
         clearTimeout(editorSyncTimer);
         editorSyncTimer = setTimeout(() => {
             saveCurrentFile();
-        }, 100);
+        }, 100);  
   
         updateLineCounter();  
-  
         updatePreview();  
-  
     }  
 );  
 
@@ -6534,6 +6599,12 @@ codeEditor.addEventListener("select", updateLineCounter);
 codeEditor.addEventListener("scroll", () => {
     const gutter = document.getElementById("lineGutter");
     if (gutter) gutter.scrollTop = codeEditor.scrollTop;
+
+    const highlightPre = document.getElementById("editorHighlight");
+    if (highlightPre) {
+        highlightPre.scrollTop = codeEditor.scrollTop;
+        highlightPre.scrollLeft = codeEditor.scrollLeft;
+    }
 });
 
 function autoSaveProjectState(){
@@ -6552,33 +6623,46 @@ setInterval(autoSaveProjectState, 15000);
    CONTADOR DE LÍNEAS REALES  
 ===================================================== */  
   
+let cachedGutterLineCount = -1;
+
 function updateLineCounter(){  
     const gutter = document.getElementById("lineGutter");
     const value = codeEditor && !codeEditor.disabled ? codeEditor.value : "";
     const cursor = codeEditor && !codeEditor.disabled ? codeEditor.selectionStart : 0;
-    const beforeCursor = value.slice(0, cursor);
-    const line = beforeCursor.split("\n").length;
-    const column = beforeCursor.length - beforeCursor.lastIndexOf("\n");
+
+    let line = 1;
+    let lastNewLine = -1;
+    for (let i = 0; i < cursor; i++) {
+        if (value.charCodeAt(i) === 10) { // \n
+            line++;
+            lastNewLine = i;
+        }
+    }
+    const column = cursor - lastNewLine;
 
     if (gutter) {
-        const lineCount = Math.max(1, value.split("\n").length);
-        gutter.textContent = Array.from({ length: lineCount }, (_, index) => index + 1).join("\n");
+        let totalLines = 1;
+        for (let i = 0; i < value.length; i++) {
+            if (value.charCodeAt(i) === 10) totalLines++;
+        }
+
+        if (totalLines !== cachedGutterLineCount) {
+            cachedGutterLineCount = totalLines;
+            let numbers = "";
+            for (let i = 1; i <= totalLines; i++) {
+                numbers += i + "\n";
+            }
+            gutter.textContent = numbers;
+        }
         gutter.scrollTop = codeEditor ? codeEditor.scrollTop : 0;
     }
 
-    if(  
-        !currentFileName ||  
-        codeEditor.disabled  
-    ){  
-  
+    if(!currentFileName || codeEditor.disabled){  
         lineCounter.textContent = "Ln 1, Col 1";
-  
         return;  
     }  
-  
-  
+
     lineCounter.textContent = `Ln ${line}, Col ${column}`;
-  
 }  
   
   
@@ -7679,9 +7763,10 @@ function lintAndFixCurrentCode() {
     const fileType = typeof getFileType === "function" ? getFileType(currentFileName) : "";
     let issues = [];
 
-    if (fileType === "js" && typeof JSHint !== "undefined") {
-        JSHint(raw, { esversion: 11, undef: false, unused: false, asy: true });
-        const errors = JSHint.errors || [];
+    const jshintLinter = typeof JSHINT !== "undefined" ? JSHINT : (typeof JSHint !== "undefined" ? JSHint : null);
+    if (fileType === "js" && jshintLinter) {
+        jshintLinter(raw, { esversion: 11, undef: false, unused: false, asi: true });
+        const errors = jshintLinter.errors || [];
         if (errors.length > 0) {
             issues = errors.filter(Boolean).map(e => `Línea ${e.line}: ${e.reason}`);
         }
@@ -8071,15 +8156,7 @@ document.addEventListener(
             workspace.getBoundingClientRect();  
   
   
-        let percentage =  
-            (  
-                (  
-                    event.clientX -  
-                    rect.left  
-                )  
-                /  
-                rect.width  
-            ) * 100;  
+        let percentage = ((event.clientX - rect.left) / rect.width) * 100;  
   
   
         percentage =  
@@ -8378,8 +8455,10 @@ function reloadRealPhoneFrame() {
             const walker = document.createTreeWalker(button, NodeFilter.SHOW_TEXT);
             const textNodes = [];
             while (walker.nextNode()) textNodes.push(walker.currentNode);
+            const spacesPattern = /\s+/g;
             textNodes.forEach(node => {
-                node.nodeValue = node.nodeValue.replace(emojiPattern, "").replace(/\s{2,}/g, " ");
+                const cleaned = node.nodeValue.replace(emojiPattern, "");
+                node.nodeValue = cleaned.replace(spacesPattern, " ");
             });
         }
     });
