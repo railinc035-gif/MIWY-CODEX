@@ -617,7 +617,7 @@ button{border:0;cursor:pointer}
     display: flex;  
     align-items: center;  
     justify-content: center;  
-    padding: 10px;  
+    padding: 0;  
     overflow: hidden;  
     position: relative;
     box-sizing: border-box;
@@ -629,33 +629,25 @@ button{border:0;cursor:pointer}
     max-width: 100%;
     max-height: 100%;
     display: block;  
-    border: 1px solid var(--border);  
-    border-radius: 10px;  
+    border: none;  
+    border-radius: 0;  
     background: white;  
     transition: all 0.25s ease;  
     box-sizing: border-box;
 }  
 
 .preview-frame.mobile{
-    height: 100%;
-    max-height: 100%;
+    height: calc(100% - 32px);
+    max-height: calc(100% - 32px);
     width: auto;
     aspect-ratio: 9 / 18.5;
-    max-width: 100%;
+    max-width: calc(100% - 32px);
+    margin: 16px;
     border-radius: 28px;
     border: 8px solid #1a1a1a;
     box-shadow: 0 15px 40px rgba(0,0,0,0.6);
 }
 
-.preview-frame.mobile-horizontal{
-    width: 680px;
-    max-width: 100%;
-    height: 380px;
-    max-height: 100%;
-    border-radius: 28px;
-    border: 8px solid #1a1a1a;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.6);
-}
 
 /* =========================  
    MINI SIMULADOR DE DISPOSITIVOS  
@@ -688,15 +680,6 @@ button{border:0;cursor:pointer}
     box-shadow: 0 0 0 2px #333, 0 25px 60px rgba(0,0,0,0.8);
 }
 
-.device-simulator.mobile-horizontal {
-    width: 720px;
-    min-width: 720px;
-    max-width: 100%;
-    height: 390px;
-    border-radius: 36px;
-    border: 8px solid #222;
-    box-shadow: 0 0 0 2px #333, 0 25px 60px rgba(0,0,0,0.8);
-}
 
 .device-header {
     height: 28px;
@@ -1721,7 +1704,7 @@ button:not(.miwy-tb-btn):not(.settings-button):not(.new-file-button):not(.miwy-c
     bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(12, 12, 12, 0.95);
+    background: rgba(16, 22, 28, 0.92);
     border: 1.5px solid #ff6a00aa;
     border-radius: 35px;
     padding: 6px 14px;
@@ -1729,23 +1712,14 @@ button:not(.miwy-tb-btn):not(.settings-button):not(.new-file-button):not(.miwy-c
     align-items: flex-start;
     gap: 8px;
     z-index: 2147483647 !important;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.9);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.8);
     backdrop-filter: blur(14px);
     color: #eee;
     font-family: system-ui, sans-serif;
     font-size: 11px;
     user-select: none;
-}
-.miwy-floating-dock.vertical {
-    flex-direction: column;
-    align-items: center;
-    left: 16px;
-    top: 50%;
-    bottom: auto;
-    transform: translateY(-50%);
-    max-height: 85vh;
-    overflow-y: auto;
-    border-radius: 28px;
+    max-width: calc(100vw - 32px);
+    overflow-x: auto;
 }
 .miwy-dock-group {
     display: flex;
@@ -1753,13 +1727,6 @@ button:not(.miwy-tb-btn):not(.settings-button):not(.new-file-button):not(.miwy-c
     gap: 6px;
     border-right: 1px solid #2a2a2a;
     padding-right: 8px;
-}
-.miwy-floating-dock.vertical .miwy-dock-group {
-    flex-direction: column;
-    border-right: none;
-    border-bottom: 1px solid #2a2a2a;
-    padding-right: 0;
-    padding-bottom: 8px;
 }
 .miwy-dock-group:last-child {
     border-right: none;
@@ -2322,9 +2289,10 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 .file-tab.active { background: #2b180d; border-color: #ff6a0050; color: var(--orange); }
 .code-editor { padding: 22px 24px; font-size: 13px; line-height: 1.7; }
 .code-footer { height: 34px; padding: 0 16px; background: #10151c; border-top-color: #22303b; }
-.preview-panel { background: #0d1217; }
-.preview-wrapper { padding: 20px; }
-.preview-frame { border-color: #2c3c49; border-radius: 12px; box-shadow: 0 18px 40px rgba(0,0,0,.22); }
+.preview-panel { background: #0d1217; display: flex; flex-direction: column; flex: 1; height: 100%; min-width: 0; width: auto; }
+.preview-wrapper-container { flex: 1; display: flex; flex-direction: column; width: 100%; height: 100%; min-height: 0; }
+.preview-wrapper { padding: 0; flex: 1; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
+.preview-frame { border: none; border-radius: 0; box-shadow: none; }
 .preview-controls { gap: 6px; }
 .preview-button { height: 30px; padding: 0 10px; border: 1px solid transparent; border-radius: 7px; }
 .preview-button:hover { border-color: #344856; background: #16202a; }
@@ -2692,11 +2660,7 @@ function updateDockSettingsUI() {
 
     const parentDock = document.getElementById("parentVisualDock");
     if (parentDock) {
-        if (orient === "vertical") {
-            parentDock.classList.add("vertical");
-        } else {
-            parentDock.classList.remove("vertical");
-        }
+        parentDock.classList.remove("vertical");
     }
 }
 
@@ -2706,38 +2670,15 @@ function restoreDockPosition() {
     const parentDock = document.getElementById("parentVisualDock");
     if (!parentDock) return;
 
-    if (!savedDockPosition) {
-        try {
-            const raw = localStorage.getItem("miwy_dock_pos");
-            if (raw) savedDockPosition = JSON.parse(raw);
-        } catch (err) {
-            console.warn("Error leyendo dock pos:", err);
-        }
-    }
-
-    parentDock.style.transform = "none";
-    parentDock.style.bottom = "auto";
+    parentDock.style.left = "50%";
+    parentDock.style.top = "auto";
+    parentDock.style.bottom = "20px";
     parentDock.style.right = "auto";
-
-    const dockWidth = parentDock.offsetWidth || 300;
-    const dockHeight = parentDock.offsetHeight || 50;
-
-    const maxX = Math.max(10, window.innerWidth - dockWidth - 10);
-    const maxY = Math.max(10, window.innerHeight - dockHeight - 10);
-
-    let posX = savedDockPosition ? savedDockPosition.x : Math.max(10, Math.floor((window.innerWidth - dockWidth) / 2));
-    let posY = savedDockPosition ? savedDockPosition.y : Math.max(10, window.innerHeight - dockHeight - 30);
-
-    // Constrain strictly within visible viewport bounds
-    posX = Math.max(10, Math.min(posX, maxX));
-    posY = Math.max(10, Math.min(posY, maxY));
-
-    parentDock.style.left = posX + "px";
-    parentDock.style.top = posY + "px";
-
-    savedDockPosition = { x: posX, y: posY };
+    parentDock.style.transform = "translateX(-50%)";
+    savedDockPosition = null;
     try {
-        localStorage.setItem("miwy_dock_pos", JSON.stringify(savedDockPosition));
+        localStorage.removeItem("miwy_dock_pos");
+        localStorage.removeItem("miwy_dock_orientation");
     } catch (e) { /* ignore */ }
 }
 
@@ -3173,24 +3114,41 @@ function updatePreviewImmediate(sequence = previewUpdateSequence){
             resizeCorner.setAttribute('data-miwy-system', 'true');
             selectedTarget.appendChild(resizeCorner);
 
-            resizeCorner.addEventListener('mousedown', function(e) {
-                e.stopPropagation();
-                e.preventDefault();
-                var startX = e.clientX, startY = e.clientY;
+            var handleResizeStart = function(clientX, clientY) {
+                var startX = clientX, startY = clientY;
                 var startW = selectedTarget.offsetWidth, startH = selectedTarget.offsetHeight;
 
                 var doResize = function(me) {
-                    selectedTarget.style.width = Math.max(20, startW + (me.clientX - startX)) + 'px';
-                    selectedTarget.style.height = Math.max(20, startH + (me.clientY - startY)) + 'px';
+                    var cx = me.clientX !== undefined ? me.clientX : (me.touches && me.touches[0] ? me.touches[0].clientX : startX);
+                    var cy = me.clientY !== undefined ? me.clientY : (me.touches && me.touches[0] ? me.touches[0].clientY : startY);
+                    selectedTarget.style.width = Math.max(20, startW + (cx - startX)) + 'px';
+                    selectedTarget.style.height = Math.max(20, startH + (cy - startY)) + 'px';
                 };
                 var stopResize = function() {
                     window.removeEventListener('mousemove', doResize);
                     window.removeEventListener('mouseup', stopResize);
+                    window.removeEventListener('touchmove', doResize);
+                    window.removeEventListener('touchend', stopResize);
                     sendCleanHtml();
                 };
                 window.addEventListener('mousemove', doResize);
                 window.addEventListener('mouseup', stopResize);
+                window.addEventListener('touchmove', doResize, { passive: true });
+                window.addEventListener('touchend', stopResize);
+            };
+
+            resizeCorner.addEventListener('mousedown', function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                handleResizeStart(e.clientX, e.clientY);
             });
+
+            resizeCorner.addEventListener('touchstart', function(e) {
+                if (e.touches && e.touches.length > 0) {
+                    e.stopPropagation();
+                    handleResizeStart(e.touches[0].clientX, e.touches[0].clientY);
+                }
+            }, { passive: true });
 
             var moveHandle = document.createElement('div');
             moveHandle.className = 'miwy-move-handle';
@@ -3198,31 +3156,48 @@ function updatePreviewImmediate(sequence = previewUpdateSequence){
             moveHandle.title = 'Arrastrar para reubicar elemento';
             selectedTarget.appendChild(moveHandle);
 
-            moveHandle.addEventListener('mousedown', function(e) {
-                e.stopPropagation();
-                e.preventDefault();
+            var handleMoveStart = function(clientX, clientY) {
                 var draggingElem = true;
                 selectedTarget.style.position = 'relative';
-                var startX = e.clientX, startY = e.clientY;
+                var startX = clientX, startY = clientY;
                 var startLeft = parseFloat(selectedTarget.style.left) || 0;
                 var startTop = parseFloat(selectedTarget.style.top) || 0;
 
                 var doElemMove = function(me) {
                     if (!draggingElem) return;
-                    selectedTarget.style.left = (startLeft + (me.clientX - startX)) + 'px';
-                    selectedTarget.style.top = (startTop + (me.clientY - startY)) + 'px';
+                    var cx = me.clientX !== undefined ? me.clientX : (me.touches && me.touches[0] ? me.touches[0].clientX : startX);
+                    var cy = me.clientY !== undefined ? me.clientY : (me.touches && me.touches[0] ? me.touches[0].clientY : startY);
+                    selectedTarget.style.left = (startLeft + (cx - startX)) + 'px';
+                    selectedTarget.style.top = (startTop + (cy - startY)) + 'px';
                 };
 
                 var stopElemMove = function() {
                     draggingElem = false;
                     window.removeEventListener('mousemove', doElemMove);
                     window.removeEventListener('mouseup', stopElemMove);
+                    window.removeEventListener('touchmove', doElemMove);
+                    window.removeEventListener('touchend', stopElemMove);
                     sendCleanHtml();
                 };
 
                 window.addEventListener('mousemove', doElemMove);
                 window.addEventListener('mouseup', stopElemMove);
+                window.addEventListener('touchmove', doElemMove, { passive: true });
+                window.addEventListener('touchend', stopElemMove);
+            };
+
+            moveHandle.addEventListener('mousedown', function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                handleMoveStart(e.clientX, e.clientY);
             });
+
+            moveHandle.addEventListener('touchstart', function(e) {
+                if (e.touches && e.touches.length > 0) {
+                    e.stopPropagation();
+                    handleMoveStart(e.touches[0].clientX, e.touches[0].clientY);
+                }
+            }, { passive: true });
         }
 
         var attachElementEvents = function(el) {
@@ -3331,14 +3306,12 @@ document.addEventListener("DOMContentLoaded", function() {
     const previewFrame = document.getElementById("previewFrame");
     const desktopPreview = document.getElementById("desktopPreview");  
     const mobilePreview = document.getElementById("mobilePreview");  
-    const mobileLandscapePreview = document.getElementById("mobileLandscapePreview");
 
     if (desktopPreview && previewFrame) {
         desktopPreview.addEventListener("click", () => {  
             previewFrame.className = "preview-frame";
             desktopPreview.classList.add("active");  
             if (mobilePreview) mobilePreview.classList.remove("active");  
-            if (mobileLandscapePreview) mobileLandscapePreview.classList.remove("active");  
         });  
     }
 
@@ -3347,18 +3320,9 @@ document.addEventListener("DOMContentLoaded", function() {
             previewFrame.className = "preview-frame mobile";
             mobilePreview.classList.add("active");  
             if (desktopPreview) desktopPreview.classList.remove("active");  
-            if (mobileLandscapePreview) mobileLandscapePreview.classList.remove("active");  
         });  
     }
 
-    if (mobileLandscapePreview && previewFrame) {
-        mobileLandscapePreview.addEventListener("click", () => {  
-            previewFrame.className = "preview-frame mobile-horizontal";
-            mobileLandscapePreview.classList.add("active");  
-            if (desktopPreview) desktopPreview.classList.remove("active");  
-            if (mobilePreview) mobilePreview.classList.remove("active");  
-        });  
-    }
 
     // Parent Visual Dock Drag Handler Across Whole Screen (Mouse & Mobile Touch)
     const parentDock = document.getElementById("parentVisualDock");
@@ -4485,7 +4449,7 @@ function replaceAllMatches() {
                     <div class="editor-wrapper">
                         <div id="lineGutter" class="line-gutter" aria-hidden="true">1</div>
                         <div class="editor-content">
-                        <pre id="editorHighlight" class="editor-highlight" aria-hidden="true"><code id="editorHighlightCode"></pre>
+                        <pre id="editorHighlight" class="editor-highlight" aria-hidden="true"><code id="editorHighlightCode"></code></pre>
                         <textarea  
                             id="codeEditor"  
                             class="code-editor locked"  
@@ -4593,13 +4557,6 @@ function replaceAllMatches() {
                 class="preview-button"  
                 title="Vista teléfono">  
                 Teléfono  
-            </button>  
-
-            <button  
-                id="mobileLandscapePreview"  
-                class="preview-button"  
-                title="Vista teléfono horizontal">  
-                📱 Horizontal  
             </button>  
   
         </div>  
@@ -8127,86 +8084,73 @@ const workspaceResizer =
 let resizingWorkspace = false;  
   
   
-workspaceResizer.addEventListener(  
-    "mousedown",  
-    () => {  
-  
-        resizingWorkspace = true;  
-  
-        workspaceResizer.classList.add(  
-            "dragging"  
-        );  
-  
-        document.body.style.userSelect =  
-            "none";  
-  
-    }  
-);  
-  
-  
-document.addEventListener(  
-    "mousemove",  
-    event => {  
-  
-        if(!resizingWorkspace)  
-            return;  
-  
-  
-        const rect =  
-            workspace.getBoundingClientRect();  
-  
-  
-        let percentage = ((event.clientX - rect.left) / rect.width) * 100;  
-  
-  
-        percentage =  
-            Math.max(  
-                25,  
-                Math.min(  
-                    75,  
-                    percentage  
-                )  
-            );  
-  
-  
-        codePanel.style.width =  
-            percentage + "%";  
-  
-    }  
-);  
-  
-  
-document.addEventListener(  
-    "mouseup",  
-    () => {  
-  
-        resizingWorkspace = false;  
-  
-        workspaceResizer.classList.remove(  
-            "dragging"  
-        );  
-  
-        document.body.style.userSelect =  
-            "";  
-  
-    }  
-);  
+function startWorkspaceResize() {
+    resizingWorkspace = true;
+    workspaceResizer.classList.add("dragging");
+    document.body.style.userSelect = "none";
+}
+
+function moveWorkspaceResize(clientX, clientY) {
+    if(!resizingWorkspace) return;
+    const rect = workspace.getBoundingClientRect();
+
+    let percentage = 0;
+    if (window.innerWidth <= 750) {
+        // Vertical layout on mobile screens
+        percentage = ((clientY - rect.top) / rect.height) * 100;
+        percentage = Math.max(20, Math.min(80, percentage));
+        codePanel.style.height = percentage + "%";
+    } else {
+        // Horizontal layout on desktop
+        percentage = ((clientX - rect.left) / rect.width) * 100;
+        percentage = Math.max(25, Math.min(75, percentage));
+        codePanel.style.width = percentage + "%";
+    }
+}
+
+function stopWorkspaceResize() {
+    resizingWorkspace = false;
+    workspaceResizer.classList.remove("dragging");
+    document.body.style.userSelect = "";
+}
+
+workspaceResizer.addEventListener("mousedown", startWorkspaceResize);
+
+document.addEventListener("mousemove", (event) => {
+    moveWorkspaceResize(event.clientX, event.clientY);
+});
+
+document.addEventListener("mouseup", stopWorkspaceResize);
+
+workspaceResizer.addEventListener("touchstart", (e) => {
+    if (e.touches && e.touches.length > 0) {
+        startWorkspaceResize();
+    }
+}, { passive: true });
+
+document.addEventListener("touchmove", (e) => {
+    if (resizingWorkspace && e.touches && e.touches.length > 0) {
+        if (e.cancelable) e.preventDefault();
+        moveWorkspaceResize(e.touches[0].clientX, e.touches[0].clientY);
+    }
+}, { passive: false });
+
+document.addEventListener("touchend", stopWorkspaceResize);
+document.addEventListener("touchcancel", stopWorkspaceResize);
   
   
 /* =====================================================  
-   VISTA MÓVIL / LAPTOP / MÓVIL HORIZONTAL  
+   VISTA MÓVIL / LAPTOP
 ===================================================== */  
   
 const desktopPreview = document.getElementById("desktopPreview");  
 const mobilePreview = document.getElementById("mobilePreview");  
-const mobileLandscapePreview = document.getElementById("mobileLandscapePreview");
 
 if (desktopPreview) {
     desktopPreview.addEventListener("click", () => {  
         previewFrame.className = "preview-frame";
         desktopPreview.classList.add("active");  
         if (mobilePreview) mobilePreview.classList.remove("active");  
-        if (mobileLandscapePreview) mobileLandscapePreview.classList.remove("active");  
     });  
 }
 
@@ -8215,16 +8159,6 @@ if (mobilePreview) {
         previewFrame.className = "preview-frame mobile";
         mobilePreview.classList.add("active");  
         if (desktopPreview) desktopPreview.classList.remove("active");  
-        if (mobileLandscapePreview) mobileLandscapePreview.classList.remove("active");  
-    });  
-}
-
-if (mobileLandscapePreview) {
-    mobileLandscapePreview.addEventListener("click", () => {  
-        previewFrame.className = "preview-frame mobile-horizontal";
-        mobileLandscapePreview.classList.add("active");  
-        if (desktopPreview) desktopPreview.classList.remove("active");  
-        if (mobilePreview) mobilePreview.classList.remove("active");  
     });  
 }
   
