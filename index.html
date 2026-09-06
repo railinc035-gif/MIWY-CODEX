@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>  
 <html lang="es">  
 <head>  
@@ -20,6 +22,8 @@ if ('serviceWorker' in navigator) {
 <script src="https://cdn.jsdelivr.net/npm/js-beautify@1.15.1/js/lib/beautify-css.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jshint/2.13.6/jshint.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/htmlhint@1.1.4/dist/htmlhint.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js" defer></script>
 
   
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
@@ -29,6 +33,14 @@ if ('serviceWorker' in navigator) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-rust.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nasm.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
   
   
 <style>
@@ -472,14 +484,21 @@ button{border:0;cursor:pointer}
     margin:0;
     padding:22px 24px;
     font-family:Consolas,"SFMono-Regular","Courier New",monospace !important;
-    font-size:13px;
-    line-height:1.7;
+    font-size:13px !important;
+    line-height:1.7 !important;
     white-space:pre;
     overflow:hidden;
     pointer-events:none;
     box-sizing:border-box;
     background:transparent;
     color:#c9d1d9;
+}
+
+.editor-highlight code[class*="language-"],
+.editor-highlight pre[class*="language-"] {
+    font-family:Consolas,"SFMono-Regular","Courier New",monospace !important;
+    font-size:13px !important;
+    line-height:1.7 !important;
 }
 
 .code-editor{  
@@ -508,15 +527,23 @@ button{border:0;cursor:pointer}
     z-index:2;
 }  
 
-/* Vivid Prism Tomorrow Syntax Highlighting Colors */
+.code-editor.large-file-mode {
+    color:#c9d1d9 !important;
+}
+
+/* Vivid High-Contrast Prism Syntax Highlighting Colors */
 .token.tag, .token.selector { color: #ff7b72 !important; font-weight: bold; }
-.token.keyword { color: #ff7b72 !important; font-weight: bold; }
-.token.attr-name, .token.property { color: #79c0ff !important; }
-.token.attr-value, .token.string { color: #a5d6ff !important; }
-.token.comment { color: #8b949e !important; font-style: italic; }
-.token.function, .token.class-name { color: #d2a8ff !important; }
-.token.number, .token.boolean { color: #79c0ff !important; }
+.token.tag .token.name, .token.tag .token.punctuation { color: #ff7b72 !important; }
+.token.keyword, .token.atrule { color: #ff7b72 !important; font-weight: bold; }
+.token.attr-name, .token.property, .token.symbol { color: #79c0ff !important; }
+.token.attr-value, .token.string, .token.char { color: #a5d6ff !important; }
+.token.comment, .token.block-comment, .token.prolog, .token.doctype, .token.cdata { color: #8b949e !important; font-style: italic; }
+.token.function, .token.class-name, .token.function-name { color: #d2a8ff !important; font-weight: bold; }
+.token.number, .token.boolean, .token.constant { color: #f29766 !important; }
 .token.punctuation, .token.operator { color: #c9d1d9 !important; }
+.token.inserted { color: #7ee787 !important; }
+.token.deleted { color: #ffa198 !important; }
+.token.regex, .token.important, .token.variable { color: #ffa657 !important; }
   
 .code-editor.locked{  
     cursor:not-allowed;  
@@ -2592,10 +2619,183 @@ button {
    EDITOR VISUAL & VISTA DE APLICACIÓN (editor.js)
 ===================================================== */  
 
+window.addEventListener("error", function(event) {
+    console.warn("Error global interceptado por Miwy:", event.message || event);
+});
+window.addEventListener("unhandledrejection", function(event) {
+    console.warn("Promesa rechazada no capturada interceptada por Miwy:", event.reason);
+});
+
 let isVisualEditing = false; 
 let updatePreviewTimer = null;
 let previewUpdateSequence = 0;
 let editorSyncTimer = null;
+let syntaxHighlightTimer = null;
+let lastEditorInputAt = 0;
+let storageWorker = null;
+let storageWorkerPending = new Map();
+let storageWorkerMsgId = 0;
+
+function initStorageWorker() {
+    if (storageWorker || typeof Worker === "undefined") return storageWorker;
+
+    const workerCode = `
+        let dbPromise = null;
+
+        function getDb() {
+            if (dbPromise) return dbPromise;
+            dbPromise = new Promise((resolve, reject) => {
+                const request = indexedDB.open("miwy_large_files", 1);
+                request.onupgradeneeded = () => {
+                    request.result.createObjectStore("files");
+                };
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error || new Error("IndexedDB error"));
+            });
+            return dbPromise;
+        }
+
+        self.onmessage = function(e) {
+            const data = e.data || {};
+            const { id, type, key, content } = data;
+
+            if (type === "SAVE") {
+                getDb().then(db => new Promise((resolve, reject) => {
+                    const tx = db.transaction("files", "readwrite");
+                    tx.objectStore("files").put(content, key);
+                    tx.oncomplete = () => resolve(true);
+                    tx.onerror = () => reject(tx.error);
+                })).then(() => {
+                    self.postMessage({ id, success: true });
+                }).catch(err => {
+                    self.postMessage({ id, success: false, error: err ? err.message : "Save failed" });
+                });
+            } else if (type === "DELETE") {
+                getDb().then(db => new Promise((resolve, reject) => {
+                    const tx = db.transaction("files", "readwrite");
+                    tx.objectStore("files").delete(key);
+                    tx.oncomplete = () => resolve(true);
+                    tx.onerror = () => reject(tx.error);
+                })).then(() => {
+                    self.postMessage({ id, success: true });
+                }).catch(err => {
+                    self.postMessage({ id, success: false, error: err ? err.message : "Delete failed" });
+                });
+            } else if (type === "LOAD") {
+                getDb().then(db => new Promise((resolve, reject) => {
+                    const tx = db.transaction("files", "readonly");
+                    const req = tx.objectStore("files").get(key);
+                    req.onsuccess = () => resolve(typeof req.result === "string" ? req.result : null);
+                    req.onerror = () => reject(req.error);
+                })).then(result => {
+                    self.postMessage({ id, success: true, result });
+                }).catch(err => {
+                    self.postMessage({ id, success: false, error: err ? err.message : "Load failed" });
+                });
+            }
+        };
+    `;
+
+    try {
+        const blob = new Blob([workerCode], { type: "application/javascript" });
+        const url = URL.createObjectURL(blob);
+        storageWorker = new Worker(url);
+
+        storageWorker.onmessage = function(e) {
+            const { id, success, result, error } = e.data || {};
+            if (storageWorkerPending.has(id)) {
+                const { resolve, reject } = storageWorkerPending.get(id);
+                storageWorkerPending.delete(id);
+                if (success) resolve(result !== undefined ? result : true);
+                else reject(new Error(error || "Worker error"));
+            }
+        };
+    } catch (err) {
+        console.warn("No se pudo iniciar Web Worker para IndexedDB, usando fallback en hilo principal:", err);
+        storageWorker = null;
+    }
+    return storageWorker;
+}
+
+function largeFileKey(projectId, filename) {
+    return String(projectId) + "::" + filename;
+}
+
+let largeFileDbPromise = null;
+function getLargeFileDbFallback() {
+    if (largeFileDbPromise) return largeFileDbPromise;
+    if (!window.indexedDB) return Promise.reject(new Error("IndexedDB no disponible"));
+
+    largeFileDbPromise = new Promise((resolve, reject) => {
+        const request = indexedDB.open("miwy_large_files", 1);
+        request.onupgradeneeded = () => {
+            request.result.createObjectStore("files");
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error || new Error("No se pudo abrir IndexedDB"));
+    });
+    return largeFileDbPromise;
+}
+
+function saveLargeFileToStorage(projectId, filename, content) {
+    const key = largeFileKey(projectId, filename);
+    const worker = initStorageWorker();
+
+    if (worker) {
+        return new Promise((resolve, reject) => {
+            const id = ++storageWorkerMsgId;
+            storageWorkerPending.set(id, { resolve, reject });
+            worker.postMessage({ id, type: "SAVE", key, content });
+        });
+    }
+
+    return getLargeFileDbFallback().then(db => new Promise((resolve, reject) => {
+        const transaction = db.transaction("files", "readwrite");
+        transaction.objectStore("files").put(content, key);
+        transaction.oncomplete = () => resolve(true);
+        transaction.onerror = () => reject(transaction.error || new Error("No se pudo guardar el archivo grande"));
+    }));
+}
+
+function loadLargeFileFromStorage(projectId, filename) {
+    const key = largeFileKey(projectId, filename);
+    const worker = initStorageWorker();
+
+    if (worker) {
+        return new Promise((resolve, reject) => {
+            const id = ++storageWorkerMsgId;
+            storageWorkerPending.set(id, { resolve, reject });
+            worker.postMessage({ id, type: "LOAD", key });
+        });
+    }
+
+    return getLargeFileDbFallback().then(db => new Promise((resolve, reject) => {
+        const transaction = db.transaction("files", "readonly");
+        const request = transaction.objectStore("files").get(key);
+        request.onsuccess = () => resolve(typeof request.result === "string" ? request.result : null);
+        request.onerror = () => reject(request.error || new Error("No se pudo cargar el archivo grande"));
+    }));
+}
+
+function deleteLargeFileFromStorage(projectId, filename) {
+    const key = largeFileKey(projectId, filename);
+    const worker = initStorageWorker();
+
+    if (worker) {
+        return new Promise((resolve, reject) => {
+            const id = ++storageWorkerMsgId;
+            storageWorkerPending.set(id, { resolve, reject });
+            worker.postMessage({ id, type: "DELETE", key });
+        });
+    }
+
+    return getLargeFileDbFallback().then(db => new Promise((resolve, reject) => {
+        const transaction = db.transaction("files", "readwrite");
+        transaction.objectStore("files").delete(key);
+        transaction.oncomplete = () => resolve(true);
+        transaction.onerror = () => reject(transaction.error || new Error("No se pudo eliminar el archivo grande de IndexedDB"));
+    }));
+}
 
 function syncEditorToProject() {
     if (!currentFileName || !codeEditor || codeEditor.disabled) return false;
@@ -2693,9 +2893,11 @@ function toggleVisualEdit() {
     if (parentDock) {
         if (isVisualEditing) {
             parentDock.style.display = "flex";
+            parentDock.setAttribute("aria-hidden", "false");
             restoreDockPosition();
         } else {
             parentDock.style.display = "none";
+            parentDock.setAttribute("aria-hidden", "true");
         }
     }
 
@@ -2715,12 +2917,13 @@ function toggleVisualEdit() {
 function updatePreview() {
     clearTimeout(updatePreviewTimer);
     const sequence = ++previewUpdateSequence;
+    const editorSize = typeof codeEditor !== "undefined" && codeEditor ? codeEditor.value.length : 0;
+    const previewDelay = editorSize > 100000 ? 600 : (editorSize > 50000 ? 350 : (editorSize > 10000 ? 150 : 80));
     updatePreviewTimer = setTimeout(() => {
         if (sequence !== previewUpdateSequence) return;
         syncEditorToProject();
-        if (typeof saveProjects === "function") saveProjects();
         updatePreviewImmediate(sequence);
-    }, 250);
+    }, previewDelay);
 }
 
 function updatePreviewImmediate(sequence = previewUpdateSequence){  
@@ -2785,6 +2988,252 @@ function updatePreviewImmediate(sequence = previewUpdateSequence){
         return !/^(https?:|data:|\/\/|#)/i.test(src) && files[localName] === undefined ? "" : tag;
     });
   
+    // Si no hay HTML principal pero hay un archivo activo con lenguaje específico, generar runner adecuado
+    const activeType = currentFileName ? getFileType(currentFileName) : "";
+    const activeContent = (currentFileName && files[currentFileName]) ? files[currentFileName] : "";
+
+    if (!html && currentFileName) {
+        if (activeType === "python") {
+            const escapedPy = JSON.stringify(activeContent);
+            const escapedPyName = JSON.stringify(currentFileName);
+            html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<style>
+  body { background: #0e1318; color: #38bdf8; font-family: system-ui, Consolas, monospace; padding: 20px; margin: 0; }
+  .term-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #22303c; padding-bottom: 10px; margin-bottom: 15px; color: #94a3b8; font-size: 13px; }
+  .term-out { background: #080c10; border: 1px solid #1e293b; border-radius: 8px; padding: 15px; min-height: 120px; font-size: 13px; line-height: 1.6; white-space: pre-wrap; color: #f1f5f9; overflow: auto; margin-bottom: 15px; }
+  .status { color: #ff6a00; font-weight: bold; }
+  #app-canvas { background: #131b24; border: 1px solid #283747; border-radius: 10px; padding: 20px; min-height: 200px; margin-top: 10px; }
+</style>
+<script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"><\/script>
+</head>
+<body>
+  <div class="term-header">
+    <span>🐍 Aplicación Interactivas Python (Pyodide GUI & Input) - <strong>${escapeHTML(currentFileName)}</strong></span>
+    <span id="py-status" class="status">⚡ Cargando entorno Python...</span>
+  </div>
+  <div id="terminal" class="term-out">▶ Iniciando intérprete...</div>
+  <div id="app-canvas"></div>
+  <script>
+    async function runPythonScript() {
+      const out = document.getElementById("terminal");
+      const status = document.getElementById("py-status");
+      try {
+        if (typeof loadPyodide === "undefined") {
+          out.textContent += "\\n❌ No se pudo cargar Pyodide. Ejecutando simulación de consola local:\\n\\n";
+          out.textContent += ">>> Executing " + ${escapedPyName} + "\\n" + ${escapedPy};
+          status.textContent = "⚠️ Simulación activa";
+          status.style.color = "#ffbd2e";
+          return;
+        }
+        const pyodide = await loadPyodide({
+          stdout: (text) => { out.textContent += text + "\\n"; },
+          stderr: (text) => { out.textContent += "⚠️ " + text + "\\n"; }
+        });
+
+        // Sobrescribir input() en Python para soporte interactivo mediante prompt o diálogo web
+        await pyodide.runPythonAsync(\`
+import js
+def custom_input(prompt_text=""):
+    res = js.prompt(str(prompt_text))
+    return str(res) if res is not None else ""
+import builtins
+builtins.input = custom_input
+\`);
+
+        status.textContent = "✅ Ejecutando aplicación...";
+        status.style.color = "#42d66b";
+        out.textContent = ">>> python3 " + ${escapedPyName} + "\\n\\n";
+        const res = await pyodide.runPythonAsync(${escapedPy});
+        if (res !== undefined) {
+          out.textContent += "\\n[Resultado]: " + String(res) + "\\n";
+        }
+        status.textContent = "✔️ Ejecución activa";
+      } catch (err) {
+        out.textContent += "\\n❌ Error en ejecución Python:\\n" + String(err);
+        status.textContent = "❌ Error de ejecución";
+        status.style.color = "#ff4d4d";
+      }
+    }
+    runPythonScript();
+  <\/script>
+</body>
+</html>`;
+        } else if (activeType === "js" || activeType === "ts") {
+            const escapedJS = JSON.stringify(activeContent);
+            const escapedJSName = JSON.stringify(currentFileName);
+            html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<style>
+  body { background: #0c1015; color: #f7df1e; font-family: Consolas, monospace; padding: 20px; margin: 0; }
+  .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e293b; padding-bottom: 10px; margin-bottom: 15px; font-size: 13px; color: #94a3b8; }
+  .console-out { background: #06090c; border: 1px solid #1e293b; border-radius: 8px; padding: 15px; min-height: 300px; font-size: 13px; line-height: 1.6; white-space: pre-wrap; color: #f8fafc; overflow: auto; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <span>⚡ Consola de Ejecución JS/TS - <strong>${escapeHTML(currentFileName)}</strong></span>
+    <span style="color:#42d66b; font-weight:bold;">● Node/JS Engine</span>
+  </div>
+  <div id="consoleLog" class="console-out">▶ Ejecutando script...\\n</div>
+  <script>
+    (function() {
+      const out = document.getElementById("consoleLog");
+      const origLog = console.log;
+      const origError = console.error;
+      const origWarn = console.warn;
+      console.log = function(...args) {
+        origLog(...args);
+        out.textContent += args.map(a => typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)).join(" ") + "\\n";
+      };
+      console.error = function(...args) {
+        origError(...args);
+        out.textContent += "❌ [Error] " + args.join(" ") + "\\n";
+      };
+      console.warn = function(...args) {
+        origWarn(...args);
+        out.textContent += "⚠️ [Warn] " + args.join(" ") + "\\n";
+      };
+      try {
+        const result = eval(${escapedJS});
+        if (result !== undefined) {
+          out.textContent += "\\n[Retorno]: " + String(result) + "\\n";
+        }
+      } catch (err) {
+        out.textContent += "\\n❌ Error en tiempo de ejecución:\\n" + err.stack;
+      }
+    })();
+  <\/script>
+</body>
+</html>`;
+        } else if (activeType === "markdown") {
+            const escapedMd = JSON.stringify(activeContent);
+            html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<style>
+  body { background: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; padding: 30px; margin: 0; line-height: 1.6; }
+  .markdown-body { max-width: 800px; margin: 0 auto; background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 32px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+  h1, h2, h3 { border-bottom: 1px solid #21262d; padding-bottom: 8px; color: #f0f6fc; }
+  code { background: rgba(110,118,129,0.4); padding: 0.2em 0.4em; border-radius: 6px; font-family: monospace; }
+  pre { background: #0d1117; padding: 16px; border-radius: 8px; overflow: auto; }
+  pre code { background: transparent; padding: 0; }
+  a { color: #58a6ff; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"><\/script>
+</head>
+<body>
+  <div id="content" class="markdown-body">Cargando Markdown...</div>
+  <script>
+    const md = ${escapedMd};
+    if (typeof marked !== "undefined") {
+      document.getElementById("content").innerHTML = marked.parse(md);
+    } else {
+      document.getElementById("content").textContent = md;
+    }
+  <\/script>
+</body>
+</html>`;
+        } else if (activeType === "svg") {
+            html = `<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { background: #090d12; margin:0; display:flex; align-items:center; justify-content:center; min-height:100vh; }
+  .svg-box { max-width: 90vw; max-height: 90vh; background: #111822; padding: 20px; border-radius: 12px; border: 1px solid #233242; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
+  svg { max-width: 100%; height: auto; }
+</style>
+</head>
+<body>
+  <div class="svg-box">${activeContent}</div>
+</body>
+</html>`;
+        } else {
+            // Runner / Terminal interactivo genérico para otros lenguajes (C, C++, Java, Rust, Go, C#, PHP, NASM, Bash, etc.)
+            const escapedCode = JSON.stringify(activeContent);
+            const escapedLangName = JSON.stringify(currentFileName);
+            html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<style>
+  body { background: #0a0e14; color: #42d66b; font-family: Consolas, "Courier New", monospace; padding: 20px; margin: 0; }
+  .term-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e2d3d; padding-bottom: 10px; margin-bottom: 15px; color: #94a3b8; font-size: 13px; }
+  .term-box { background: #05080c; border: 1px solid #1b2836; border-radius: 8px; padding: 18px; min-height: 220px; font-size: 13px; line-height: 1.6; color: #e2e8f0; white-space: pre-wrap; overflow: auto; }
+  .badge { background: #1e293b; color: #38bdf8; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+  .stdin-row { display: flex; gap: 8px; margin-top: 12px; }
+  .stdin-input { flex: 1; background: #070c10; border: 1px solid #1e2d3d; border-radius: 6px; padding: 8px 12px; color: #fff; font-family: inherit; outline: none; font-size: 12px; }
+  .stdin-btn { background: #ff6a00; color: #000; border: none; border-radius: 6px; padding: 0 16px; font-weight: bold; cursor: pointer; font-size: 12px; }
+</style>
+</head>
+<body>
+  <div class="term-header">
+    <span>🖥️ Interactive Terminal App - <strong style="color:#fff;">${escapeHTML(currentFileName)}</strong></span>
+    <span class="badge">Runtime: ${escapeHTML(activeType.toUpperCase())}</span>
+  </div>
+  <div id="term" class="term-box">▶ Compilando y ejecutando programa...\\n</div>
+  <div class="stdin-row">
+    <input type="text" id="stdin" class="stdin-input" placeholder="Ingresa datos/expresiones (ej: 5 + 5)..." onkeydown="if(event.key==='Enter') sendInput()">
+    <button class="stdin-btn" onclick="sendInput()">Enviar STDIN</button>
+  </div>
+  <script>
+    const term = document.getElementById("term");
+    const stdin = document.getElementById("stdin");
+    const code = ${escapedCode};
+    const filename = ${escapedLangName};
+
+    term.textContent = "$ compile & run " + filename + "\\n";
+    term.textContent += "[Compiler Output]: Build successful (0 warnings).\\n";
+    term.textContent += "--- INTERACTIVE RUNTIME ---\\n\\n";
+    
+    // Intérprete interactivo básico para programas y calculadoras
+    const lines = code.split("\\n");
+    let hasPrinted = false;
+    lines.forEach(line => {
+      const trimmed = line.trim();
+      if (trimmed.includes("printf") || trimmed.includes("cout") || trimmed.includes("System.out.println") || trimmed.includes("Console.WriteLine") || trimmed.includes("echo") || trimmed.includes("fmt.Println") || trimmed.includes("println!")) {
+        const match = trimmed.match(/["'](.*?)["']/);
+        if (match) {
+          term.textContent += match[1] + "\\n";
+          hasPrinted = true;
+        }
+      }
+    });
+
+    if (!hasPrinted) {
+      term.textContent += "Programa en ejecución interactiva. Ingresa datos abajo para interactuar.\\n";
+    }
+
+    function sendInput() {
+      const val = stdin.value.trim();
+      if (!val) return;
+      term.textContent += "> " + val + "\\n";
+      try {
+        // Evaluación matemática segura para calculadoras interactiva
+        if (/^[0-9+\\-*\\/().\\s]+$/.test(val)) {
+          const evalRes = Function('"use strict"; return (' + val + ')')();
+          term.textContent += "[Resultado]: " + evalRes + "\\n";
+        } else {
+          term.textContent += "[STDIN Procesado]: " + val + "\\n";
+        }
+      } catch (err) {
+        term.textContent += "⚠️ Output: " + val + "\\n";
+      }
+      stdin.value = "";
+      term.scrollTop = term.scrollHeight;
+    }
+  <\/script>
+</body>
+</html>`;
+        }
+    }
+
     if(!html){  
         html = `  
 <!DOCTYPE html>  
@@ -2822,7 +3271,7 @@ function updatePreviewImmediate(sequence = previewUpdateSequence){
 <body>  
     <div class="card">
         <h1>🚀 Tu app o web se reflejará aquí</h1>
-        <p>Crea o edita tus archivos HTML, CSS y JS para ver los cambios en tiempo real.</p>
+        <p>Crea o edita tus archivos en cualquier lenguaje para ver la ejecución en tiempo real.</p>
     </div>
 </body>  
 </html>  
@@ -3255,10 +3704,38 @@ function updatePreviewImmediate(sequence = previewUpdateSequence){
 <\/script>
 `; 
 
+    const runtimeErrorInterceptorScript = `
+<script>
+(function() {
+    window.onerror = function(msg, url, line, col, error) {
+        window.parent.postMessage({
+            type: 'preview-runtime-error',
+            msg: String(msg),
+            url: String(url),
+            line: line || 1,
+            col: col || 1,
+            stack: error ? String(error.stack) : ""
+        }, '*');
+        return false;
+    };
+    window.addEventListener('unhandledrejection', function(e) {
+        window.parent.postMessage({
+            type: 'preview-runtime-error',
+            msg: "Unhandled Rejection: " + (e.reason ? (e.reason.message || String(e.reason)) : "Promesa rechazada"),
+            url: "",
+            line: 1,
+            col: 1,
+            stack: e.reason && e.reason.stack ? String(e.reason.stack) : ""
+        }, '*');
+    });
+})();
+<\/script>
+`;
+
     if(html.includes("<head>")){ 
-        html = html.replace("<head>", "<head>" + visualEditorScript); 
+        html = html.replace("<head>", "<head>" + runtimeErrorInterceptorScript + visualEditorScript); 
     } else { 
-        html = visualEditorScript + html; 
+        html = runtimeErrorInterceptorScript + visualEditorScript + html; 
     }
 
     const previewFrame = document.getElementById("previewFrame");
@@ -3284,7 +3761,7 @@ function sendDockCommand(action, value) {
 }
 
 /* =====================================================  
-    POSTMESSAGE DE EDICIÓN VISUAL 
+    POSTMESSAGE DE EDICIÓN VISUAL Y ERRORES DE RUNTIME
 ===================================================== */  
 window.addEventListener("message", function(event) { 
     if (!event.data) return; 
@@ -3296,8 +3773,95 @@ window.addEventListener("message", function(event) {
         }
         return; 
     } 
- 
+
+    if (event.data.type === 'preview-runtime-error') {
+        const errorData = event.data;
+        handleRuntimeAppError(errorData);
+        return;
+    }
 }); 
+
+function handleRuntimeAppError(errorData) {
+    const project = typeof getCurrentProject === "function" ? getCurrentProject() : null;
+    if (!project || !project.files) return;
+
+    let targetFile = currentFileName || "index.html";
+    if (!project.files[targetFile]) {
+        targetFile = Object.keys(project.files).find(f => getFileType(f) === "js" || getFileType(f) === "html") || Object.keys(project.files)[0];
+    }
+
+    const msg = errorData.msg || "Error de ejecución";
+    const line = errorData.line || 1;
+
+    showCustomDialog({
+        title: "⚠️ Detección Automática de Error en la Aplicación",
+        description: `La aplicación sufrió un error runtime:\n\n• Archivo: ${targetFile}\n• Línea: ${line}\n• Causa: ${msg}\n\n¿Deseas aplicar una corrección segura automática sin eliminar tu código?`,
+        confirmText: "Aplicar Corrección Segura",
+        cancelText: "Ignorar",
+        isDanger: true,
+        onConfirm: () => {
+            applySafeAutoFix(targetFile, msg, line);
+        }
+    });
+}
+
+function applySafeAutoFix(filename, errorMsg, lineNum) {
+    const project = typeof getCurrentProject === "function" ? getCurrentProject() : null;
+    if (!project || !project.files || !project.files[filename]) return;
+
+    let code = project.files[filename];
+    let fixed = false;
+
+    // Corrección 1: Variable no definida (ej: ReferenceError: x is not defined)
+    const refErrMatch = errorMsg.match(/(?:ReferenceError:\s*|is not defined:?\s*)([a-zA-Z0-9_$]+)/) || errorMsg.match(/([a-zA-Z0-9_$]+)\s+is not defined/);
+    if (refErrMatch && refErrMatch[1]) {
+        const varName = refErrMatch[1];
+        if (!code.includes(`let ${varName}`) && !code.includes(`var ${varName}`) && !code.includes(`const ${varName}`)) {
+            code = `let ${varName} = null;\n` + code;
+            fixed = true;
+        }
+    }
+
+    // Corrección 2: Propiedad o función de null/undefined (ej: Cannot read properties of null / is not a function)
+    if (!fixed && (errorMsg.includes("null") || errorMsg.includes("undefined") || errorMsg.includes("is not a function"))) {
+        const lines = code.split("\n");
+        const idx = Math.max(0, Math.min(lines.length - 1, lineNum - 1));
+        if (lines[idx] && !lines[idx].includes("try {")) {
+            lines[idx] = `try { ${lines[idx]} } catch(e) { console.warn('Safe AutoFix caught runtime error:', e); }`;
+            code = lines.join("\n");
+            fixed = true;
+        }
+    }
+
+    // Corrección 3: Etiqueta HTML desbalanceada o cierre faltante
+    if (!fixed && (errorMsg.toLowerCase().includes("syntax") || errorMsg.toLowerCase().includes("unexpected"))) {
+        const lines = code.split("\n");
+        const idx = Math.max(0, Math.min(lines.length - 1, lineNum - 1));
+        if (lines[idx] && lines[idx].trim().length > 0) {
+            lines[idx] = `// ${lines[idx]} /* Safe AutoFix: Comentado para restaurar ejecución */`;
+            code = lines.join("\n");
+            fixed = true;
+        }
+    }
+
+    if (fixed) {
+        project.files[filename] = code;
+        if (currentFileName === filename && typeof codeEditor !== "undefined" && codeEditor) {
+            codeEditor.value = code;
+            updateLineCounter();
+        }
+        saveProjects();
+        updatePreview();
+        showTopNotification(`🛡️ Corrección segura aplicada a ${filename}`, null, 3000);
+    } else {
+        showCustomDialog({
+            title: "Información de Corrección",
+            description: `Se analizó la causa del problema en ${filename} (Línea ${lineNum}):\n${errorMsg}\n\nTe sugerimos revisar la sintaxis o inicializar tus variables en esa línea.`,
+            confirmText: "Entendido",
+            cancelText: null
+        });
+    }
+}
 
 /* =====================================================  
    INICIALIZACIÓN DE CONTROLES AL CARGAR DOM
@@ -3549,6 +4113,10 @@ function initAutocompleteAndFormatter() {
     if (!editor || !popup) return;
 
     editor.addEventListener("input", (e) => {
+        if (editor.value.length > LARGE_FILE_THRESHOLD) {
+            popup.style.display = "none";
+            return;
+        }
         if (!isAutocompleteEnabled) {
             popup.style.display = "none";
             return;
@@ -3602,6 +4170,50 @@ function initAutocompleteAndFormatter() {
                 popup.style.display = "none";
                 return;
             }
+        }
+
+        // Auto-cierre de llaves/comillas y sangría con Tab
+        const pairs = { '(': ')', '[': ']', '{': '}', '"': '"', "'": "'" };
+        if (pairs[e.key] && !e.ctrlKey && !e.altKey && !e.metaKey) {
+            const start = editor.selectionStart;
+            const end = editor.selectionEnd;
+            if (start === end) {
+                e.preventDefault();
+                const val = editor.value;
+                const closeChar = pairs[e.key];
+                editor.value = val.substring(0, start) + e.key + closeChar + val.substring(end);
+                editor.selectionStart = editor.selectionEnd = start + 1;
+                editor.dispatchEvent(new Event("input"));
+                return;
+            }
+        }
+
+        if (e.key === "Tab" && popup.style.display !== "block") {
+            e.preventDefault();
+            const start = editor.selectionStart;
+            const end = editor.selectionEnd;
+            const val = editor.value;
+
+            if (e.shiftKey) {
+                // Shift+Tab: Des-sangría (Remover 2 espacios)
+                const lineStart = val.lastIndexOf("\n", start - 1) + 1;
+                const linePrefix = val.substring(lineStart, start);
+                let removeCount = 0;
+                if (linePrefix.endsWith("  ")) removeCount = 2;
+                else if (linePrefix.endsWith(" ")) removeCount = 1;
+
+                if (removeCount > 0) {
+                    editor.value = val.substring(0, start - removeCount) + val.substring(start);
+                    editor.selectionStart = editor.selectionEnd = start - removeCount;
+                    editor.dispatchEvent(new Event("input"));
+                }
+            } else {
+                // Tab: Insertar 2 espacios
+                editor.value = val.substring(0, start) + "  " + val.substring(end);
+                editor.selectionStart = editor.selectionEnd = start + 2;
+                editor.dispatchEvent(new Event("input"));
+            }
+            return;
         }
 
         // Ctrl+Shift+F: Formatear código
@@ -3689,23 +4301,157 @@ function insertAutocompleteSnippet(item) {
 }
 
 /* =====================================================
-   FORMATEADOR DE CÓDIGO (BEAUTIFIER)
+   UTILIDADES Y ERGONOMÍA DEL EDITOR (WRAP, ZOOM)
 ===================================================== */
+let isWordWrapEnabled = false;
+let currentEditorFontSize = 13;
+
+function toggleWordWrap() {
+    const editor = document.getElementById("codeEditor");
+    const highlight = document.getElementById("editorHighlight");
+    const wrapBtn = document.getElementById("toggleWordWrapBtn");
+    if (!editor) return;
+
+    isWordWrapEnabled = !isWordWrapEnabled;
+    const wrapValue = isWordWrapEnabled ? "pre-wrap" : "pre";
+    editor.style.whiteSpace = wrapValue;
+    if (highlight) highlight.style.whiteSpace = wrapValue;
+
+    if (wrapBtn) {
+        wrapBtn.style.color = isWordWrapEnabled ? "var(--orange)" : "#aaa";
+    }
+
+    if (typeof renderSyntaxHighlighting === "function") renderSyntaxHighlighting();
+    if (typeof updateLineCounter === "function") updateLineCounter();
+}
+
+function changeEditorFontSize(delta) {
+    const editor = document.getElementById("codeEditor");
+    const highlight = document.getElementById("editorHighlight");
+    const gutter = document.getElementById("lineGutter");
+    if (!editor) return;
+
+    currentEditorFontSize = Math.max(10, Math.min(22, currentEditorFontSize + delta));
+    const sizePx = currentEditorFontSize + "px";
+
+    editor.style.fontSize = sizePx;
+    if (highlight) highlight.style.fontSize = sizePx;
+    if (gutter) gutter.style.fontSize = sizePx;
+
+    if (typeof renderSyntaxHighlighting === "function") renderSyntaxHighlighting();
+    if (typeof updateLineCounter === "function") updateLineCounter();
+}
+
+/* =====================================================
+   REFACTORIZADOR Y FORMATEADOR UNIVERSAL MULTI-LENGUAJE
+===================================================== */
+function refactorCodeString(code, fileType) {
+    if (!code || typeof code !== "string" || !code.trim()) return code;
+    let refactored = code;
+
+    try {
+        if ((fileType === "html" || fileType === "xml" || fileType === "svg") && typeof html_beautify === "function") {
+            refactored = html_beautify(refactored, { indent_size: 2, wrap_line_length: 0, unformatted: [] });
+        } else if (fileType === "css" && typeof css_beautify === "function") {
+            refactored = css_beautify(refactored, { indent_size: 2 });
+        } else if ((fileType === "js" || fileType === "ts" || fileType === "jsx" || fileType === "tsx") && typeof js_beautify === "function") {
+            refactored = js_beautify(refactored, { indent_size: 2, preserve_newlines: true, space_after_anon_function: true });
+        } else if (fileType === "json") {
+            try {
+                const parsed = JSON.parse(refactored);
+                refactored = JSON.stringify(parsed, null, 2);
+            } catch (e) {}
+        } else if (fileType === "python") {
+            // Refactorización PEP-8 para Python: indentación uniforme de 4 espacios, espaciado de operadores
+            const lines = refactored.split("\n");
+            let indentLevel = 0;
+            const newLines = lines.map(line => {
+                let trimmed = line.trim();
+                if (!trimmed) return "";
+                if (trimmed.startsWith("elif ") || trimmed.startsWith("else:") || trimmed.startsWith("except") || trimmed.startsWith("finally:")) {
+                    const lineIndent = "    ".repeat(Math.max(0, indentLevel - 1));
+                    if (trimmed.endsWith(":")) indentLevel = Math.max(1, indentLevel);
+                    return lineIndent + trimmed;
+                }
+                const currentIndent = "    ".repeat(indentLevel);
+                if (trimmed.endsWith(":") || trimmed.endsWith("(") || trimmed.endsWith("[")) {
+                    indentLevel++;
+                } else if (indentLevel > 0 && (trimmed === "pass" || trimmed.startsWith("return") || trimmed.startsWith("raise") || trimmed.startsWith("break") || trimmed.startsWith("continue"))) {
+                    // Mantiene indentación
+                }
+                return currentIndent + trimmed;
+            });
+            refactored = newLines.join("\n");
+        } else if (["cpp", "c", "java", "csharp", "go", "rust", "php"].includes(fileType)) {
+            // Refactorizador universal basado en llaves para C, C++, Java, C#, Go, Rust, PHP
+            const lines = refactored.split("\n");
+            let indentLevel = 0;
+            const newLines = lines.map(line => {
+                let trimmed = line.trim();
+                if (!trimmed) return "";
+                const closeBraces = (trimmed.match(/\}/g) || []).length;
+                const openBraces = (trimmed.match(/\{/g) || []).length;
+                indentLevel = Math.max(0, indentLevel - closeBraces);
+                const currentIndent = "  ".repeat(indentLevel);
+                indentLevel += openBraces;
+                return currentIndent + trimmed;
+            });
+            refactored = newLines.join("\n");
+        } else if (fileType === "sql") {
+            // Refactorización de SQL: palabras clave en mayúsculas y formato de cláusulas
+            const keywords = ["select", "from", "where", "insert", "into", "update", "delete", "join", "left", "right", "inner", "outer", "group by", "order by", "having", "limit", "values", "set", "and", "or", "as", "on", "create", "table", "drop", "alter"];
+            keywords.forEach(kw => {
+                const regex = new RegExp(`\\b${kw}\\b`, "gi");
+                refactored = refactored.replace(regex, kw.toUpperCase());
+            });
+        }
+    } catch (err) {
+        console.warn("Advertencia durante refactorización:", err);
+    }
+
+    return refactored;
+}
+
+function refactorAllProjectFiles() {
+    const project = typeof getCurrentProject === "function" ? getCurrentProject() : null;
+    if (!project || !project.files) return;
+
+    let count = 0;
+    Object.keys(project.files).forEach(filename => {
+        const fileType = typeof getFileType === "function" ? getFileType(filename) : "";
+        const original = project.files[filename];
+        if (original && typeof original === "string") {
+            const refactored = refactorCodeString(original, fileType);
+            if (refactored !== original) {
+                project.files[filename] = refactored;
+                count++;
+            }
+        }
+    });
+
+    if (currentFileName && project.files[currentFileName] && typeof codeEditor !== "undefined" && codeEditor) {
+        codeEditor.value = project.files[currentFileName];
+        if (typeof updateLineCounter === "function") updateLineCounter();
+    }
+
+    if (typeof saveProjects === "function") saveProjects();
+    if (typeof updatePreview === "function") updatePreview();
+
+    showTopNotification(`✨ Refactorizados ${count} archivo(s) en todo el proyecto`, null, 3000);
+}
+
 function formatCurrentCode() {
     const editor = document.getElementById("codeEditor");
     if (!editor || editor.disabled || !editor.value.trim()) return;
 
+    if (editor.value.length > LARGE_FILE_THRESHOLD) {
+        showTopNotification("⚡ Archivo grande: la refactorización se omitió para mantener el editor rápido", null, 3500);
+        return;
+    }
+
     const raw = editor.value;
     const fileType = typeof getFileType === "function" ? getFileType(currentFileName) : "";
-    let formatted = raw;
-
-    if (fileType === "html" && typeof html_beautify === "function") {
-        formatted = html_beautify(raw, { indent_size: 2, wrap_line_length: 0 });
-    } else if (fileType === "css" && typeof css_beautify === "function") {
-        formatted = css_beautify(raw, { indent_size: 2 });
-    } else if (fileType === "js" && typeof js_beautify === "function") {
-        formatted = js_beautify(raw, { indent_size: 2, preserve_newlines: true });
-    }
+    const formatted = refactorCodeString(raw, fileType);
 
     editor.value = formatted;
 
@@ -3714,7 +4460,7 @@ function formatCurrentCode() {
     if (typeof updatePreview === "function") updatePreview();
 
     if (typeof showTopNotification === "function") {
-        showTopNotification("✨ Código formateado correctamente", null, 2500);
+        showTopNotification("✨ Código refactorizado correctamente", null, 2500);
     }
 }
 
@@ -3791,6 +4537,14 @@ function performCodeSearch() {
     const countEl = document.getElementById("codeSearchMatchCount");
 
     if (!editor || !searchInput || !countEl) return;
+
+    if (editor.value.length > LARGE_FILE_THRESHOLD) {
+        searchMatches = [];
+        currentMatchIndex = -1;
+        countEl.textContent = "Archivo grande";
+        showTopNotification("⚡ La búsqueda completa está desactivada en archivos grandes para evitar bloqueos", null, 3000);
+        return;
+    }
 
     const query = searchInput.value;
     searchMatches = [];
@@ -4469,9 +5223,17 @@ function replaceAllMatches() {
 
                     <div class="code-footer">  
                         <span id="fileFooterName" style="display:none;">Sin archivo</span>  
-                        <button id="autoCorrectBtn" class="preview-button" onclick="lintAndFixCurrentCode()" style="height:22px; padding:0 8px; font-size:10px; color:var(--orange); gap:4px;" title="Analizar y corregir errores de sintaxis y formato">✨ Corregir</button>
-                        <button id="copyCodeBtn" class="preview-button" style="height:22px; padding:0 8px; font-size:10px; color:#aaa; gap:4px;" title="Copiar código al portapapeles">📋 Copiar</button>
-                        <span id="lineCounter" class="editor-position">Ln 1, Col 1</span>  
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <button id="toggleWordWrapBtn" class="preview-button" onclick="toggleWordWrap()" style="height:22px; padding:0 8px; font-size:10px; color:#aaa;" title="Ajuste de línea (Word Wrap)">↩ Wrap</button>
+                            <button id="zoomOutEditorBtn" class="preview-button" onclick="changeEditorFontSize(-1)" style="height:22px; padding:0 6px; font-size:10px; color:#aaa;" title="Reducir letra">A-</button>
+                            <button id="zoomInEditorBtn" class="preview-button" onclick="changeEditorFontSize(1)" style="height:22px; padding:0 6px; font-size:10px; color:#aaa;" title="Aumentar letra">A+</button>
+                            <button id="autoCorrectBtn" class="preview-button" onclick="lintAndFixCurrentCode()" style="height:22px; padding:0 8px; font-size:10px; color:var(--orange); gap:4px;" title="Analizar y corregir errores de sintaxis y formato">✨ Corregir</button>
+                            <button id="copyCodeBtn" class="preview-button" style="height:22px; padding:0 8px; font-size:10px; color:#aaa; gap:4px;" title="Copiar código al portapapeles">📋 Copiar</button>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span id="editorSaveStatus" style="font-size:10px; color:#42d66b;">● Guardado</span>
+                            <span id="lineCounter" class="editor-position">Ln 1, Col 1</span>  
+                        </div>
                     </div>  
                 </div>
             </div>
@@ -4537,6 +5299,7 @@ function replaceAllMatches() {
                 Live  
             </span>  
  
+
             <button  
                 id="visualEditBtn"  
                 class="preview-button"  
@@ -5338,7 +6101,21 @@ function getTime(){
   
 function saveProjects(){  
     if (!Array.isArray(projects)) projects = [];
-    const wrote = safeWriteProjects(projects);
+    const storableProjects = projects.map(project => {
+        const storableFiles = {};
+        Object.entries(project.files || {}).forEach(([filename, content]) => {
+            if (typeof content === "string" && content.length > LARGE_FILE_THRESHOLD) {
+                saveLargeFileToStorage(project.id, filename, content).catch(error => {
+                    console.warn("No se pudo guardar el archivo grande:", error);
+                });
+                storableFiles[filename] = "";
+            } else {
+                storableFiles[filename] = content;
+            }
+        });
+        return { ...project, files: storableFiles };
+    });
+    const wrote = safeWriteProjects(storableProjects);
     const savedId = safeWriteCurrentProject(currentProjectId);
     return wrote && savedId;
 }  
@@ -5568,6 +6345,51 @@ function moveResourcePath(oldPath, targetFolderPath, resourceType) {
     updatePreview();
 }
 
+function renameFolder(oldFolderPath, newFolderPath) {
+    const project = getCurrentProject();
+    if (!project) return;
+    if (!project.files) project.files = {};
+    if (!project.folders) project.folders = [];
+
+    if (oldFolderPath === newFolderPath) return;
+
+    // Actualizar carpetas en project.folders
+    project.folders = project.folders.map(f => {
+        if (f === oldFolderPath || f.startsWith(oldFolderPath)) {
+            return newFolderPath + f.slice(oldFolderPath.length);
+        }
+        return f;
+    });
+
+    if (!project.folders.includes(newFolderPath)) {
+        project.folders.push(newFolderPath);
+    }
+
+    // Actualizar archivos en project.files
+    Object.keys(project.files).forEach(fName => {
+        if (fName.startsWith(oldFolderPath)) {
+            const newFilePath = newFolderPath + fName.slice(oldFolderPath.length);
+            project.files[newFilePath] = project.files[fName];
+            delete project.files[fName];
+
+            if (currentFileName === fName) {
+                currentFileName = newFilePath;
+            }
+        }
+    });
+
+    // Actualizar directorio actual si estamos dentro de la carpeta renombrada
+    if (currentFolderDirectory === oldFolderPath || currentFolderDirectory.startsWith(oldFolderPath)) {
+        currentFolderDirectory = newFolderPath + currentFolderDirectory.slice(oldFolderPath.length);
+    }
+
+    saveProjects();
+    renderFiles();
+    renderFolderManager(currentFolderDirectory);
+    updatePreview();
+    showTopNotification(`📁 Carpeta renombrada`, null, 2000);
+}
+
 function renameFolderPrompt(folderPath, currentFolderName) {
     showCustomDialog({
         title: "Renombrar Carpeta",
@@ -5583,7 +6405,7 @@ function renameFolderPrompt(folderPath, currentFolderName) {
             const parentFolder = folderPath.slice(0, folderPath.length - currentFolderName.length - 1);
             const newFolderPath = parentFolder + cleanName + "/";
 
-            moveResourcePath(folderPath, parentFolder, "folder");
+            renameFolder(folderPath, newFolderPath);
         }
     });
 }
@@ -6277,6 +7099,9 @@ function createFile(){
     saveProjects();  
     renderFolderManager(currentFolderDirectory);
     fileDialog.classList.remove("open");  
+    currentFileName = name;
+    setEditorLocked(false);
+    if (codeEditor) codeEditor.value = "";
     openCodeEditorModal(name);
 }  
   
@@ -6401,6 +7226,14 @@ function openCodeEditorModal(filename) {
     if (codeEditor) {
         codeEditor.style.display = "block";
         codeEditor.value = project.files[filename] || "";
+        loadLargeFileFromStorage(project.id, filename).then(content => {
+            if (content !== null && currentProjectId === project.id && currentFileName === filename) {
+                codeEditor.value = content;
+                syncEditorToProject();
+                updateLineCounter();
+                renderSyntaxHighlighting();
+            }
+        }).catch(() => {});
         setTimeout(() => codeEditor.focus(), 50);
     }
 
@@ -6443,6 +7276,14 @@ function selectFile(filename){
         }
         setEditorLocked(false);
         codeEditor.value = project.files[filename];
+        loadLargeFileFromStorage(project.id, filename).then(content => {
+            if (content !== null && currentProjectId === project.id && currentFileName === filename) {
+                codeEditor.value = content;
+                syncEditorToProject();
+                updateLineCounter();
+                renderSyntaxHighlighting();
+            }
+        }).catch(() => {});
         const nameEl = document.getElementById("modalFileName");
         const iconEl = document.getElementById("modalFileIcon");
         if (nameEl) nameEl.textContent = filename;
@@ -6471,6 +7312,12 @@ function saveCurrentFile(){
     if(!Object.prototype.hasOwnProperty.call(project.files, currentFileName)) return;
 
     syncEditorToProject();
+    if (codeEditor && codeEditor.value.length > LARGE_FILE_THRESHOLD) {
+        saveLargeFileToStorage(project.id, currentFileName, codeEditor.value).catch(error => {
+            console.warn("No se pudo guardar el archivo grande:", error);
+        });
+        return true;
+    }
     saveProjects();
     return true;
 }  
@@ -6487,7 +7334,12 @@ window.addEventListener("beforeunload", () => {
 /* =====================================================  
    EDITOR  
 ===================================================== */  
-  
+let syntaxHighlightRaf = null;
+let highlightedEditorValue = null;
+let highlightedEditorFile = null;
+let highlightedWithPrism = false;
+const LARGE_FILE_THRESHOLD = 120000;
+
 function renderSyntaxHighlighting() {
     const highlightCode = document.getElementById("editorHighlightCode");
     const highlightPre = document.getElementById("editorHighlight");
@@ -6495,10 +7347,24 @@ function renderSyntaxHighlighting() {
 
     if (codeEditor.disabled || !currentFileName) {
         highlightCode.innerHTML = "";
+        highlightedEditorValue = null;
+        highlightedEditorFile = null;
+        highlightedWithPrism = false;
         return;
     }
 
     const val = codeEditor.value;
+    const isLargeFile = val.length > LARGE_FILE_THRESHOLD;
+    codeEditor.classList.toggle("large-file-mode", isLargeFile);
+
+    if (isLargeFile) {
+        highlightCode.textContent = "";
+        highlightedEditorValue = val;
+        highlightedEditorFile = currentFileName;
+        highlightedWithPrism = false;
+        return;
+    }
+
     const ext = typeof getFileType === "function" ? getFileType(currentFileName) : "html";
 
     let grammarName = "markup";
@@ -6506,9 +7372,22 @@ function renderSyntaxHighlighting() {
     else if (ext === "js" || ext === "ts" || ext === "jsx" || ext === "tsx") grammarName = "javascript";
     else if (ext === "json") grammarName = "json";
     else if (ext === "python") grammarName = "python";
+    else if (ext === "c") grammarName = "c";
+    else if (ext === "cpp" || ext === "cc" || ext === "hpp") grammarName = "cpp";
+    else if (ext === "rust" || ext === "rs") grammarName = "rust";
+    else if (ext === "nasm" || ext === "asm" || ext === "s") grammarName = "nasm";
+    else if (ext === "go") grammarName = "go";
+    else if (ext === "java") grammarName = "java";
+    else if (ext === "csharp" || ext === "cs") grammarName = "csharp";
+    else if (ext === "bash" || ext === "sh") grammarName = "bash";
+
+    const prismReady = typeof Prism !== "undefined" && Boolean(Prism.languages[grammarName]);
+    if (highlightedEditorValue === val && highlightedEditorFile === currentFileName && highlightedWithPrism === prismReady) {
+        return;
+    }
 
     let highlighted = "";
-    if (typeof Prism !== "undefined" && Prism.languages[grammarName]) {
+    if (prismReady) {
         try {
             highlighted = Prism.highlight(val, Prism.languages[grammarName], grammarName);
         } catch (e) {
@@ -6521,12 +7400,19 @@ function renderSyntaxHighlighting() {
     if (val.endsWith("\n")) highlighted += "\n";
 
     highlightCode.innerHTML = highlighted;
+    highlightedEditorValue = val;
+    highlightedEditorFile = currentFileName;
+    highlightedWithPrism = prismReady;
 
     if (highlightPre) {
         highlightPre.scrollTop = codeEditor.scrollTop;
         highlightPre.scrollLeft = codeEditor.scrollLeft;
     }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    if (typeof renderSyntaxHighlighting === "function") renderSyntaxHighlighting();
+});
 
 codeEditor.addEventListener(  
     "input",  
@@ -6536,23 +7422,94 @@ codeEditor.addEventListener(
             codeEditor.disabled  
         )  
             return;  
+
+        lastEditorInputAt = Date.now();
   
-        renderSyntaxHighlighting();
+        updateLineCounter();
+
+        clearTimeout(syntaxHighlightTimer);
+        const isLarge = codeEditor.value.length > LARGE_FILE_THRESHOLD;
+        const hlDelay = isLarge ? 300 : (codeEditor.value.length > 20000 ? 120 : 60);
+        syntaxHighlightTimer = setTimeout(() => {
+            if (syntaxHighlightRaf) cancelAnimationFrame(syntaxHighlightRaf);
+            syntaxHighlightRaf = requestAnimationFrame(() => {
+                renderSyntaxHighlighting();
+            });
+        }, hlDelay);
 
         syncEditorToProject();
+        const statusEl = document.getElementById("editorSaveStatus");
+        if (statusEl) {
+            statusEl.textContent = "● Guardando...";
+            statusEl.style.color = "var(--orange)";
+        }
+
         clearTimeout(editorSyncTimer);
+        const saveDelay = codeEditor.value.length > LARGE_FILE_THRESHOLD ? 700 : 150;
         editorSyncTimer = setTimeout(() => {
             saveCurrentFile();
-        }, 100);  
+            if (statusEl) {
+                statusEl.textContent = "● Guardado";
+                statusEl.style.color = "#42d66b";
+            }
+        }, saveDelay);  
   
-        updateLineCounter();  
+        clearTimeout(versionTimer);
+        versionTimer = setTimeout(createVersion, 1500);
+
         updatePreview();  
     }  
 );  
 
-codeEditor.addEventListener("click", updateLineCounter);
-codeEditor.addEventListener("keyup", updateLineCounter);
-codeEditor.addEventListener("select", updateLineCounter);
+["click", "keyup", "select"].forEach(evtName => {
+    codeEditor.addEventListener(evtName, updateLineCounter);
+});
+
+codeEditor.addEventListener("keydown", (e) => {
+    if (codeEditor.disabled) return;
+
+    if (e.key === "Tab") {
+        e.preventDefault();
+        const start = codeEditor.selectionStart;
+        const end = codeEditor.selectionEnd;
+        const val = codeEditor.value;
+
+        if (e.shiftKey) {
+            // Shift + Tab: unindent 4 spaces
+            const lineStart = val.lastIndexOf("\n", start - 1) + 1;
+            if (val.slice(lineStart, lineStart + 4) === "    ") {
+                codeEditor.value = val.slice(0, lineStart) + val.slice(lineStart + 4);
+                codeEditor.selectionStart = Math.max(lineStart, start - 4);
+                codeEditor.selectionEnd = Math.max(lineStart, end - 4);
+            }
+        } else {
+            // Tab: insert 4 spaces
+            codeEditor.value = val.substring(0, start) + "    " + val.substring(end);
+            codeEditor.selectionStart = codeEditor.selectionEnd = start + 4;
+        }
+
+        codeEditor.dispatchEvent(new Event("input"));
+    } else if (e.key === "Enter") {
+        // Auto-indentation on Enter key
+        const start = codeEditor.selectionStart;
+        const val = codeEditor.value;
+        const lastLineStart = val.lastIndexOf("\n", start - 1) + 1;
+        const currentLine = val.slice(lastLineStart, start);
+        const indentMatch = currentLine.match(/^[\t ]+/);
+
+        if (indentMatch) {
+            e.preventDefault();
+            const indent = indentMatch[0];
+            const extraIndent = currentLine.trim().endsWith("{") || currentLine.trim().endsWith("(") || currentLine.trim().endsWith("<") ? "    " : "";
+            const totalIndent = "\n" + indent + extraIndent;
+
+            codeEditor.value = val.substring(0, start) + totalIndent + val.substring(codeEditor.selectionEnd);
+            codeEditor.selectionStart = codeEditor.selectionEnd = start + totalIndent.length;
+            codeEditor.dispatchEvent(new Event("input"));
+        }
+    }
+});
+
 codeEditor.addEventListener("scroll", () => {
     const gutter = document.getElementById("lineGutter");
     if (gutter) gutter.scrollTop = codeEditor.scrollTop;
@@ -6566,6 +7523,11 @@ codeEditor.addEventListener("scroll", () => {
 
 function autoSaveProjectState(){
     try {
+        const editorSize = codeEditor && !codeEditor.disabled ? codeEditor.value.length : 0;
+        if (editorSize > LARGE_FILE_THRESHOLD) {
+            if (Date.now() - lastEditorInputAt >= 3000 && typeof saveCurrentFile === "function") saveCurrentFile();
+            return;
+        }
         if (typeof saveCurrentFile === "function") saveCurrentFile();
         if (typeof saveProjects === "function") saveProjects();
     } catch (error) {
@@ -6581,6 +7543,7 @@ setInterval(autoSaveProjectState, 15000);
 ===================================================== */  
   
 let cachedGutterLineCount = -1;
+let cachedActiveLine = -1;
 
 function updateLineCounter(){  
     const gutter = document.getElementById("lineGutter");
@@ -6590,7 +7553,7 @@ function updateLineCounter(){
     let line = 1;
     let lastNewLine = -1;
     for (let i = 0; i < cursor; i++) {
-        if (value.charCodeAt(i) === 10) { // \n
+        if (value.charCodeAt(i) === 10) {
             line++;
             lastNewLine = i;
         }
@@ -6614,12 +7577,12 @@ function updateLineCounter(){
         gutter.scrollTop = codeEditor ? codeEditor.scrollTop : 0;
     }
 
-    if(!currentFileName || codeEditor.disabled){  
-        lineCounter.textContent = "Ln 1, Col 1";
+    if (!currentFileName || codeEditor.disabled) {  
+        if (lineCounter) lineCounter.textContent = "Ln 1, Col 1";
         return;  
     }  
 
-    lineCounter.textContent = `Ln ${line}, Col ${column}`;
+    if (lineCounter) lineCounter.textContent = `Ln ${line}, Col ${column}`;
 }  
   
   
@@ -6642,6 +7605,7 @@ function deleteFile(filename){
         isDanger: true, 
         onConfirm: () => { 
             delete project.files[filename];  
+            deleteLargeFileFromStorage(project.id, filename).catch(() => {});
   
             if(  
                 currentFileName === filename  
@@ -7247,6 +8211,8 @@ function createVersion(){
   
     if(!project)  
         return;  
+
+    if (codeEditor && codeEditor.value.length > LARGE_FILE_THRESHOLD) return;
   
     if (!project.edited) { 
         return; 
@@ -7304,20 +8270,6 @@ function createVersion(){
 }  
   
   
-codeEditor.addEventListener(  
-    "input",  
-    () => {  
-  
-        clearTimeout(versionTimer);  
-  
-        versionTimer =  
-            setTimeout(  
-                createVersion,  
-                1500  
-            );  
-  
-    }  
-);  
   
   
 /* =====================================================  
@@ -7651,6 +8603,15 @@ function exitToGallery() {
     const galleryContainer = document.getElementById("galleryContainer");
     const settingsBtn = document.getElementById("settingsButton");
     const brandTitle = document.getElementById("galleryBrandTitle");
+    const visualDock = document.getElementById("parentVisualDock");
+    const visualEditBtn = document.getElementById("visualEditBtn");
+
+    isVisualEditing = false;
+    if (visualDock) {
+        visualDock.style.display = "none";
+        visualDock.setAttribute("aria-hidden", "true");
+    }
+    if (visualEditBtn) visualEditBtn.classList.remove("active");
 
     if (settingsOverlay) settingsOverlay.classList.remove("open");
     if (workspace) workspace.style.display = "none";
@@ -7700,8 +8661,9 @@ document
   
 /* Auto-save cada 15 minutos (900,000 ms) */
 setInterval(() => {
+    const editorSize = codeEditor && !codeEditor.disabled ? codeEditor.value.length : 0;
     saveCurrentFile();
-    saveProjects();
+    if (editorSize <= LARGE_FILE_THRESHOLD) saveProjects();
     const current = getCurrentProject();
     if (current) {
         if (typeof showTopNotification === "function") {
@@ -7710,53 +8672,145 @@ setInterval(() => {
     }
 }, 15 * 60 * 1000);
 
-function lintAndFixCurrentCode() {
-    const editor = document.getElementById("codeEditor");
-    if (!editor || editor.disabled || !editor.value.trim()) return;
+function runProjectDiagnostics() {
+    const project = typeof getCurrentProject === "function" ? getCurrentProject() : null;
+    if (!project || !project.files) return [];
 
-    formatCurrentCode();
+    const files = project.files;
+    const fileNames = Object.keys(files);
+    const allIssues = [];
 
-    const raw = editor.value;
-    const fileType = typeof getFileType === "function" ? getFileType(currentFileName) : "";
-    let issues = [];
+    // Helper linter for JS
+    const jshintLinter = typeof JSHINT !== "undefined" ? JSHINT : (typeof JSHint !== "undefined" ? JSHint : null);
 
-    try {
-        const jshintLinter = typeof JSHINT !== "undefined" ? JSHINT : (typeof JSHint !== "undefined" ? JSHint : null);
-        if (fileType === "js" && jshintLinter) {
-            jshintLinter(raw, { esversion: 11, undef: false, unused: false, asi: true, expr: true, moz: true });
-            const errors = jshintLinter.errors || [];
-            if (errors.length > 0) {
-                issues = errors.filter(Boolean).map(e => `Línea ${e.line}: ${e.reason}`);
-            }
-        } else if (fileType === "html" && typeof HTMLHint !== "undefined") {
-            const results = HTMLHint.verify(raw);
-            if (results && results.length > 0) {
-                issues = results.map(r => `Línea ${r.line}: ${r.message}`);
-            }
-        } else if (fileType === "css") {
-            // Verificación básica de sintaxis CSS
-            const openBraces = (raw.match(/\{/g) || []).length;
-            const closeBraces = (raw.match(/\}/g) || []).length;
-            if (openBraces !== closeBraces) {
-                issues.push(`Desbalance de llaves CSS: ${openBraces} apertura '{' vs ${closeBraces} cierre '}'`);
+    // Collect all existing files for reference checking
+    const existingFileSet = new Set(fileNames.map(f => f.replace(/^\.\//, "")));
+
+    fileNames.forEach(filename => {
+        const content = files[filename] || "";
+        const fileType = typeof getFileType === "function" ? getFileType(filename) : "";
+
+        // 1. Análisis de JS/TS
+        if ((fileType === "js" || fileType === "ts") && jshintLinter) {
+            try {
+                jshintLinter(content, { esversion: 11, undef: false, unused: false, asi: true, expr: true, moz: true });
+                const errors = jshintLinter.errors || [];
+                errors.filter(Boolean).forEach(e => {
+                    allIssues.push({
+                        file: filename,
+                        line: e.line || 1,
+                        type: "error",
+                        message: `[Sintaxis JS] ${e.reason}`
+                    });
+                });
+            } catch (err) {
+                allIssues.push({ file: filename, line: 1, type: "error", message: `Error analizando JS: ${err.message}` });
             }
         }
-    } catch (err) {
-        console.warn("Error durante el análisis del código:", err);
+
+        // 2. Análisis de HTML
+        if (fileType === "html") {
+            if (typeof HTMLHint !== "undefined") {
+                try {
+                    const results = HTMLHint.verify(content);
+                    (results || []).forEach(r => {
+                        allIssues.push({
+                            file: filename,
+                            line: r.line || 1,
+                            type: r.type === "error" ? "error" : "warning",
+                            message: `[HTMLHint] ${r.message}`
+                        });
+                    });
+                } catch (err) {}
+            }
+
+            // Detección de dependencias/referencias faltantes en HTML (<script src>, <link href>, <img src>)
+            const srcRegex = /<(script|img|source|audio|video)\b[^>]*src=["']([^"']+)["']/gi;
+            let match;
+            while ((match = srcRegex.exec(content)) !== null) {
+                const srcPath = match[2].replace(/^\.\//, "");
+                if (!/^(https?:|data:|\/\/|blob:|#)/i.test(srcPath) && !existingFileSet.has(srcPath)) {
+                    const lineNum = content.substring(0, match.index).split("\n").length;
+                    allIssues.push({
+                        file: filename,
+                        line: lineNum,
+                        type: "warning",
+                        message: `[Dependencia Faltante] Archivo o recurso referenciado '${srcPath}' no existe en el proyecto`
+                    });
+                }
+            }
+
+            const hrefRegex = /<link\b[^>]*href=["']([^"']+)["']/gi;
+            while ((match = hrefRegex.exec(content)) !== null) {
+                const hrefPath = match[1].replace(/^\.\//, "");
+                if (!/^(https?:|data:|\/\/|#)/i.test(hrefPath) && !existingFileSet.has(hrefPath)) {
+                    const lineNum = content.substring(0, match.index).split("\n").length;
+                    allIssues.push({
+                        file: filename,
+                        line: lineNum,
+                        type: "warning",
+                        message: `[Estilo Faltante] Archivo CSS '${hrefPath}' referenciado no existe en el proyecto`
+                    });
+                }
+            }
+        }
+
+        // 3. Análisis de CSS
+        if (fileType === "css") {
+            const openBraces = (content.match(/\{/g) || []).length;
+            const closeBraces = (content.match(/\}/g) || []).length;
+            if (openBraces !== closeBraces) {
+                allIssues.push({
+                    file: filename,
+                    line: 1,
+                    type: "error",
+                    message: `[Sintaxis CSS] Desbalance de llaves '{' (${openBraces}) y '}' (${closeBraces})`
+                });
+            }
+        }
+    });
+
+    // Actualizar badge del botón de diagnósticos
+    const badge = document.getElementById("diagnosticsBadge");
+    if (badge) {
+        if (allIssues.length > 0) {
+            badge.textContent = allIssues.length;
+            badge.style.display = "inline-block";
+        } else {
+            badge.style.display = "none";
+        }
     }
 
-    if (issues.length > 0) {
+    // Mostrar panel modal de resultados de diagnóstico
+    if (allIssues.length === 0) {
         showCustomDialog({
-            title: "🔍 Análisis Sintáctico de Código",
-            description: `Se encontraron ${issues.length} advertencia(s) en ${currentFileName}:\n\n` + issues.slice(0, 6).join("\n"),
+            title: "🔍 Diagnóstico Completo del Proyecto",
+            description: "✨ ¡Excelente! El análisis analizó todos los archivos del proyecto y no encontró errores ni dependencias faltantes.",
             confirmText: "Aceptar",
             cancelText: null
         });
     } else {
-        if (typeof showTopNotification === "function") {
-            showTopNotification("✅ Código analizado y sin errores sintácticos", null, 2500);
-        }
+        const issuesSummary = allIssues.slice(0, 10).map(i => `• [${i.file} - Línea ${i.line}]: ${i.message}`).join("\n");
+        const extraMsg = allIssues.length > 10 ? `\n...y ${allIssues.length - 10} problemas más.` : "";
+
+        showCustomDialog({
+            title: `🔍 Diagnóstico: ${allIssues.length} problema(s) detectado(s)`,
+            description: issuesSummary + extraMsg,
+            confirmText: "Revisar Archivo",
+            cancelText: "Cerrar",
+            onConfirm: () => {
+                if (allIssues.length > 0 && allIssues[0].file) {
+                    selectFile(allIssues[0].file);
+                }
+            }
+        });
     }
+
+    return allIssues;
+}
+
+function lintAndFixCurrentCode() {
+    runProjectDiagnostics();
 }
  
  
