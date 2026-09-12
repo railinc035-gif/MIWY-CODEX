@@ -8,13 +8,6 @@
 <title>Miwy</title>  
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23111820' stroke='%23ff6a00' stroke-width='6'/><circle cx='50' cy='40' r='16' fill='%23ffffff'/><circle cx='50' cy='68' r='22' fill='%23ffffff'/><circle cx='43' cy='38' r='4' fill='%23ff6a00'/><circle cx='57' cy='38' r='4' fill='%23ff6a00'/><path d='M34 38 Q15 25 10 40 M32 45 Q12 45 8 58 M32 55 Q12 65 10 78 M35 62 Q18 80 22 92 M66 38 Q85 25 90 40 M68 45 Q88 45 92 58 M68 55 Q88 65 90 78 M65 62 Q82 80 78 92' stroke='%23ffffff' stroke-width='5' stroke-linecap='round' fill='none'/></svg>">
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(err => console.error('SW error:', err));
-  });
-}
-</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script> 
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/js-beautify@1.15.1/js/lib/beautify.js" defer></script>
@@ -23,7 +16,6 @@ if ('serviceWorker' in navigator) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jshint/2.13.6/jshint.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/htmlhint@1.1.4/dist/htmlhint.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
-<script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js" defer></script>
 
   
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
@@ -31,16 +23,13 @@ if ('serviceWorker' in navigator) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-swift.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-dart.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-rust.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nasm.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
   
   
 <style>
@@ -162,19 +151,15 @@ button{border:0;cursor:pointer}
 .leg.r3{right:0;top:13px;transform:rotate(18deg)}  
 .leg.r4{right:0;top:17px;transform:rotate(35deg)}  
   
-.logo-button{  
-    width:48px;  
-    height:48px;  
+.logo-clean-icon {  
+    width:32px;  
+    height:32px;  
     display:flex;  
     align-items:center;  
     justify-content:center;  
-    background: linear-gradient(180deg, #2a323d 0%, #182028 100%);  
-    color:#cbd5e1;  
-    border-radius:12px;  
-    border: 1px solid rgba(255, 122, 26, 0.25);
-    box-shadow: 0 3px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    padding: 3px;
+    background: transparent;  
+    border: none;
+    padding: 0;
 }  
 
 .settings-button{  
@@ -191,7 +176,6 @@ button{border:0;cursor:pointer}
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }  
   
-.logo-button:hover,  
 .settings-button:hover{  
     background: linear-gradient(180deg, #2f3742 0%, #1e2630 100%);  
     color:#ffffff;  
@@ -200,7 +184,6 @@ button{border:0;cursor:pointer}
     transform: translateY(-1px);
 }
 
-.logo-button:active,
 .settings-button:active {
     transform: translateY(0);
     box-shadow: 0 1px 2px rgba(0,0,0,0.4);
@@ -648,6 +631,8 @@ button{border:0;cursor:pointer}
     overflow: hidden;  
     position: relative;
     box-sizing: border-box;
+    width: 100%;
+    height: 100%;
 }  
   
 .preview-frame{  
@@ -669,43 +654,15 @@ button{border:0;cursor:pointer}
     width: auto;
     aspect-ratio: 9 / 18.5;
     max-width: calc(100% - 32px);
-    margin: 16px;
+    margin: 16px auto;
     border-radius: 28px;
     border: 8px solid #1a1a1a;
     box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+    object-fit: contain;
 }
 
 
 /* =========================  
-   MINI SIMULADOR DE DISPOSITIVOS  
-========================= */  
-.device-simulator {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    background: #141414;
-    border: 2px solid #282828;
-    border-radius: 12px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    margin: auto;
-}
-
-.device-simulator.laptop {
-    width: 100%;
-    height: 100%;
-    border-radius: 10px;
-}
-
-.device-simulator.mobile {
-    width: 390px;
-    min-width: 390px;
-    height: 720px;
-    max-height: 100%;
-    border-radius: 36px;
-    border: 8px solid #222;
-    box-shadow: 0 0 0 2px #333, 0 25px 60px rgba(0,0,0,0.8);
-}
 
 
 .device-header {
@@ -1230,8 +1187,6 @@ button.iconized::before{ content:""; display:inline-block; vertical-align:-3px; 
 button.iconized.icon-save::before{ border:1.5px solid currentColor; border-radius:2px; }
 button.iconized.icon-import::before{ border:1.5px solid currentColor; border-radius:2px; clip-path:polygon(0 25%, 38% 25%, 50% 0, 100% 0, 100% 100%, 0 100%); }
 button.iconized.icon-export::before{ border:1.5px solid currentColor; border-radius:2px; clip-path:polygon(0 0, 100% 0, 100% 72%, 62% 72%, 50% 100%, 38% 72%, 0 72%); }
-button.iconized.icon-edit::before{ border:1.5px solid currentColor; border-radius:2px; transform:skew(-15deg); }
-button.iconized.icon-theme::before{ border:1.5px solid currentColor; border-radius:50%; box-shadow:5px -3px 0 -3px #101010, 5px -3px 0 -1.5px currentColor; }
 button.iconized.icon-close::before{ content:"x"; font-size:16px; line-height:13px; }
 button.iconized.icon-arrow::before{ content:">"; font-size:18px; line-height:13px; }
 button.iconized.icon-plus::before{ content:"+"; font-size:18px; line-height:13px; }
@@ -1249,13 +1204,12 @@ button.iconized.icon-play::before{ content:""; width:0; height:0; border-top:5px
 .dialog-buttons .dialog-cancel, .dialog-buttons .dialog-confirm { font-size:11px; }
 .close-settings { font-size:16px; }
 
-button:not(.miwy-tb-btn):not(.settings-button):not(.new-file-button):not(.miwy-create-project):not(.create-project):not(.miwy-delete-btn)::before,
-button:not(.miwy-tb-btn):not(.settings-button):not(.new-file-button):not(.miwy-create-project):not(.create-project):not(.miwy-delete-btn)::after {
+button:not(.miwy-tb-btn):not(.new-file-button):not(.miwy-create-project):not(.create-project):not(.miwy-delete-btn)::before,
+button:not(.miwy-tb-btn):not(.new-file-button):not(.miwy-create-project):not(.create-project):not(.miwy-delete-btn)::after {
     content: none !important;
     display: none !important;
 }
 
-.settings-button::before,
 .new-file-button::before,
 .miwy-create-project::before,
 .create-project::before,
@@ -1265,14 +1219,6 @@ button:not(.miwy-tb-btn):not(.settings-button):not(.new-file-button):not(.miwy-c
     display: inline-block !important;
     position: relative;
     flex: 0 0 auto;
-}
-
-.settings-button::before {
-    width: 14px;
-    height: 14px;
-    border: 1.5px solid currentColor;
-    border-radius: 50%;
-    box-shadow: inset 0 0 0 3px transparent, 0 0 0 2px #111820;
 }
 
 .new-file-button::before,
@@ -1303,23 +1249,6 @@ button:not(.miwy-tb-btn):not(.settings-button):not(.new-file-button):not(.miwy-c
 .option-icon.icon-option-import::before,
 .option-icon.icon-option-edit::before,
 .option-icon.icon-option-version::before,
-.option-icon.icon-option-save::before,
-.option-icon.icon-option-theme::before,
-.option-icon.icon-option-keyboard::before {
-    content: "";
-    display: block;
-    width: 15px;
-    height: 15px;
-    border: 1.5px solid currentColor;
-    border-radius: 3px;
-}
-.option-icon.icon-option-export::after { content: "↓"; font-size: 15px; position: absolute; }
-.option-icon.icon-option-import::after { content: "↑"; font-size: 15px; position: absolute; }
-.option-icon.icon-option-edit::after { content: "/"; font-size: 17px; transform: rotate(-35deg); position: absolute; }
-.option-icon.icon-option-version::after { content: "↶"; font-size: 17px; position: absolute; }
-.option-icon.icon-option-save::after { content: ""; position: absolute; width: 7px; height: 4px; border-bottom: 1.5px solid currentColor; }
-.option-icon.icon-option-theme::after { content: ""; position: absolute; width: 7px; height: 7px; border: 1.5px solid currentColor; border-radius: 50%; }
-.option-icon.icon-option-keyboard::after { content: ""; position: absolute; width: 9px; height: 1.5px; background: currentColor; }
 .option-icon { position: relative; color: var(--orange); }
   
   
@@ -1747,6 +1676,134 @@ button:not(.miwy-tb-btn):not(.settings-button):not(.new-file-button):not(.miwy-c
     user-select: none;
     max-width: calc(100vw - 32px);
     overflow-x: auto;
+    transition: border-radius 0.15s ease, border-color 0.15s ease;
+}
+
+.miwy-floating-dock.dock-welded-top {
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    border-top: none !important;
+}
+
+.miwy-floating-dock.dock-welded-bottom {
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-bottom: none !important;
+}
+
+.miwy-floating-dock.dock-welded-left {
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    border-left: none !important;
+}
+
+.miwy-floating-dock.dock-welded-right {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-right: none !important;
+}
+
+.miwy-floating-dock.dock-fixed-top {
+    top: 6px;
+    bottom: auto;
+    left: 175px;
+    right: 58px;
+    transform: none;
+    width: auto;
+    max-width: none;
+    border-radius: 8px;
+    padding: 2px 14px;
+    background: rgba(10, 14, 18, 0.85);
+    border: 1px solid #ff6a0044;
+    box-shadow: none;
+    backdrop-filter: blur(8px);
+    align-items: center;
+    gap: 16px;
+    height: 38px;
+}
+
+.miwy-floating-dock.dock-fixed-top .miwy-dock-drag-handle {
+    display: none !important;
+}
+
+.miwy-floating-dock.dock-fixed-top .miwy-dock-group {
+    gap: 10px;
+    padding-right: 12px;
+    align-items: center;
+}
+
+.miwy-floating-dock.dock-fixed-top .miwy-tb-item {
+    gap: 2px;
+}
+
+.miwy-floating-dock.dock-fixed-top .miwy-tb-btn {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    font-size: 11px;
+}
+
+.miwy-floating-dock.dock-fixed-top .miwy-tb-btn svg {
+    width: 12px;
+    height: 12px;
+}
+
+.miwy-floating-dock.dock-fixed-top .miwy-chromatic-circle {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+}
+
+.miwy-floating-dock.dock-fixed-top .miwy-tb-label {
+    font-size: 9px;
+    opacity: 0.85;
+}
+
+.miwy-floating-dock.dock-vertical {
+    flex-direction: column !important;
+    align-items: center !important;
+    padding: 8px 5px !important;
+    border-radius: 16px !important;
+    gap: 4px !important;
+    max-height: calc(100vh - 40px) !important;
+    overflow-y: auto !important;
+}
+
+.miwy-floating-dock.dock-vertical .miwy-dock-group {
+    flex-direction: column !important;
+    border-right: none !important;
+    border-bottom: 1px solid #2a2a2a !important;
+    padding-right: 0 !important;
+    padding-bottom: 4px !important;
+    gap: 3px !important;
+}
+
+.miwy-floating-dock.dock-vertical .miwy-dock-group:last-child {
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+}
+
+.miwy-floating-dock.dock-vertical .miwy-tb-btn {
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+    font-size: 11px !important;
+}
+
+.miwy-floating-dock.dock-vertical .miwy-tb-btn svg {
+    width: 12px !important;
+    height: 12px !important;
+}
+
+.miwy-floating-dock.dock-vertical .miwy-chromatic-circle {
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+}
+
+.miwy-floating-dock.dock-vertical .miwy-tb-label {
+    font-size: 8px !important;
+    opacity: 0.85 !important;
 }
 .miwy-dock-group {
     display: flex;
@@ -1875,109 +1932,6 @@ button:not(.miwy-tb-btn):not(.settings-button):not(.new-file-button):not(.miwy-c
 }  
  
 /* =====================================================  
-   TEMAS DE INTERFAZ  
-===================================================== */  
-/* Oscuro (Default) */ 
-body.theme-oscuro { 
-    --bg:#080808;  
-    --panel:#0d0d0d;  
-    --panel2:#111;  
-    --border:#252525;  
-    --orange:#ff6a00;  
-    --text:#eee;  
-    --muted:#777;  
-    --green:#42d66b;  
-    --danger:#ff4d4d;  
-} 
- 
-/* Claro */ 
-body.theme-claro { 
-    --bg:#f5f5f5;  
-    --panel:#ffffff;  
-    --panel2:#eaeaea;  
-    --border:#cccccc;  
-    --orange:#e65c00;  
-    --text:#1a1a1a;  
-    --muted:#666666;  
-    --green:#2b8a3e;  
-    --danger:#c92a2a;  
-} 
-body.theme-claro .topbar { background: #ffffff; } 
-body.theme-claro .code-panel { background: #fafafa; } 
-body.theme-claro .preview-panel { background: #fafafa; } 
-body.theme-claro .panel-header { background: #ffffff; } 
-body.theme-claro .file-bar { background: #eeeeee; border-bottom-color: #cccccc; } 
-body.theme-claro .file-tab { background: #ffffff; border-color: #cccccc; color: #555555; } 
-body.theme-claro .file-tab.active { background: #ffe8cc; color: #d9480f; border-color: #ffd8a8; } 
-body.theme-claro .code-editor { background: #fafafa; color: #1a1a1a; } 
-body.theme-claro .code-footer { background: #ffffff; } 
-body.theme-claro .settings-panel, 
-body.theme-claro .project-menu, 
-body.theme-claro .dialog { background: #ffffff; border-color: #cccccc; } 
-body.theme-claro .settings-option:hover, 
-body.theme-claro .project-item:hover { background: #f0f0f0; color: #1a1a1a; } 
-body.theme-claro .option-icon { background: #f0f0f0; } 
-body.theme-claro .empty-editor span { background: #ffffff; border-color: #cccccc; color: #666; } 
- 
-/* Cobalto */ 
-body.theme-cobalto { 
-    --bg:#001524;  
-    --panel:#002240;  
-    --panel2:#003366;  
-    --border:#003df240;  
-    --orange:#00aaff;  
-    --text:#e1f5fe;  
-    --muted:#5c7080;  
-    --green:#00e676;  
-    --danger:#ff1744;  
-} 
-body.theme-cobalto .topbar { background: #001524; } 
-body.theme-cobalto .code-panel { background: #001b2e; } 
-body.theme-cobalto .preview-panel { background: #001b2e; } 
-body.theme-cobalto .panel-header { background: #002240; } 
-body.theme-cobalto .file-bar { background: #001726; border-bottom-color: #002c4c; } 
-body.theme-cobalto .file-tab { background: #002240; border-color: #003366; color: #a1c2fa; } 
-body.theme-cobalto .file-tab.active { background: #003366; color: #ffffff; border-color: #00aaff; } 
-body.theme-cobalto .code-editor { background: #001b2e; color: #e1f5fe; } 
-body.theme-cobalto .code-footer { background: #002240; } 
-body.theme-cobalto .settings-panel, 
-body.theme-cobalto .project-menu, 
-body.theme-cobalto .dialog { background: #002240; border-color: #003df240; } 
-body.theme-cobalto .settings-option:hover, 
-body.theme-cobalto .project-item:hover { background: #003366; color: #ffffff; } 
-body.theme-cobalto .option-icon { background: #003366; } 
-body.theme-cobalto .empty-editor span { background: #002240; border-color: #003366; color: #5c7080; } 
- 
-/* Monokai */ 
-body.theme-monokai { 
-    --bg:#1e1e1e;  
-    --panel:#272822;  
-    --panel2:#3e3d32;  
-    --border:#49483e;  
-    --orange:#f92672;  
-    --text:#f8f8f2;  
-    --muted:#75715e;  
-    --green:#a6e22e;  
-    --danger:#f92672;  
-} 
-body.theme-monokai .topbar { background: #1e1e1e; } 
-body.theme-monokai .code-panel { background: #272822; } 
-body.theme-monokai .preview-panel { background: #272822; } 
-body.theme-monokai .panel-header { background: #272822; } 
-body.theme-monokai .file-bar { background: #1e1e1e; border-bottom-color: #3e3d32; } 
-body.theme-monokai .file-tab { background: #272822; border-color: #49483e; color: #f8f8f2; } 
-body.theme-monokai .file-tab.active { background: #3e3d32; color: #a6e22e; border-color: #f92672; } 
-body.theme-monokai .code-editor { background: #272822; color: #f8f8f2; } 
-body.theme-monokai .code-footer { background: #272822; } 
-body.theme-monokai .settings-panel, 
-body.theme-monokai .project-menu, 
-body.theme-monokai .dialog { background: #272822; border-color: #49483e; } 
-body.theme-monokai .settings-option:hover, 
-body.theme-monokai .project-item:hover { background: #3e3d32; color: #ffffff; } 
-body.theme-monokai .option-icon { background: #3e3d32; } 
-body.theme-monokai .empty-editor span { background: #272822; border-color: #49483e; color: #75715e; }
-/* =========================================================
-   MIWY — GALERÍA DE PROYECTOS (MODERN DASHBOARD LAYOUT)
    ========================================================= */
 
 :root {
@@ -2613,6 +2567,32 @@ button {
     .miwy-project-card, .dialog, .settings-panel { box-shadow: 0 6px 16px rgba(0,0,0,.4) !important; }
 }
 
+
+/* TEMAS: CLARO Y OSCURO */
+body.theme-claro {
+    --bg-dark: #f8fafc;
+    --bg-panel: #ffffff;
+    --bg-card: #f1f5f9;
+    --border-color: #cbd5e1;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --editor-bg: #ffffff;
+    --header-bg: #f1f5f9;
+    color: #0f172a;
+}
+body.theme-claro .workspace, 
+body.theme-claro .code-panel, 
+body.theme-claro .preview-panel, 
+body.theme-claro .panel-header, 
+body.theme-claro .miwy-gallery {
+    background: #f8fafc;
+    color: #0f172a;
+}
+body.theme-claro .file-tree, body.theme-claro .editor-container {
+    background: #ffffff;
+    color: #0f172a;
+}
+
 </style>  
 <script>
 /* =====================================================  
@@ -2631,7 +2611,6 @@ let updatePreviewTimer = null;
 let previewUpdateSequence = 0;
 let editorSyncTimer = null;
 let syntaxHighlightTimer = null;
-let lastEditorInputAt = 0;
 let storageWorker = null;
 let storageWorkerPending = new Map();
 let storageWorkerMsgId = 0;
@@ -2811,6 +2790,23 @@ function saveVisualEditToExistingFile(updatedHtml) {
     const project = typeof getCurrentProject === "function" ? getCurrentProject() : null;
     if (!project || !updatedHtml) return false;
 
+    // Static syntax validation via DOMParser before persisting visual changes
+    try {
+        const parser = new DOMParser();
+        const parsedDoc = parser.parseFromString(updatedHtml, "text/html");
+        const parserErrors = parsedDoc.querySelectorAll("parsererror");
+        if (parserErrors && parserErrors.length > 0) {
+            console.warn("Validación sintáctica fallida en edición visual. Revertiendo cambios:", parserErrors[0].textContent);
+            if (typeof showTopNotification === "function") {
+                showTopNotification("⚠️ Sintaxis inválida detectada en edición visual; cambio revertido automáticamente.", null, 3000);
+            }
+            return false;
+        }
+    } catch (err) {
+        console.warn("Error en validador sintáctico del editor visual:", err);
+        return false;
+    }
+
     const htmlFile = Object.keys(project.files || {}).find(filename => {
         return typeof getFileType === "function" && getFileType(filename) === "html";
     });
@@ -2840,7 +2836,6 @@ function setDockOrientation(orient) {
 
 function updateDockSettingsUI() {
     const orient = getDockOrientation();
-
     const horizBtn = document.getElementById("dockOrientHorizontalBtn");
     const vertBtn = document.getElementById("dockOrientVerticalBtn");
 
@@ -2848,19 +2843,24 @@ function updateDockSettingsUI() {
         if (orient === "horizontal") {
             horizBtn.style.border = "1px solid var(--orange)";
             horizBtn.style.color = "var(--orange)";
-            vertBtn.style.border = "";
-            vertBtn.style.color = "";
+            vertBtn.style.border = "1px solid rgba(255,255,255,0.08)";
+            vertBtn.style.color = "#cbd5e1";
         } else {
             vertBtn.style.border = "1px solid var(--orange)";
             vertBtn.style.color = "var(--orange)";
-            horizBtn.style.border = "";
-            horizBtn.style.color = "";
+            horizBtn.style.border = "1px solid rgba(255,255,255,0.08)";
+            horizBtn.style.color = "#cbd5e1";
         }
     }
 
     const parentDock = document.getElementById("parentVisualDock");
     if (parentDock) {
-        parentDock.classList.remove("vertical");
+        parentDock.classList.remove("dock-fixed-top");
+        if (orient === "vertical") {
+            parentDock.classList.add("dock-vertical");
+        } else {
+            parentDock.classList.remove("dock-vertical");
+        }
     }
 }
 
@@ -2870,6 +2870,7 @@ function restoreDockPosition() {
     const parentDock = document.getElementById("parentVisualDock");
     if (!parentDock) return;
 
+    parentDock.classList.remove("dock-fixed-top", "dock-welded-top", "dock-welded-bottom", "dock-welded-left", "dock-welded-right");
     parentDock.style.left = "50%";
     parentDock.style.top = "auto";
     parentDock.style.bottom = "20px";
@@ -2878,8 +2879,30 @@ function restoreDockPosition() {
     savedDockPosition = null;
     try {
         localStorage.removeItem("miwy_dock_pos");
-        localStorage.removeItem("miwy_dock_orientation");
     } catch (e) { /* ignore */ }
+}
+
+let previewDeviceMode = "desktop";
+
+function setPreviewDeviceMode(mode) {
+    previewDeviceMode = mode;
+    const desktopBtn = document.getElementById("desktopPreview");
+    const mobileBtn = document.getElementById("mobilePreview");
+    const frame = document.getElementById("previewFrame");
+
+    if (desktopBtn) desktopBtn.classList.toggle("active", mode === "desktop");
+    if (mobileBtn) mobileBtn.classList.toggle("active", mode === "mobile");
+
+    if (frame) {
+        if (mode === "mobile") {
+            frame.classList.add("mobile");
+        } else {
+            frame.classList.remove("mobile");
+        }
+        frame.__lastHtml = null;
+    }
+
+    updatePreview();
 }
 
 function toggleVisualEdit() { 
@@ -2925,6 +2948,8 @@ function updatePreview() {
         updatePreviewImmediate(sequence);
     }, previewDelay);
 }
+
+
 
 function updatePreviewImmediate(sequence = previewUpdateSequence){  
     if (sequence !== previewUpdateSequence) return;
@@ -2993,75 +3018,7 @@ function updatePreviewImmediate(sequence = previewUpdateSequence){
     const activeContent = (currentFileName && files[currentFileName]) ? files[currentFileName] : "";
 
     if (!html && currentFileName) {
-        if (activeType === "python") {
-            const escapedPy = JSON.stringify(activeContent);
-            const escapedPyName = JSON.stringify(currentFileName);
-            html = `<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<style>
-  body { background: #0e1318; color: #38bdf8; font-family: system-ui, Consolas, monospace; padding: 20px; margin: 0; }
-  .term-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #22303c; padding-bottom: 10px; margin-bottom: 15px; color: #94a3b8; font-size: 13px; }
-  .term-out { background: #080c10; border: 1px solid #1e293b; border-radius: 8px; padding: 15px; min-height: 120px; font-size: 13px; line-height: 1.6; white-space: pre-wrap; color: #f1f5f9; overflow: auto; margin-bottom: 15px; }
-  .status { color: #ff6a00; font-weight: bold; }
-  #app-canvas { background: #131b24; border: 1px solid #283747; border-radius: 10px; padding: 20px; min-height: 200px; margin-top: 10px; }
-</style>
-<script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"><\/script>
-</head>
-<body>
-  <div class="term-header">
-    <span>🐍 Aplicación Interactivas Python (Pyodide GUI & Input) - <strong>${escapeHTML(currentFileName)}</strong></span>
-    <span id="py-status" class="status">⚡ Cargando entorno Python...</span>
-  </div>
-  <div id="terminal" class="term-out">▶ Iniciando intérprete...</div>
-  <div id="app-canvas"></div>
-  <script>
-    async function runPythonScript() {
-      const out = document.getElementById("terminal");
-      const status = document.getElementById("py-status");
-      try {
-        if (typeof loadPyodide === "undefined") {
-          out.textContent += "\\n❌ No se pudo cargar Pyodide. Ejecutando simulación de consola local:\\n\\n";
-          out.textContent += ">>> Executing " + ${escapedPyName} + "\\n" + ${escapedPy};
-          status.textContent = "⚠️ Simulación activa";
-          status.style.color = "#ffbd2e";
-          return;
-        }
-        const pyodide = await loadPyodide({
-          stdout: (text) => { out.textContent += text + "\\n"; },
-          stderr: (text) => { out.textContent += "⚠️ " + text + "\\n"; }
-        });
-
-        // Sobrescribir input() en Python para soporte interactivo mediante prompt o diálogo web
-        await pyodide.runPythonAsync(\`
-import js
-def custom_input(prompt_text=""):
-    res = js.prompt(str(prompt_text))
-    return str(res) if res is not None else ""
-import builtins
-builtins.input = custom_input
-\`);
-
-        status.textContent = "✅ Ejecutando aplicación...";
-        status.style.color = "#42d66b";
-        out.textContent = ">>> python3 " + ${escapedPyName} + "\\n\\n";
-        const res = await pyodide.runPythonAsync(${escapedPy});
-        if (res !== undefined) {
-          out.textContent += "\\n[Resultado]: " + String(res) + "\\n";
-        }
-        status.textContent = "✔️ Ejecución activa";
-      } catch (err) {
-        out.textContent += "\\n❌ Error en ejecución Python:\\n" + String(err);
-        status.textContent = "❌ Error de ejecución";
-        status.style.color = "#ff4d4d";
-      }
-    }
-    runPythonScript();
-  <\/script>
-</body>
-</html>`;
-        } else if (activeType === "js" || activeType === "ts") {
+        if (activeType === "js" || activeType === "ts") {
             const escapedJS = JSON.stringify(activeContent);
             const escapedJSName = JSON.stringify(currentFileName);
             html = `<!DOCTYPE html>
@@ -3072,6 +3029,58 @@ builtins.input = custom_input
   body { background: #0c1015; color: #f7df1e; font-family: Consolas, monospace; padding: 20px; margin: 0; }
   .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e293b; padding-bottom: 10px; margin-bottom: 15px; font-size: 13px; color: #94a3b8; }
   .console-out { background: #06090c; border: 1px solid #1e293b; border-radius: 8px; padding: 15px; min-height: 300px; font-size: 13px; line-height: 1.6; white-space: pre-wrap; color: #f8fafc; overflow: auto; }
+
+/* TEMAS: CLARO Y OSCURO */
+body.theme-claro {
+    --bg-dark: #f8fafc;
+    --bg-panel: #ffffff;
+    --bg-card: #f1f5f9;
+    --border-color: #cbd5e1;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --editor-bg: #ffffff;
+    --header-bg: #f1f5f9;
+    color: #0f172a;
+}
+body.theme-claro .workspace, 
+body.theme-claro .code-panel, 
+body.theme-claro .preview-panel, 
+body.theme-claro .panel-header, 
+body.theme-claro .miwy-gallery {
+    background: #f8fafc;
+    color: #0f172a;
+}
+body.theme-claro .file-tree, body.theme-claro .editor-container {
+    background: #ffffff;
+    color: #0f172a;
+}
+
+</style>
+<style>
+/* TEMAS: CLARO Y OSCURO */
+body.theme-claro {
+    --bg-dark: #f8fafc;
+    --bg-panel: #ffffff;
+    --bg-card: #f1f5f9;
+    --border-color: #cbd5e1;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --editor-bg: #ffffff;
+    --header-bg: #f1f5f9;
+    color: #0f172a;
+}
+body.theme-claro .workspace, 
+body.theme-claro .code-panel, 
+body.theme-claro .preview-panel, 
+body.theme-claro .panel-header, 
+body.theme-claro .miwy-gallery {
+    background: #f8fafc;
+    color: #0f172a;
+}
+body.theme-claro .file-tree, body.theme-claro .editor-container {
+    background: #ffffff;
+    color: #0f172a;
+}
 </style>
 </head>
 <body>
@@ -3092,7 +3101,7 @@ builtins.input = custom_input
       };
       console.error = function(...args) {
         origError(...args);
-        out.textContent += "❌ [Error] " + args.join(" ") + "\\n";
+        out.textContent += "⚠️ [Error] " + args.join(" ") + "\\n";
       };
       console.warn = function(...args) {
         origWarn(...args);
@@ -3104,7 +3113,7 @@ builtins.input = custom_input
           out.textContent += "\\n[Retorno]: " + String(result) + "\\n";
         }
       } catch (err) {
-        out.textContent += "\\n❌ Error en tiempo de ejecución:\\n" + err.stack;
+        out.textContent += "\\n⚠️ Error en tiempo de ejecución:\\n" + err.stack;
       }
     })();
   <\/script>
@@ -3125,8 +3134,60 @@ builtins.input = custom_input
   pre code { background: transparent; padding: 0; }
   a { color: #58a6ff; text-decoration: none; }
   a:hover { text-decoration: underline; }
+
+/* TEMAS: CLARO Y OSCURO */
+body.theme-claro {
+    --bg-dark: #f8fafc;
+    --bg-panel: #ffffff;
+    --bg-card: #f1f5f9;
+    --border-color: #cbd5e1;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --editor-bg: #ffffff;
+    --header-bg: #f1f5f9;
+    color: #0f172a;
+}
+body.theme-claro .workspace, 
+body.theme-claro .code-panel, 
+body.theme-claro .preview-panel, 
+body.theme-claro .panel-header, 
+body.theme-claro .miwy-gallery {
+    background: #f8fafc;
+    color: #0f172a;
+}
+body.theme-claro .file-tree, body.theme-claro .editor-container {
+    background: #ffffff;
+    color: #0f172a;
+}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"><\/script>
+<style>
+/* TEMAS: CLARO Y OSCURO */
+body.theme-claro {
+    --bg-dark: #f8fafc;
+    --bg-panel: #ffffff;
+    --bg-card: #f1f5f9;
+    --border-color: #cbd5e1;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --editor-bg: #ffffff;
+    --header-bg: #f1f5f9;
+    color: #0f172a;
+}
+body.theme-claro .workspace, 
+body.theme-claro .code-panel, 
+body.theme-claro .preview-panel, 
+body.theme-claro .panel-header, 
+body.theme-claro .miwy-gallery {
+    background: #f8fafc;
+    color: #0f172a;
+}
+body.theme-claro .file-tree, body.theme-claro .editor-container {
+    background: #ffffff;
+    color: #0f172a;
+}
+</style>
 </head>
 <body>
   <div id="content" class="markdown-body">Cargando Markdown...</div>
@@ -3148,87 +3209,62 @@ builtins.input = custom_input
   body { background: #090d12; margin:0; display:flex; align-items:center; justify-content:center; min-height:100vh; }
   .svg-box { max-width: 90vw; max-height: 90vh; background: #111822; padding: 20px; border-radius: 12px; border: 1px solid #233242; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
   svg { max-width: 100%; height: auto; }
+
+/* TEMAS: CLARO Y OSCURO */
+body.theme-claro {
+    --bg-dark: #f8fafc;
+    --bg-panel: #ffffff;
+    --bg-card: #f1f5f9;
+    --border-color: #cbd5e1;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --editor-bg: #ffffff;
+    --header-bg: #f1f5f9;
+    color: #0f172a;
+}
+body.theme-claro .workspace, 
+body.theme-claro .code-panel, 
+body.theme-claro .preview-panel, 
+body.theme-claro .panel-header, 
+body.theme-claro .miwy-gallery {
+    background: #f8fafc;
+    color: #0f172a;
+}
+body.theme-claro .file-tree, body.theme-claro .editor-container {
+    background: #ffffff;
+    color: #0f172a;
+}
+
+</style>
+<style>
+/* TEMAS: CLARO Y OSCURO */
+body.theme-claro {
+    --bg-dark: #f8fafc;
+    --bg-panel: #ffffff;
+    --bg-card: #f1f5f9;
+    --border-color: #cbd5e1;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --editor-bg: #ffffff;
+    --header-bg: #f1f5f9;
+    color: #0f172a;
+}
+body.theme-claro .workspace, 
+body.theme-claro .code-panel, 
+body.theme-claro .preview-panel, 
+body.theme-claro .panel-header, 
+body.theme-claro .miwy-gallery {
+    background: #f8fafc;
+    color: #0f172a;
+}
+body.theme-claro .file-tree, body.theme-claro .editor-container {
+    background: #ffffff;
+    color: #0f172a;
+}
 </style>
 </head>
 <body>
   <div class="svg-box">${activeContent}</div>
-</body>
-</html>`;
-        } else {
-            // Runner / Terminal interactivo genérico para otros lenguajes (C, C++, Java, Rust, Go, C#, PHP, NASM, Bash, etc.)
-            const escapedCode = JSON.stringify(activeContent);
-            const escapedLangName = JSON.stringify(currentFileName);
-            html = `<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<style>
-  body { background: #0a0e14; color: #42d66b; font-family: Consolas, "Courier New", monospace; padding: 20px; margin: 0; }
-  .term-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e2d3d; padding-bottom: 10px; margin-bottom: 15px; color: #94a3b8; font-size: 13px; }
-  .term-box { background: #05080c; border: 1px solid #1b2836; border-radius: 8px; padding: 18px; min-height: 220px; font-size: 13px; line-height: 1.6; color: #e2e8f0; white-space: pre-wrap; overflow: auto; }
-  .badge { background: #1e293b; color: #38bdf8; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
-  .stdin-row { display: flex; gap: 8px; margin-top: 12px; }
-  .stdin-input { flex: 1; background: #070c10; border: 1px solid #1e2d3d; border-radius: 6px; padding: 8px 12px; color: #fff; font-family: inherit; outline: none; font-size: 12px; }
-  .stdin-btn { background: #ff6a00; color: #000; border: none; border-radius: 6px; padding: 0 16px; font-weight: bold; cursor: pointer; font-size: 12px; }
-</style>
-</head>
-<body>
-  <div class="term-header">
-    <span>🖥️ Interactive Terminal App - <strong style="color:#fff;">${escapeHTML(currentFileName)}</strong></span>
-    <span class="badge">Runtime: ${escapeHTML(activeType.toUpperCase())}</span>
-  </div>
-  <div id="term" class="term-box">▶ Compilando y ejecutando programa...\\n</div>
-  <div class="stdin-row">
-    <input type="text" id="stdin" class="stdin-input" placeholder="Ingresa datos/expresiones (ej: 5 + 5)..." onkeydown="if(event.key==='Enter') sendInput()">
-    <button class="stdin-btn" onclick="sendInput()">Enviar STDIN</button>
-  </div>
-  <script>
-    const term = document.getElementById("term");
-    const stdin = document.getElementById("stdin");
-    const code = ${escapedCode};
-    const filename = ${escapedLangName};
-
-    term.textContent = "$ compile & run " + filename + "\\n";
-    term.textContent += "[Compiler Output]: Build successful (0 warnings).\\n";
-    term.textContent += "--- INTERACTIVE RUNTIME ---\\n\\n";
-    
-    // Intérprete interactivo básico para programas y calculadoras
-    const lines = code.split("\\n");
-    let hasPrinted = false;
-    lines.forEach(line => {
-      const trimmed = line.trim();
-      if (trimmed.includes("printf") || trimmed.includes("cout") || trimmed.includes("System.out.println") || trimmed.includes("Console.WriteLine") || trimmed.includes("echo") || trimmed.includes("fmt.Println") || trimmed.includes("println!")) {
-        const match = trimmed.match(/["'](.*?)["']/);
-        if (match) {
-          term.textContent += match[1] + "\\n";
-          hasPrinted = true;
-        }
-      }
-    });
-
-    if (!hasPrinted) {
-      term.textContent += "Programa en ejecución interactiva. Ingresa datos abajo para interactuar.\\n";
-    }
-
-    function sendInput() {
-      const val = stdin.value.trim();
-      if (!val) return;
-      term.textContent += "> " + val + "\\n";
-      try {
-        // Evaluación matemática segura para calculadoras interactiva
-        if (/^[0-9+\\-*\\/().\\s]+$/.test(val)) {
-          const evalRes = Function('"use strict"; return (' + val + ')')();
-          term.textContent += "[Resultado]: " + evalRes + "\\n";
-        } else {
-          term.textContent += "[STDIN Procesado]: " + val + "\\n";
-        }
-      } catch (err) {
-        term.textContent += "⚠️ Output: " + val + "\\n";
-      }
-      stdin.value = "";
-      term.scrollTop = term.scrollHeight;
-    }
-  <\/script>
 </body>
 </html>`;
         }
@@ -3266,11 +3302,63 @@ builtins.input = custom_input
     }
     h1 { margin-top: 0; color: #ff6a00; font-size: 24px; }
     p { color: #aaa; font-size: 14px; margin-bottom: 20px; }
+
+/* TEMAS: CLARO Y OSCURO */
+body.theme-claro {
+    --bg-dark: #f8fafc;
+    --bg-panel: #ffffff;
+    --bg-card: #f1f5f9;
+    --border-color: #cbd5e1;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --editor-bg: #ffffff;
+    --header-bg: #f1f5f9;
+    color: #0f172a;
+}
+body.theme-claro .workspace, 
+body.theme-claro .code-panel, 
+body.theme-claro .preview-panel, 
+body.theme-claro .panel-header, 
+body.theme-claro .miwy-gallery {
+    background: #f8fafc;
+    color: #0f172a;
+}
+body.theme-claro .file-tree, body.theme-claro .editor-container {
+    background: #ffffff;
+    color: #0f172a;
+}
+
+</style>
+<style>
+/* TEMAS: CLARO Y OSCURO */
+body.theme-claro {
+    --bg-dark: #f8fafc;
+    --bg-panel: #ffffff;
+    --bg-card: #f1f5f9;
+    --border-color: #cbd5e1;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --editor-bg: #ffffff;
+    --header-bg: #f1f5f9;
+    color: #0f172a;
+}
+body.theme-claro .workspace, 
+body.theme-claro .code-panel, 
+body.theme-claro .preview-panel, 
+body.theme-claro .panel-header, 
+body.theme-claro .miwy-gallery {
+    background: #f8fafc;
+    color: #0f172a;
+}
+body.theme-claro .file-tree, body.theme-claro .editor-container {
+    background: #ffffff;
+    color: #0f172a;
+}
 </style>
 </head>  
 <body>  
     <div class="card">
-        <h1>🚀 Tu app o web se reflejará aquí</h1>
+        <h1> Tu app o web se reflejará aquí</h1>
         <p>Crea o edita tus archivos en cualquier lenguaje para ver la ejecución en tiempo real.</p>
     </div>
 </body>  
@@ -3278,10 +3366,36 @@ builtins.input = custom_input
 `;  
     }  
   
-    const style = `<style>${css}</style>`;  
+    const style = `<style>${css}
+/* TEMAS: CLARO Y OSCURO */
+body.theme-claro {
+    --bg-dark: #f8fafc;
+    --bg-panel: #ffffff;
+    --bg-card: #f1f5f9;
+    --border-color: #cbd5e1;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --editor-bg: #ffffff;
+    --header-bg: #f1f5f9;
+    color: #0f172a;
+}
+body.theme-claro .workspace, 
+body.theme-claro .code-panel, 
+body.theme-claro .preview-panel, 
+body.theme-claro .panel-header, 
+body.theme-claro .miwy-gallery {
+    background: #f8fafc;
+    color: #0f172a;
+}
+body.theme-claro .file-tree, body.theme-claro .editor-container {
+    background: #ffffff;
+    color: #0f172a;
+}
+
+</style>`;  
     const script = `<script>\n${js}\n<\/script>`;  
   
-    if(html.includes("</head>")){  
+    if(html.includes("</head>")) {  
         html = html.replace("</head>", style + "</head>");  
     } else {  
         html = style + html;  
@@ -3308,8 +3422,24 @@ builtins.input = custom_input
         var style = document.createElement('style'); 
         style.id = '__miwy_visual_style__'; 
         style.textContent = \` 
+            html, body {
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+                overflow-x: hidden !important;
+                word-wrap: break-word !important;
+                word-break: break-word !important;
+            }
             body {
                 user-select: none !important;
+            }
+            * {
+                box-sizing: border-box !important;
+                max-width: 100% !important;
+            }
+            pre, code {
+                white-space: pre-wrap !important;
+                word-break: break-all !important;
+                overflow-x: auto !important;
             }
             [data-miwy-editable]:hover { 
                 outline: 1.5px dashed #ff6a00 !important; 
@@ -3566,14 +3696,31 @@ builtins.input = custom_input
             var handleResizeStart = function(clientX, clientY) {
                 var startX = clientX, startY = clientY;
                 var startW = selectedTarget.offsetWidth, startH = selectedTarget.offsetHeight;
+                var latestResizeX = clientX, latestResizeY = clientY;
+                var isResizing = true;
+                var rafId = null;
+
+                var updateResize = function() {
+                    rafId = null;
+                    if (!isResizing) return;
+                    selectedTarget.style.width = Math.max(20, startW + (latestResizeX - startX)) + 'px';
+                    selectedTarget.style.height = Math.max(20, startH + (latestResizeY - startY)) + 'px';
+                };
 
                 var doResize = function(me) {
-                    var cx = me.clientX !== undefined ? me.clientX : (me.touches && me.touches[0] ? me.touches[0].clientX : startX);
-                    var cy = me.clientY !== undefined ? me.clientY : (me.touches && me.touches[0] ? me.touches[0].clientY : startY);
-                    selectedTarget.style.width = Math.max(20, startW + (cx - startX)) + 'px';
-                    selectedTarget.style.height = Math.max(20, startH + (cy - startY)) + 'px';
+                    if (!isResizing) return;
+                    latestResizeX = me.clientX !== undefined ? me.clientX : (me.touches && me.touches[0] ? me.touches[0].clientX : startX);
+                    latestResizeY = me.clientY !== undefined ? me.clientY : (me.touches && me.touches[0] ? me.touches[0].clientY : startY);
+                    if (!rafId) {
+                        rafId = requestAnimationFrame(updateResize);
+                    }
                 };
                 var stopResize = function() {
+                    isResizing = false;
+                    if (rafId) {
+                        cancelAnimationFrame(rafId);
+                        rafId = null;
+                    }
                     window.removeEventListener('mousemove', doResize);
                     window.removeEventListener('mouseup', stopResize);
                     window.removeEventListener('touchmove', doResize);
@@ -3611,17 +3758,31 @@ builtins.input = custom_input
                 var startX = clientX, startY = clientY;
                 var startLeft = parseFloat(selectedTarget.style.left) || 0;
                 var startTop = parseFloat(selectedTarget.style.top) || 0;
+                var latestMoveX = clientX, latestMoveY = clientY;
+                var elemRafId = null;
+
+                var updateElemMove = function() {
+                    elemRafId = null;
+                    if (!draggingElem) return;
+                    selectedTarget.style.left = (startLeft + (latestMoveX - startX)) + 'px';
+                    selectedTarget.style.top = (startTop + (latestMoveY - startY)) + 'px';
+                };
 
                 var doElemMove = function(me) {
                     if (!draggingElem) return;
-                    var cx = me.clientX !== undefined ? me.clientX : (me.touches && me.touches[0] ? me.touches[0].clientX : startX);
-                    var cy = me.clientY !== undefined ? me.clientY : (me.touches && me.touches[0] ? me.touches[0].clientY : startY);
-                    selectedTarget.style.left = (startLeft + (cx - startX)) + 'px';
-                    selectedTarget.style.top = (startTop + (cy - startY)) + 'px';
+                    latestMoveX = me.clientX !== undefined ? me.clientX : (me.touches && me.touches[0] ? me.touches[0].clientX : startX);
+                    latestMoveY = me.clientY !== undefined ? me.clientY : (me.touches && me.touches[0] ? me.touches[0].clientY : startY);
+                    if (!elemRafId) {
+                        elemRafId = requestAnimationFrame(updateElemMove);
+                    }
                 };
 
                 var stopElemMove = function() {
                     draggingElem = false;
+                    if (elemRafId) {
+                        cancelAnimationFrame(elemRafId);
+                        elemRafId = null;
+                    }
                     window.removeEventListener('mousemove', doElemMove);
                     window.removeEventListener('mouseup', stopElemMove);
                     window.removeEventListener('touchmove', doElemMove);
@@ -3681,8 +3842,8 @@ builtins.input = custom_input
  
     function sendCleanHtml() { 
         var clone = document.documentElement.cloneNode(true); 
-        var visStyle = clone.querySelector('#__miwy_visual_style__'); 
-        if (visStyle) visStyle.remove(); 
+        var visStyles = clone.querySelectorAll('#__miwy_visual_style__'); 
+        visStyles.forEach(function(vs) { vs.remove(); }); 
  
         var systemElements = clone.querySelectorAll('[data-miwy-system], .miwy-resize-corner, .miwy-move-handle, .miwy-minimal-toolbar, .miwy-floating-dock');
         systemElements.forEach(function(s) { s.remove(); });
@@ -3693,6 +3854,14 @@ builtins.input = custom_input
             el.removeAttribute('data-miwy-editable'); 
             el.removeAttribute('data-miwy-selected'); 
         }); 
+
+        // Remove duplicate injected visual editor script tags if present in clone
+        var scripts = clone.querySelectorAll('script');
+        scripts.forEach(function(sc) {
+            if (sc.textContent && sc.textContent.includes('initVisualEditor')) {
+                sc.remove();
+            }
+        });
  
         var htmlStr = '<!DOCTYPE html>\\n<html' + (clone.getAttribute('lang') ? ' lang="' + clone.getAttribute('lang') + '"' : '') + '>' + clone.innerHTML + '\\n</html>'; 
         window.parent.postMessage({ 
@@ -3704,38 +3873,19 @@ builtins.input = custom_input
 <\/script>
 `; 
 
-    const runtimeErrorInterceptorScript = `
-<script>
-(function() {
-    window.onerror = function(msg, url, line, col, error) {
-        window.parent.postMessage({
-            type: 'preview-runtime-error',
-            msg: String(msg),
-            url: String(url),
-            line: line || 1,
-            col: col || 1,
-            stack: error ? String(error.stack) : ""
-        }, '*');
-        return false;
-    };
-    window.addEventListener('unhandledrejection', function(e) {
-        window.parent.postMessage({
-            type: 'preview-runtime-error',
-            msg: "Unhandled Rejection: " + (e.reason ? (e.reason.message || String(e.reason)) : "Promesa rechazada"),
-            url: "",
-            line: 1,
-            col: 1,
-            stack: e.reason && e.reason.stack ? String(e.reason.stack) : ""
-        }, '*');
-    });
-})();
-<\/script>
-`;
+    if(!/<meta\s+name=["']viewport["']/i.test(html)) {
+        const viewportMeta = '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
+        if(html.includes("<head>")){
+            html = html.replace("<head>", "<head>\n" + viewportMeta);
+        } else {
+            html = viewportMeta + "\n" + html;
+        }
+    }
 
     if(html.includes("<head>")){ 
-        html = html.replace("<head>", "<head>" + runtimeErrorInterceptorScript + visualEditorScript); 
+        html = html.replace("<head>", "<head>" + visualEditorScript); 
     } else { 
-        html = runtimeErrorInterceptorScript + visualEditorScript + html; 
+        html = visualEditorScript + html; 
     }
 
     const previewFrame = document.getElementById("previewFrame");
@@ -3761,7 +3911,7 @@ function sendDockCommand(action, value) {
 }
 
 /* =====================================================  
-    POSTMESSAGE DE EDICIÓN VISUAL Y ERRORES DE RUNTIME
+    POSTMESSAGE DE EDICIÓN VISUAL
 ===================================================== */  
 window.addEventListener("message", function(event) { 
     if (!event.data) return; 
@@ -3769,123 +3919,17 @@ window.addEventListener("message", function(event) {
     if (event.data.type === 'preview-visual-edit' && event.data.html) { 
         if (!saveVisualEditToExistingFile(event.data.html)) return;
         if (typeof showTopNotification === "function") {
-            showTopNotification("💾 Cambios visuales guardados automáticamente", null, 2500);
+            showTopNotification(" Cambios visuales guardados automáticamente", null, 2500);
         }
         return; 
     } 
-
-    if (event.data.type === 'preview-runtime-error') {
-        const errorData = event.data;
-        handleRuntimeAppError(errorData);
-        return;
-    }
 }); 
-
-function handleRuntimeAppError(errorData) {
-    const project = typeof getCurrentProject === "function" ? getCurrentProject() : null;
-    if (!project || !project.files) return;
-
-    let targetFile = currentFileName || "index.html";
-    if (!project.files[targetFile]) {
-        targetFile = Object.keys(project.files).find(f => getFileType(f) === "js" || getFileType(f) === "html") || Object.keys(project.files)[0];
-    }
-
-    const msg = errorData.msg || "Error de ejecución";
-    const line = errorData.line || 1;
-
-    showCustomDialog({
-        title: "⚠️ Detección Automática de Error en la Aplicación",
-        description: `La aplicación sufrió un error runtime:\n\n• Archivo: ${targetFile}\n• Línea: ${line}\n• Causa: ${msg}\n\n¿Deseas aplicar una corrección segura automática sin eliminar tu código?`,
-        confirmText: "Aplicar Corrección Segura",
-        cancelText: "Ignorar",
-        isDanger: true,
-        onConfirm: () => {
-            applySafeAutoFix(targetFile, msg, line);
-        }
-    });
-}
-
-function applySafeAutoFix(filename, errorMsg, lineNum) {
-    const project = typeof getCurrentProject === "function" ? getCurrentProject() : null;
-    if (!project || !project.files || !project.files[filename]) return;
-
-    let code = project.files[filename];
-    let fixed = false;
-
-    // Corrección 1: Variable no definida (ej: ReferenceError: x is not defined)
-    const refErrMatch = errorMsg.match(/(?:ReferenceError:\s*|is not defined:?\s*)([a-zA-Z0-9_$]+)/) || errorMsg.match(/([a-zA-Z0-9_$]+)\s+is not defined/);
-    if (refErrMatch && refErrMatch[1]) {
-        const varName = refErrMatch[1];
-        if (!code.includes(`let ${varName}`) && !code.includes(`var ${varName}`) && !code.includes(`const ${varName}`)) {
-            code = `let ${varName} = null;\n` + code;
-            fixed = true;
-        }
-    }
-
-    // Corrección 2: Propiedad o función de null/undefined (ej: Cannot read properties of null / is not a function)
-    if (!fixed && (errorMsg.includes("null") || errorMsg.includes("undefined") || errorMsg.includes("is not a function"))) {
-        const lines = code.split("\n");
-        const idx = Math.max(0, Math.min(lines.length - 1, lineNum - 1));
-        if (lines[idx] && !lines[idx].includes("try {")) {
-            lines[idx] = `try { ${lines[idx]} } catch(e) { console.warn('Safe AutoFix caught runtime error:', e); }`;
-            code = lines.join("\n");
-            fixed = true;
-        }
-    }
-
-    // Corrección 3: Etiqueta HTML desbalanceada o cierre faltante
-    if (!fixed && (errorMsg.toLowerCase().includes("syntax") || errorMsg.toLowerCase().includes("unexpected"))) {
-        const lines = code.split("\n");
-        const idx = Math.max(0, Math.min(lines.length - 1, lineNum - 1));
-        if (lines[idx] && lines[idx].trim().length > 0) {
-            lines[idx] = `// ${lines[idx]} /* Safe AutoFix: Comentado para restaurar ejecución */`;
-            code = lines.join("\n");
-            fixed = true;
-        }
-    }
-
-    if (fixed) {
-        project.files[filename] = code;
-        if (currentFileName === filename && typeof codeEditor !== "undefined" && codeEditor) {
-            codeEditor.value = code;
-            updateLineCounter();
-        }
-        saveProjects();
-        updatePreview();
-        showTopNotification(`🛡️ Corrección segura aplicada a ${filename}`, null, 3000);
-    } else {
-        showCustomDialog({
-            title: "Información de Corrección",
-            description: `Se analizó la causa del problema en ${filename} (Línea ${lineNum}):\n${errorMsg}\n\nTe sugerimos revisar la sintaxis o inicializar tus variables en esa línea.`,
-            confirmText: "Entendido",
-            cancelText: null
-        });
-    }
-}
 
 /* =====================================================  
    INICIALIZACIÓN DE CONTROLES AL CARGAR DOM
 ===================================================== */  
 document.addEventListener("DOMContentLoaded", function() {
     const previewFrame = document.getElementById("previewFrame");
-    const desktopPreview = document.getElementById("desktopPreview");  
-    const mobilePreview = document.getElementById("mobilePreview");  
-
-    if (desktopPreview && previewFrame) {
-        desktopPreview.addEventListener("click", () => {  
-            previewFrame.className = "preview-frame";
-            desktopPreview.classList.add("active");  
-            if (mobilePreview) mobilePreview.classList.remove("active");  
-        });  
-    }
-
-    if (mobilePreview && previewFrame) {
-        mobilePreview.addEventListener("click", () => {  
-            previewFrame.className = "preview-frame mobile";
-            mobilePreview.classList.add("active");  
-            if (desktopPreview) desktopPreview.classList.remove("active");  
-        });  
-    }
 
 
     // Parent Visual Dock Drag Handler Across Whole Screen (Mouse & Mobile Touch)
@@ -3894,44 +3938,113 @@ document.addEventListener("DOMContentLoaded", function() {
     if (parentDock && parentHandle) {
         let draggingParentDock = false;
         let pOffsetX = 0, pOffsetY = 0;
+        let latestX = 0, latestY = 0;
+        let dockRafId = null;
 
         var startDockDrag = function(clientX, clientY) {
             draggingParentDock = true;
+            latestX = clientX;
+            latestY = clientY;
             const rect = parentDock.getBoundingClientRect();
             pOffsetX = clientX - rect.left;
             pOffsetY = clientY - rect.top;
             parentDock.style.transform = "none";
             parentDock.style.bottom = "auto";
             parentDock.style.right = "auto";
+            parentDock.style.willChange = "left, top";
         };
 
-        var moveDockDrag = function(clientX, clientY) {
+        var updateDockPosition = function() {
+            dockRafId = null;
             if (!draggingParentDock) return;
+
             const dockWidth = parentDock.offsetWidth || 300;
             const dockHeight = parentDock.offsetHeight || 50;
 
-            const maxX = Math.max(10, window.innerWidth - dockWidth - 10);
-            const maxY = Math.max(10, window.innerHeight - dockHeight - 10);
+            let rawX = latestX - pOffsetX;
+            let rawY = latestY - pOffsetY;
 
-            let rawX = clientX - pOffsetX;
-            let rawY = clientY - pOffsetY;
+            const threshold = 20;
+            const maxRawX = window.innerWidth - dockWidth;
+            const maxRawY = window.innerHeight - dockHeight;
 
-            // Constrain within screen bounds
-            let clampedX = Math.max(10, Math.min(rawX, maxX));
-            let clampedY = Math.max(10, Math.min(rawY, maxY));
+            let isTop = rawY <= threshold;
+            let isBottom = rawY >= maxRawY - threshold;
+            let isLeft = rawX <= threshold;
+            let isRight = rawX >= maxRawX - threshold;
+
+            let finalX = rawX;
+            let finalY = rawY;
+
+            if (isTop) {
+                finalY = 0;
+                parentDock.classList.add("dock-welded-top");
+            } else {
+                parentDock.classList.remove("dock-welded-top");
+            }
+
+            if (isBottom) {
+                finalY = maxRawY;
+                parentDock.classList.add("dock-welded-bottom");
+            } else {
+                parentDock.classList.remove("dock-welded-bottom");
+            }
+
+            if (isLeft) {
+                finalX = 0;
+                parentDock.classList.add("dock-welded-left");
+            } else {
+                parentDock.classList.remove("dock-welded-left");
+            }
+
+            if (isRight) {
+                finalX = maxRawX;
+                parentDock.classList.add("dock-welded-right");
+            } else {
+                parentDock.classList.remove("dock-welded-right");
+            }
+
+            let clampedX = Math.max(0, Math.min(finalX, window.innerWidth - dockWidth));
+            let clampedY = Math.max(0, Math.min(finalY, window.innerHeight - dockHeight));
 
             parentDock.style.left = clampedX + "px";
             parentDock.style.top = clampedY + "px";
 
             savedDockPosition = { x: clampedX, y: clampedY };
-            try {
-                localStorage.setItem("miwy_dock_pos", JSON.stringify(savedDockPosition));
-            } catch (err) { /* ignore */ }
+        };
+
+        var moveDockDrag = function(clientX, clientY) {
+            if (!draggingParentDock) return;
+            latestX = clientX;
+            latestY = clientY;
+            if (!dockRafId) {
+                dockRafId = requestAnimationFrame(updateDockPosition);
+            }
         };
 
         var endDockDrag = function() {
             draggingParentDock = false;
+            if (dockRafId) {
+                cancelAnimationFrame(dockRafId);
+                dockRafId = null;
+            }
+            parentDock.style.willChange = "auto";
+            if (savedDockPosition) {
+                try {
+                    localStorage.setItem("miwy_dock_pos", JSON.stringify(savedDockPosition));
+                } catch (err) { /* ignore */ }
+            }
         };
+
+        // Prevent default dblclick jumping / teleportation
+        parentHandle.addEventListener("dblclick", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+        parentDock.addEventListener("dblclick", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
 
         // Mouse events
         parentHandle.addEventListener("mousedown", (e) => {
@@ -4020,6 +4133,12 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
+    const floatPosBtn = document.getElementById("dockPosFloatingBtn");
+    const fixedPosBtn = document.getElementById("dockPosFixedBtn");
+
+    if (floatPosBtn) floatPosBtn.addEventListener("click", () => setDockPositionMode("floating"));
+    if (fixedPosBtn) fixedPosBtn.addEventListener("click", () => setDockPositionMode("fixed"));
+
     const horizBtn = document.getElementById("dockOrientHorizontalBtn");
     const vertBtn = document.getElementById("dockOrientVerticalBtn");
 
@@ -4029,275 +4148,31 @@ document.addEventListener("DOMContentLoaded", function() {
     updateDockSettingsUI();
 
     initCodeSearchAndReplace();
-    initAutocompleteAndFormatter();
     initSettingsToggles();
 });
 
+let isCodeSearchEnabled = true;
+
 function initSettingsToggles() {
     const searchBtn = document.getElementById("toggleSearchSettingBtn");
-    const autoBtn = document.getElementById("toggleAutocompleteSettingBtn");
-    const autoStatus = document.getElementById("autocompleteSettingStatus");
+    const searchStatus = document.getElementById("searchSettingStatus");
     const settingsOverlay = document.getElementById("settingsOverlay");
 
     if (searchBtn) {
         searchBtn.addEventListener("click", () => {
-            if (settingsOverlay) settingsOverlay.classList.remove("open");
-            toggleCodeSearch(true);
-        });
-    }
-
-    if (autoBtn) {
-        autoBtn.addEventListener("click", () => {
-            isAutocompleteEnabled = !isAutocompleteEnabled;
-            if (autoStatus) {
-                autoStatus.textContent = isAutocompleteEnabled ? "Activado (Sugerencias e IntelliSense)" : "Desactivado";
-                autoStatus.style.color = isAutocompleteEnabled ? "#42d66b" : "#ff4d4d";
+            isCodeSearchEnabled = !isCodeSearchEnabled;
+            if (searchStatus) {
+                searchStatus.textContent = isCodeSearchEnabled ? "Activado" : "Desactivado";
+                searchStatus.style.color = isCodeSearchEnabled ? "#42d66b" : "#ff4d4d";
+            }
+            if (!isCodeSearchEnabled) {
+                toggleCodeSearch(false);
             }
             if (typeof showTopNotification === "function") {
-                showTopNotification(isAutocompleteEnabled ? "💡 Auto-Completado Activado" : "💡 Auto-Completado Desactivado", null, 2500);
+                showTopNotification(isCodeSearchEnabled ? "🔍 Buscador de Código Activado" : "🔍 Buscador de Código Desactivado", null, 2500);
             }
         });
     }
-}
-
-/* =====================================================
-   AUTO-COMPLETADO E INTELLISENSE
-===================================================== */
-let isAutocompleteEnabled = true;
-let isFormatterEnabled = true;
-let autocompleteSelectedIndex = 0;
-let currentCompletions = [];
-
-const COMPLETER_DICTIONARY = {
-    html: [
-        { label: "div", snippet: "<div></div>", desc: "Contenedor div HTML" },
-        { label: "span", snippet: "<span></span>", desc: "Elemento inline span" },
-        { label: "button", snippet: "<button></button>", desc: "Botón clickeable" },
-        { label: "p", snippet: "<p></p>", desc: "Párrafo de texto" },
-        { label: "h1", snippet: "<h1></h1>", desc: "Encabezado principal H1" },
-        { label: "h2", snippet: "<h2></h2>", desc: "Encabezado H2" },
-        { label: "input", snippet: '<input type="text" placeholder="...">', desc: "Campo de entrada" },
-        { label: "a", snippet: '<a href="#"></a>', desc: "Enlace hipertexto" },
-        { label: "img", snippet: '<img src="" alt="...">', desc: "Imagen HTML" },
-        { label: "script", snippet: "<script>\n  \n<" + "/script>", desc: "Bloque Script JS" },
-        { label: "style", snippet: "<style>\n  \n</style>", desc: "Bloque Estilo CSS" },
-        { label: "flex", snippet: '<div style="display: flex; gap: 10px; align-items: center;">\n  \n</div>', desc: "Layout Flexbox" }
-    ],
-    css: [
-        { label: "display", snippet: "display: flex;", desc: "Modelo de caja flex" },
-        { label: "background", snippet: "background: #111;", desc: "Color de fondo" },
-        { label: "color", snippet: "color: #fff;", desc: "Color de texto" },
-        { label: "padding", snippet: "padding: 10px;", desc: "Relleno interior" },
-        { label: "margin", snippet: "margin: 0;", desc: "Margen exterior" },
-        { label: "border-radius", snippet: "border-radius: 8px;", desc: "Borde redondeado" },
-        { label: "font-size", snippet: "font-size: 14px;", desc: "Tamaño de fuente" },
-        { label: "align-items", snippet: "align-items: center;", desc: "Alineación vertical" },
-        { label: "justify-content", snippet: "justify-content: center;", desc: "Alineación horizontal" },
-        { label: "box-shadow", snippet: "box-shadow: 0 4px 12px rgba(0,0,0,0.3);", desc: "Sombra paralela" }
-    ],
-    js: [
-        { label: "function", snippet: "function miFuncion() {\n    \n}", desc: "Declaración de función" },
-        { label: "addEventListener", snippet: 'addEventListener("click", (event) => {\n    \n});', desc: "Escuchador de eventos" },
-        { label: "getElementById", snippet: 'document.getElementById("")', desc: "Obtener elemento por ID" },
-        { label: "querySelector", snippet: 'document.querySelector("")', desc: "Seleccionar por CSS" },
-        { label: "console.log", snippet: "console.log();", desc: "Imprimir en consola" },
-        { label: "setTimeout", snippet: "setTimeout(() => {\n    \n}, 1000);", desc: "Temporizador de ejecución" },
-        { label: "fetch", snippet: 'fetch("url")\n  .then(res => res.json())\n  .then(data => {\n    \n  });', desc: "Petición HTTP Fetch" }
-    ]
-};
-
-function initAutocompleteAndFormatter() {
-    const editor = document.getElementById("codeEditor");
-    const popup = document.getElementById("autocompletePopup");
-
-    if (!editor || !popup) return;
-
-    editor.addEventListener("input", (e) => {
-        if (editor.value.length > LARGE_FILE_THRESHOLD) {
-            popup.style.display = "none";
-            return;
-        }
-        if (!isAutocompleteEnabled) {
-            popup.style.display = "none";
-            return;
-        }
-
-        const cursor = editor.selectionStart;
-        const textBefore = editor.value.substring(0, cursor);
-        const match = textBefore.match(/([a-zA-Z0-9_\-<]+)$/);
-
-        if (!match || match[1].length < 2) {
-            popup.style.display = "none";
-            return;
-        }
-
-        const query = match[1].toLowerCase().replace(/^</, "");
-        const fileExt = typeof currentFileName !== "undefined" && currentFileName ? currentFileName.split(".").pop().toLowerCase() : "html";
-        const category = fileExt === "js" ? "js" : (fileExt === "css" ? "css" : "html");
-
-        currentCompletions = (COMPLETER_DICTIONARY[category] || []).filter(item => item.label.toLowerCase().includes(query));
-
-        if (currentCompletions.length === 0) {
-            popup.style.display = "none";
-            return;
-        }
-
-        autocompleteSelectedIndex = 0;
-        renderAutocompletePopup(match[1]);
-    });
-
-    editor.addEventListener("keydown", (e) => {
-        if (popup.style.display === "block" && currentCompletions.length > 0) {
-            if (e.key === "ArrowDown") {
-                e.preventDefault();
-                autocompleteSelectedIndex = (autocompleteSelectedIndex + 1) % currentCompletions.length;
-                updateAutocompleteSelectionUI();
-                return;
-            }
-            if (e.key === "ArrowUp") {
-                e.preventDefault();
-                autocompleteSelectedIndex = (autocompleteSelectedIndex - 1 + currentCompletions.length) % currentCompletions.length;
-                updateAutocompleteSelectionUI();
-                return;
-            }
-            if (e.key === "Enter" || e.key === "Tab") {
-                e.preventDefault();
-                insertAutocompleteSnippet(currentCompletions[autocompleteSelectedIndex]);
-                popup.style.display = "none";
-                return;
-            }
-            if (e.key === "Escape") {
-                popup.style.display = "none";
-                return;
-            }
-        }
-
-        // Auto-cierre de llaves/comillas y sangría con Tab
-        const pairs = { '(': ')', '[': ']', '{': '}', '"': '"', "'": "'" };
-        if (pairs[e.key] && !e.ctrlKey && !e.altKey && !e.metaKey) {
-            const start = editor.selectionStart;
-            const end = editor.selectionEnd;
-            if (start === end) {
-                e.preventDefault();
-                const val = editor.value;
-                const closeChar = pairs[e.key];
-                editor.value = val.substring(0, start) + e.key + closeChar + val.substring(end);
-                editor.selectionStart = editor.selectionEnd = start + 1;
-                editor.dispatchEvent(new Event("input"));
-                return;
-            }
-        }
-
-        if (e.key === "Tab" && popup.style.display !== "block") {
-            e.preventDefault();
-            const start = editor.selectionStart;
-            const end = editor.selectionEnd;
-            const val = editor.value;
-
-            if (e.shiftKey) {
-                // Shift+Tab: Des-sangría (Remover 2 espacios)
-                const lineStart = val.lastIndexOf("\n", start - 1) + 1;
-                const linePrefix = val.substring(lineStart, start);
-                let removeCount = 0;
-                if (linePrefix.endsWith("  ")) removeCount = 2;
-                else if (linePrefix.endsWith(" ")) removeCount = 1;
-
-                if (removeCount > 0) {
-                    editor.value = val.substring(0, start - removeCount) + val.substring(start);
-                    editor.selectionStart = editor.selectionEnd = start - removeCount;
-                    editor.dispatchEvent(new Event("input"));
-                }
-            } else {
-                // Tab: Insertar 2 espacios
-                editor.value = val.substring(0, start) + "  " + val.substring(end);
-                editor.selectionStart = editor.selectionEnd = start + 2;
-                editor.dispatchEvent(new Event("input"));
-            }
-            return;
-        }
-
-        // Ctrl+Shift+F: Formatear código
-        if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "F" || e.key === "f")) {
-            e.preventDefault();
-            formatCurrentCode();
-        }
-    });
-
-    document.addEventListener("click", (e) => {
-        if (!e.target.closest("#autocompletePopup") && e.target !== editor) {
-            popup.style.display = "none";
-        }
-    });
-}
-
-function renderAutocompletePopup(token) {
-    const popup = document.getElementById("autocompletePopup");
-    if (!popup) return;
-
-    popup.innerHTML = "";
-    currentCompletions.forEach((item, idx) => {
-        const div = document.createElement("div");
-        div.style.padding = "6px 10px";
-        div.style.cursor = "pointer";
-        div.style.fontSize = "11px";
-        div.style.display = "flex";
-        div.style.flexDirection = "column";
-        div.style.borderBottom = "1px solid #1f1f1f";
-
-        if (idx === autocompleteSelectedIndex) {
-            div.style.background = "#25170d";
-            div.style.color = "var(--orange)";
-        } else {
-            div.style.color = "#ccc";
-        }
-
-        div.innerHTML = `<strong style="font-size:11px;">${item.label}</strong><small style="color:#777; font-size:9px;">${item.desc}</small>`;
-
-        div.addEventListener("click", () => {
-            insertAutocompleteSnippet(item);
-            popup.style.display = "none";
-        });
-
-        popup.appendChild(div);
-    });
-
-    popup.style.display = "block";
-}
-
-function updateAutocompleteSelectionUI() {
-    const popup = document.getElementById("autocompletePopup");
-    if (!popup) return;
-
-    const items = popup.children;
-    for (let i = 0; i < items.length; i++) {
-        if (i === autocompleteSelectedIndex) {
-            items[i].style.background = "#25170d";
-            items[i].style.color = "var(--orange)";
-        } else {
-            items[i].style.background = "transparent";
-            items[i].style.color = "#ccc";
-        }
-    }
-}
-
-function insertAutocompleteSnippet(item) {
-    const editor = document.getElementById("codeEditor");
-    if (!editor || !item) return;
-
-    const cursor = editor.selectionStart;
-    const textBefore = editor.value.substring(0, cursor);
-    const match = textBefore.match(/([a-zA-Z0-9_\-<]+)$/);
-    const tokenLength = match ? match[1].length : 0;
-
-    const startPos = cursor - tokenLength;
-    const textAfter = editor.value.substring(cursor);
-
-    editor.value = editor.value.substring(0, startPos) + item.snippet + textAfter;
-    editor.selectionStart = editor.selectionEnd = startPos + item.snippet.length;
-
-    if (typeof saveCurrentFile === "function") saveCurrentFile();
-    if (typeof updateLineCounter === "function") updateLineCounter();
-    if (typeof updatePreview === "function") updatePreview();
 }
 
 /* =====================================================
@@ -4437,7 +4312,7 @@ function refactorAllProjectFiles() {
     if (typeof saveProjects === "function") saveProjects();
     if (typeof updatePreview === "function") updatePreview();
 
-    showTopNotification(`✨ Refactorizados ${count} archivo(s) en todo el proyecto`, null, 3000);
+    showTopNotification(` Refactorizados ${count} archivo(s) en todo el proyecto`, null, 3000);
 }
 
 function formatCurrentCode() {
@@ -4445,7 +4320,7 @@ function formatCurrentCode() {
     if (!editor || editor.disabled || !editor.value.trim()) return;
 
     if (editor.value.length > LARGE_FILE_THRESHOLD) {
-        showTopNotification("⚡ Archivo grande: la refactorización se omitió para mantener el editor rápido", null, 3500);
+        showTopNotification(" Archivo grande: la refactorización se omitió para mantener el editor rápido", null, 3500);
         return;
     }
 
@@ -4460,7 +4335,7 @@ function formatCurrentCode() {
     if (typeof updatePreview === "function") updatePreview();
 
     if (typeof showTopNotification === "function") {
-        showTopNotification("✨ Código refactorizado correctamente", null, 2500);
+        showTopNotification(" Código refactorizado correctamente", null, 2500);
     }
 }
 
@@ -4532,45 +4407,49 @@ function toggleCodeSearch(show) {
 }
 
 function performCodeSearch() {
-    const editor = document.getElementById("codeEditor");
-    const searchInput = document.getElementById("codeSearchInput");
-    const countEl = document.getElementById("codeSearchMatchCount");
+    try {
+        const editor = document.getElementById("codeEditor");
+        const searchInput = document.getElementById("codeSearchInput");
+        const countEl = document.getElementById("codeSearchMatchCount");
 
-    if (!editor || !searchInput || !countEl) return;
+        if (!editor || !searchInput || !countEl) return;
 
-    if (editor.value.length > LARGE_FILE_THRESHOLD) {
+        if (editor.value.length > LARGE_FILE_THRESHOLD) {
+            searchMatches = [];
+            currentMatchIndex = -1;
+            countEl.textContent = "Archivo grande";
+            showTopNotification(" La búsqueda completa está desactivada en archivos grandes para evitar bloqueos", null, 3000);
+            return;
+        }
+
+        const query = searchInput.value;
         searchMatches = [];
         currentMatchIndex = -1;
-        countEl.textContent = "Archivo grande";
-        showTopNotification("⚡ La búsqueda completa está desactivada en archivos grandes para evitar bloqueos", null, 3000);
-        return;
+
+        if (!query) {
+            countEl.textContent = "0 / 0";
+            return;
+        }
+
+        const text = editor.value;
+        const lowerText = text.toLowerCase();
+        const lowerQuery = query.toLowerCase();
+        let index = 0;
+
+        while ((index = lowerText.indexOf(lowerQuery, index)) !== -1) {
+            searchMatches.push(index);
+            index += query.length || 1;
+        }
+
+        if (searchMatches.length > 0) {
+            currentMatchIndex = 0;
+            highlightCurrentMatch();
+        }
+
+        updateMatchCountUI();
+    } catch (err) {
+        console.warn("Error durante la búsqueda de código:", err);
     }
-
-    const query = searchInput.value;
-    searchMatches = [];
-    currentMatchIndex = -1;
-
-    if (!query) {
-        countEl.textContent = "0 / 0";
-        return;
-    }
-
-    const text = editor.value;
-    const lowerText = text.toLowerCase();
-    const lowerQuery = query.toLowerCase();
-    let index = 0;
-
-    while ((index = lowerText.indexOf(lowerQuery, index)) !== -1) {
-        searchMatches.push(index);
-        index += query.length || 1;
-    }
-
-    if (searchMatches.length > 0) {
-        currentMatchIndex = 0;
-        highlightCurrentMatch();
-    }
-
-    updateMatchCountUI();
 }
 
 function updateMatchCountUI() {
@@ -4663,380 +4542,95 @@ function replaceAllMatches() {
 
     performCodeSearch();
     if (typeof showTopNotification === "function") {
-        showTopNotification(`✏️ Se reemplazaron ${totalReplaced} coincidencias`, null, 2500);
+        showTopNotification(`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 22 22 22 12 2"></polygon><path d="M12 10l3 5h-6z"></path></svg> Se reemplazaron ${totalReplaced} coincidencias`, null, 2500);
     }
 }
 
 /* =========================================================
-   MIWY CANVAS ANIMATION (PANTALLA SUPERIOR GALERÍA)
+   MATRIX CODE RAIN CANVAS ANIMATION (FONDO COMPLETO GALERÍA)
    ========================================================= */
 (() => {
   "use strict";
 
-  let canvasInitialized = false;
-  function safeInitCanvas() {
-    if (canvasInitialized) return;
-    canvasInitialized = true;
-    initCanvasAnimation();
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", safeInitCanvas);
-  } else {
-    safeInitCanvas();
-  }
-
-  function initCanvasAnimation() {
-    const canvas = document.getElementById("miwyCanvas");
+  function initMatrixRain() {
+    const canvas = document.getElementById("matrixCanvas");
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
 
     function resize() {
-      const rect = canvas.getBoundingClientRect();
-      const w = rect.width || canvas.clientWidth || 800;
-      const h = rect.height || canvas.clientHeight || 180;
-      const dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth <= 750 ? 1.25 : 1.5);
-      canvas.width = Math.max(300, w) * dpr;
-      canvas.height = Math.max(120, h) * dpr;
+      const container = document.getElementById("galleryContainer") || document.body;
+      canvas.width = container.clientWidth || window.innerWidth;
+      canvas.height = container.clientHeight || window.innerHeight;
     }
     resize();
     window.addEventListener("resize", resize);
 
-    const W = () => canvas.width;
-    const H = () => canvas.height;
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789</>{};=+0@!%&*";
+    const fontSize = 14;
+    const columns = Math.floor((canvas.width || window.innerWidth) / fontSize) + 1;
+    const drops = new Array(columns).fill(1);
 
-    let state = "TITLE";
-    let stateTimer = 0;
+    function draw() {
+      ctx.fillStyle = "rgba(9, 11, 15, 0.12)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    function drawGiantBrickWall() {
-      ctx.save();
-      const isMobile = window.innerWidth <= 750;
-      const brickWidth = Math.max(160, W() * 0.15);
-      const brickHeight = Math.max(70, H() * 0.12);
-      const rows = Math.ceil(H() / brickHeight) + 1;
+      ctx.fillStyle = "#00ff66";
+      ctx.font = fontSize + "px monospace";
 
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
-      ctx.lineWidth = 2.5;
-      if (!isMobile) {
-        ctx.shadowColor = "#ff0033";
-        ctx.shadowBlur = 6;
-      }
+      for (let i = 0; i < drops.length; i++) {
+        const char = chars[Math.floor(Math.random() * chars.length)];
+        const x = i * fontSize;
+        const y = drops[i] * fontSize;
 
-      ctx.beginPath();
-      for (let r = 0; r <= rows; r++) {
-        const y = r * brickHeight;
-        ctx.moveTo(0, y);
-        ctx.lineTo(W(), y);
-      }
-      for (let r = 0; r < rows; r++) {
-        const y = r * brickHeight;
-        const xOffset = (r % 2 === 0) ? 0 : brickWidth / 2;
+        ctx.fillStyle = Math.random() > 0.92 ? "#ffffff" : (Math.random() > 0.5 ? "#00ff66" : "#00cc55");
+        ctx.fillText(char, x, y);
 
-        for (let x = xOffset; x <= W() + brickWidth; x += brickWidth) {
-          ctx.moveTo(x, y);
-          ctx.lineTo(x, y + brickHeight);
+        if (y > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
         }
+        drops[i]++;
       }
-      ctx.stroke();
-      ctx.restore();
+      requestAnimationFrame(draw);
     }
+    draw();
+  }
 
-    let titleScale = 0;
-    let titleOpacity = 0;
-    let codexScale = 0;
-    let codexOpacity = 0;
-
-    function renderStyledText(text, opacity, scale) {
-      ctx.save();
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      
-      const fontSize = Math.min(W() * 0.13, 100);
-      ctx.font = `800 ${fontSize}px "Trebuchet MS", "Segoe UI", system-ui, sans-serif`;
-
-      const cx = W() / 2;
-      const cy = H() / 2;
-
-      if (opacity > 0) {
-        ctx.globalAlpha = opacity;
-        ctx.shadowColor = "#ff0033";
-        ctx.shadowBlur = 22;
-
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.scale(scale, scale);
-
-        ctx.lineWidth = 5;
-        ctx.strokeStyle = "#ff0033";
-        ctx.strokeText(text, 0, 0);
-
-        ctx.fillStyle = "#ffffff";
-        ctx.fillText(text, 0, 0);
-
-        ctx.restore();
-      }
-      ctx.restore();
-    }
-
-    function drawTitle() {
-      if (state === "TITLE") {
-        titleOpacity = Math.min(1, titleOpacity + 0.03);
-        titleScale = 0.88 + titleOpacity * 0.12;
-      } else {
-        titleOpacity = Math.max(0, titleOpacity - 0.03);
-      }
-      renderStyledText("MIWY", titleOpacity, titleScale);
-    }
-
-    function drawCodex() {
-      if (state === "CODEX") {
-        codexOpacity = Math.min(1, codexOpacity + 0.03);
-        codexScale = 0.88 + codexOpacity * 0.12;
-      } else {
-        codexOpacity = Math.max(0, codexOpacity - 0.03);
-      }
-      renderStyledText("CODEX", codexOpacity, codexScale);
-    }
-
-    class GiantSpider {
-      constructor() {
-        this.x = W() / 2;
-        this.y = -350;
-        this.targetY = H() * 0.48;
-        this.size = Math.min(W() * 0.20, 160);
-        
-        this.legs = [];
-        for (let i = 0; i < 8; i++) {
-          const side = i < 4 ? -1 : 1;
-          const idx = i % 4;
-          this.legs.push({
-            side: side,
-            angleOffset: (-0.65 + idx * 0.43) * side,
-            length: this.size * (1.35 + (idx === 1 || idx === 2 ? 0.35 : 0)),
-            currentX: this.x,
-            currentY: this.y,
-            targetX: this.x,
-            targetY: this.y,
-            stepping: false,
-            stepProgress: 0
-          });
-        }
-        this.bobAngle = 0;
-      }
-
-      update() {
-        this.x = W() / 2;
-        this.size = Math.min(W() * 0.20, 160);
-        this.bobAngle += 0.03;
-        const bob = Math.sin(this.bobAngle) * 14;
-
-        if (state === "SPIDER_DESCEND") {
-          this.y += (this.targetY - this.y) * 0.02;
-          if (Math.abs(this.y - this.targetY) < 2) state = "SPIDER_IDLE";
-        } else if (state === "SPIDER_ASCEND") {
-          this.y += (-400 - this.y) * 0.03;
-          if (this.y < -320) state = "CODEX";
-        }
-
-        const currentPosY = this.y + bob;
-
-        this.legs.forEach((leg) => {
-          const defaultAngle = leg.side === -1 ? Math.PI * 0.85 : Math.PI * 0.15;
-          const finalAngle = defaultAngle + leg.angleOffset;
-
-          const idealX = this.x + Math.cos(finalAngle) * leg.length;
-          const idealY = currentPosY + Math.sin(finalAngle) * leg.length;
-
-          const dist = Math.hypot(leg.currentX - idealX, leg.currentY - idealY);
-
-          if (dist > this.size * 0.45 && !leg.stepping) {
-            leg.stepping = true;
-            leg.targetX = idealX + (Math.random() - 0.5) * 30;
-            leg.targetY = idealY + (Math.random() - 0.5) * 30;
-            leg.stepProgress = 0;
-          }
-
-          if (leg.stepping) {
-            leg.stepProgress += 0.1;
-            leg.currentX += (leg.targetX - leg.currentX) * 0.2;
-            leg.currentY += (leg.targetY - leg.currentY) * 0.2;
-
-            if (leg.stepProgress >= 1) {
-              leg.stepping = false;
-            }
-          }
-        });
-      }
-
-      draw() {
-        if (this.y < -340) return;
-
-        const currentPosY = this.y + Math.sin(this.bobAngle) * 14;
-
-        ctx.save();
-
-        ctx.beginPath();
-        ctx.moveTo(this.x, 0);
-        ctx.lineTo(this.x, currentPosY - this.size * 0.35);
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.85)";
-        ctx.lineWidth = 3.5;
-        ctx.shadowColor = "#ffffff";
-        ctx.shadowBlur = 12;
-        ctx.stroke();
-
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = Math.max(5, this.size * 0.06);
-        ctx.lineCap = "round";
-        ctx.lineJoin = "round";
-
-        this.legs.forEach(leg => {
-          ctx.beginPath();
-          ctx.moveTo(this.x, currentPosY);
-
-          const midX = (this.x + leg.currentX) / 2 + (leg.side * -35);
-          const midY = Math.min(currentPosY, leg.currentY) - this.size * 0.45;
-
-          ctx.quadraticCurveTo(midX, midY, leg.currentX, leg.currentY);
-          ctx.stroke();
-        });
-
-        ctx.fillStyle = "#ffffff";
-        ctx.shadowColor = "#ff0033";
-        ctx.shadowBlur = 22;
-
-        ctx.beginPath();
-        ctx.ellipse(this.x, currentPosY - this.size * 0.35, this.size * 0.38, this.size * 0.5, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.ellipse(this.x, currentPosY + this.size * 0.15, this.size * 0.28, this.size * 0.28, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 4.5;
-        ctx.beginPath();
-        ctx.moveTo(this.x - 12, currentPosY + this.size * 0.38);
-        ctx.lineTo(this.x - 22, currentPosY + this.size * 0.55);
-        ctx.moveTo(this.x + 12, currentPosY + this.size * 0.38);
-        ctx.lineTo(this.x + 22, currentPosY + this.size * 0.55);
-        ctx.stroke();
-
-        ctx.fillStyle = "#ff0033";
-        ctx.shadowColor = "#ff0033";
-        ctx.shadowBlur = 12;
-        ctx.beginPath();
-        ctx.arc(this.x - 9, currentPosY + this.size * 0.22, 6.5, 0, Math.PI * 2);
-        ctx.arc(this.x + 9, currentPosY + this.size * 0.22, 6.5, 0, Math.PI * 2);
-        ctx.arc(this.x - 22, currentPosY + this.size * 0.2, 4.5, 0, Math.PI * 2);
-        ctx.arc(this.x + 22, currentPosY + this.size * 0.2, 4.5, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.restore();
-      }
-    }
-
-    const spider = new GiantSpider();
-
-    class ShockwaveRings {
-      constructor() {
-        this.rings = [];
-      }
-
-      trigger() {
-        this.rings = [
-          { radius: 0, maxRadius: Math.max(W(), H()) * 0.8, opacity: 1, color: "#ff0033", speed: 7 },
-          { radius: -45, maxRadius: Math.max(W(), H()) * 0.8, opacity: 1, color: "#ffffff", speed: 7 },
-          { radius: -90, maxRadius: Math.max(W(), H()) * 0.8, opacity: 1, color: "#ff0033", speed: 7 }
-        ];
-      }
-
-      updateAndDraw() {
-        const cx = W() / 2;
-        const cy = H() / 2;
-
-        ctx.save();
-        this.rings.forEach(r => {
-          r.radius += r.speed;
-
-          if (r.radius > 0) {
-            const alpha = Math.max(0, 1 - (r.radius / r.maxRadius));
-            ctx.strokeStyle = r.color;
-            ctx.shadowColor = r.color;
-            ctx.shadowBlur = 18;
-            ctx.lineWidth = 3.5;
-            ctx.globalAlpha = alpha;
-
-            ctx.beginPath();
-            ctx.arc(cx, cy, r.radius, 0, Math.PI * 2);
-            ctx.stroke();
-          }
-        });
-        ctx.restore();
-      }
-    }
-
-    const shockwaves = new ShockwaveRings();
-    shockwaves.trigger();
-
-    function loop() {
-      const gallery = document.getElementById("galleryContainer");
-      if (document.hidden || (gallery && gallery.style.display === "none")) {
-        requestAnimationFrame(loop);
-        return;
-      }
-
-      if (W() <= 0 || H() <= 0) resize();
-
-      ctx.clearRect(0, 0, W(), H());
-
-      // Fondo degradado retro magenta/púrpura
-      const bgGrad = ctx.createLinearGradient(0, 0, 0, H());
-      bgGrad.addColorStop(0, "#120326");
-      bgGrad.addColorStop(0.5, "#1d063b");
-      bgGrad.addColorStop(1, "#080114");
-      ctx.fillStyle = bgGrad;
-      ctx.fillRect(0, 0, W(), H());
-
-      drawGiantBrickWall();
-      shockwaves.updateAndDraw();
-
-      drawTitle();
-      drawCodex();
-
-      spider.update();
-      spider.draw();
-
-      stateTimer++;
-
-      if (state === "TITLE" && stateTimer > 220) {
-        state = "SPIDER_DESCEND";
-        stateTimer = 0;
-      } else if (state === "SPIDER_IDLE" && stateTimer > 320) {
-        state = "SPIDER_ASCEND";
-        stateTimer = 0;
-      } else if (state === "CODEX" && stateTimer > 220) {
-        state = "END_RINGS";
-        shockwaves.trigger();
-        stateTimer = 0;
-      } else if (state === "END_RINGS" && stateTimer > 140) {
-        state = "PAUSE";
-        stateTimer = 0;
-      } else if (state === "PAUSE" && stateTimer > 60) {
-        state = "TITLE";
-        shockwaves.trigger();
-        stateTimer = 0;
-      }
-
-      requestAnimationFrame(loop);
-    }
-
-    loop();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initMatrixRain);
+  } else {
+    initMatrixRain();
   }
 })();
 
 
 
 </script>
+<style>
+/* TEMAS: CLARO Y OSCURO */
+body.theme-claro {
+    --bg-dark: #f8fafc;
+    --bg-panel: #ffffff;
+    --bg-card: #f1f5f9;
+    --border-color: #cbd5e1;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --editor-bg: #ffffff;
+    --header-bg: #f1f5f9;
+    color: #0f172a;
+}
+body.theme-claro .workspace, 
+body.theme-claro .code-panel, 
+body.theme-claro .preview-panel, 
+body.theme-claro .panel-header, 
+body.theme-claro .miwy-gallery {
+    background: #f8fafc;
+    color: #0f172a;
+}
+body.theme-claro .file-tree, body.theme-claro .editor-container {
+    background: #ffffff;
+    color: #0f172a;
+}
+</style>
 </head>  
   
   
@@ -5054,10 +4648,10 @@ function replaceAllMatches() {
 <!-- TOPBAR -->  
 <header class="topbar">  
   
-    <div style="display:flex; align-items:center; gap:10px;">
-        <button class="logo-button" title="Miwy">  
+    <div style="display:flex; align-items:center; gap:8px;">
+        <div class="logo-clean-icon" title="Miwy">  
             <img src="logo.png" alt="Miwy Logo" style="width:100%; height:100%; object-fit:contain;" onerror="this.onerror=null; this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='block';">
-            <svg class="logo-fallback-svg" viewBox="0 0 100 100" style="display:none; width:38px; height:38px;">
+            <svg class="logo-fallback-svg" viewBox="0 0 100 100" style="display:none; width:30px; height:32px;">
                 <circle cx="50" cy="50" r="46" fill="#111820" stroke="var(--orange)" stroke-width="6"/>
                 <circle cx="50" cy="40" r="16" fill="#ffffff"/>
                 <circle cx="50" cy="68" r="22" fill="#ffffff"/>
@@ -5065,34 +4659,32 @@ function replaceAllMatches() {
                 <circle cx="57" cy="38" r="4" fill="var(--orange)"/>
                 <path d="M34 38 Q15 25 10 40 M32 45 Q12 45 8 58 M32 55 Q12 65 10 78 M35 62 Q18 80 22 92 M66 38 Q85 25 90 40 M68 45 Q88 45 92 58 M68 55 Q88 65 90 78 M65 62 Q82 80 78 92" stroke="#ffffff" stroke-width="5" stroke-linecap="round" fill="none"/>
             </svg>
-        </button>
-        <span id="galleryBrandTitle" class="gallery-brand-title">MIWY</span>
+        </div>
+        <span id="galleryBrandTitle" class="gallery-brand-title" style="font-weight:800; font-size:18px; letter-spacing:0.04em;">MIWY</span>
     </div>
 
     <button  
         id="settingsButton"  
-        class="settings-button">  
-        ⚙  
+        class="settings-button"
+        title="Configuración">  
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> 
     </button>  
   
 </header>  
   
   
 <!-- GALERÍA DE PROYECTOS (VISTA INICIAL DE BIENVENIDA) -->
-<div id="galleryContainer" class="miwy-gallery" style="display:block;">
-    <div class="miwy-hero-header">
-        <canvas id="miwyCanvas"></canvas>
-    </div>
+<div id="galleryContainer" class="miwy-gallery" style="display:block; position:relative; overflow:hidden;">
+    <canvas id="matrixCanvas" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:0; opacity:0.3;"></canvas>
 
-    <div class="miwy-gallery-grid">
+    <div class="miwy-gallery-grid" style="position:relative; z-index:1;">
         <div class="miwy-gallery-main" style="width: 100%;">
             <div class="miwy-projects-header">
                 <h3 class="miwy-projects-title">MIS PROYECTOS</h3>
                 <button class="miwy-create-project" onclick="openCreateProject()">+ CREAR PROYECTO</button>
             </div>
 
-            <div id="galleryProjectsList" class="miwy-projects-list">
-                ll</div>
+            <div id="galleryProjectsList" class="miwy-projects-list"></div>
         </div>
     </div>
 </div>
@@ -5124,8 +4716,8 @@ function replaceAllMatches() {
                     onclick="toggleRecursosPlusMenu(event)">+</button>
                 
                 <div id="recursosPlusDropdown" style="display:none; position:absolute; top:32px; left:80px; z-index:1000; background:#10151c; border:1px solid #2b3a48; border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,0.5); padding:4px 0; min-width:140px;">
-                    <button onclick="openCreateFilePrompt(); toggleRecursosPlusMenu();" style="width:100%; padding:8px 12px; background:transparent; border:none; color:#edf2f7; text-align:left; font-size:11px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px;">📄 Crear archivo</button>
-                    <button onclick="createNewFolderPrompt(); toggleRecursosPlusMenu();" style="width:100%; padding:8px 12px; background:transparent; border:none; color:#edf2f7; text-align:left; font-size:11px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px;">📁 Crear carpeta</button>
+                    <button onclick="openCreateFilePrompt(); toggleRecursosPlusMenu();" style="width:100%; padding:8px 12px; background:transparent; border:none; color:#edf2f7; text-align:left; font-size:11px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a1 1 0 0 0 1 1h4"/><path d="M9 15h6"/><path d="M12 12v6"/></svg><span>Crear archivo</span></button>
+                    <button onclick="createNewFolderPrompt(); toggleRecursosPlusMenu();" style="width:100%; padding:8px 12px; background:transparent; border:none; color:#edf2f7; text-align:left; font-size:11px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L8.6 3.3A2 2 0 0 0 6.9 2.5H4a2 2 0 0 0-2 2v13.5a2 2 0 0 0 2 2Z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg><span>Crear carpeta</span></button>
                 </div>
             </div>
 
@@ -5146,19 +4738,8 @@ function replaceAllMatches() {
   
     <!-- UNIFIED RECURSOS & CODE EDITOR SPACE -->
     <div id="folderView" class="folder-tab-container" style="display:flex; flex:1; min-height:0; flex-direction:column; background:#10151c; padding:12px; position:relative;">
-        <div style="display:none; justify-content:space-between; align-items:center; padding-bottom:10px; border-bottom:1px solid #25323f; margin-bottom:10px;">
-            <div style="font-size:12px; font-weight:bold; color:#edf2f7; display:flex; align-items:center; gap:8px;">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="var(--orange)"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.5 2.5A1.5 1.5 0 0 1 3 1h3.086a1.5 1.5 0 0 1 1.06.44l1.415 1.414A.5.5 0 0 0 8.914 3H13a1.5 1.5 0 0 1 1.5 1.5v8a1.5 1.5 0 0 1-1.5 1.5H3A1.5 1.5 0 0 1 1.5 12.5v-10z"/></svg>
-                <span>Recursos</span>
-            </div>
-            <div style="display:flex; gap:6px;">
-                <button onclick="createNewFolderPrompt()" style="background:#1b242e; color:#cbd5e1; border:1px solid #324454; border-radius:6px; padding:4px 10px; font-size:11px; cursor:pointer; font-weight:600; display:flex; align-items:center; gap:4px;" title="Nueva Carpeta">+ 📁 Carpeta</button>
-                <button onclick="triggerAssetUpload()" style="background:var(--orange); color:#000; border:none; border-radius:6px; padding:4px 10px; font-size:11px; cursor:pointer; font-weight:700; display:flex; align-items:center; gap:4px;" title="Subir Imagen/Archivo">+ 🖼️ Subir Archivo</button>
-            </div>
-        </div>
-
         <div id="folderBreadcrumb" style="font-size:11px; color:#91a0ad; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
-            <span style="color:var(--orange); cursor:pointer;" onclick="renderFolderManager('/')">📁 Inicio</span>
+            <span style="color:var(--orange); cursor:pointer;" onclick="renderFolderManager('/')"> °-° Inicio</span>
         </div>
 
         <div id="folderGrid" style="flex:1; overflow-y:auto; display:grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap:10px; align-content:start; padding:4px; border:2px dashed transparent; border-radius:8px; transition:all 0.2s;">
@@ -5166,7 +4747,7 @@ function replaceAllMatches() {
         </div>
 
         <div style="font-size:10px; color:#627382; padding-top:8px; border-top:1px solid #1a232c; text-align:center;">
-            ⚡ Arrastra y suelta archivos aquí para organizarlos automáticamente por tipo en tu proyecto.
+             Arrastra y suelta archivos aquí para organizarlos automáticamente por tipo en tu proyecto.
         </div>
 
         <!-- CODE EDITOR FLOATING MODAL DIALOG (OPENS ONLY ON 'EDITAR') -->
@@ -5182,7 +4763,7 @@ function replaceAllMatches() {
                             <input id="codeSearchInput" type="text" placeholder="Buscar en código..." style="flex:1; height:26px; background:#141414; border:1px solid #333; border-radius:4px; color:#fff; padding:0 8px; font-size:11px; outline:none;">
                         </div>
                         <div style="display:flex; align-items:center; gap:5px; flex:1; min-width:180px;">
-                            <span style="font-size:11px; color:#aaa;">✏️</span>
+                            <span style="font-size:11px; color:#aaa;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 22 22 22 12 2"></polygon><path d="M12 10l3 5h-6z"></path></svg></span>
                             <input id="codeReplaceInput" type="text" placeholder="Reemplazar con..." style="flex:1; height:26px; background:#141414; border:1px solid #333; border-radius:4px; color:#fff; padding:0 8px; font-size:11px; outline:none;">
                         </div>
                         <div style="display:flex; align-items:center; gap:4px;">
@@ -5221,18 +4802,14 @@ function replaceAllMatches() {
 
                     </div>  
 
-                    <div class="code-footer">  
+                    <div class="code-footer" style="justify-content:space-between;">  
                         <span id="fileFooterName" style="display:none;">Sin archivo</span>  
                         <div style="display:flex; align-items:center; gap:6px;">
-                            <button id="toggleWordWrapBtn" class="preview-button" onclick="toggleWordWrap()" style="height:22px; padding:0 8px; font-size:10px; color:#aaa;" title="Ajuste de línea (Word Wrap)">↩ Wrap</button>
-                            <button id="zoomOutEditorBtn" class="preview-button" onclick="changeEditorFontSize(-1)" style="height:22px; padding:0 6px; font-size:10px; color:#aaa;" title="Reducir letra">A-</button>
-                            <button id="zoomInEditorBtn" class="preview-button" onclick="changeEditorFontSize(1)" style="height:22px; padding:0 6px; font-size:10px; color:#aaa;" title="Aumentar letra">A+</button>
-                            <button id="autoCorrectBtn" class="preview-button" onclick="lintAndFixCurrentCode()" style="height:22px; padding:0 8px; font-size:10px; color:var(--orange); gap:4px;" title="Analizar y corregir errores de sintaxis y formato">✨ Corregir</button>
-                            <button id="copyCodeBtn" class="preview-button" style="height:22px; padding:0 8px; font-size:10px; color:#aaa; gap:4px;" title="Copiar código al portapapeles">📋 Copiar</button>
+                            <button id="copyCodeBtn" class="preview-button" style="height:22px; padding:0 8px; font-size:10px; color:#aaa; gap:4px;" title="Copiar código al portapapeles"> Copiar</button>
+                            <button id="pasteCodeBtn" class="preview-button" style="height:22px; padding:0 8px; font-size:10px; color:#aaa; gap:4px;" title="Pegar del portapapeles"> Pegar</button>
                         </div>
                         <div style="display:flex; align-items:center; gap:10px;">
-                            <span id="editorSaveStatus" style="font-size:10px; color:#42d66b;">● Guardado</span>
-                            <span id="lineCounter" class="editor-position">Ln 1, Col 1</span>  
+                            <span id="lineCounter" style="color:#42d66b !important; font-weight:700; font-size:11px;">0 Líneas</span>  
                         </div>
                     </div>  
                 </div>
@@ -5257,13 +4834,13 @@ function replaceAllMatches() {
                 id="panelCreateProjectBtn"  
                 class="create-project" 
                 style="flex: 1; margin-top: 0;">  
-                Crear proyecto  
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px; vertical-align:middle;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>Crear proyecto  
             </button>  
             <button  
                 id="panelImportProjectBtn"  
                 class="create-project" 
                 style="flex: 1; margin-top: 0; background: #1a251c; color: var(--green);">  
-                📥 Importar 
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px; vertical-align:middle;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>Importar 
             </button>  
         </div> 
     </div>
@@ -5283,22 +4860,14 @@ function replaceAllMatches() {
     class="preview-panel"  
     id="previewPanel">  
   
-    <div class="panel-header">  
+    <div class="panel-header" style="justify-content:space-between;">  
   
-        <div class="panel-name">  
-            <strong>  
-                Vista de aplicación  
-            </strong>  
-        </div>  
-  
-  
-        <div class="preview-controls">  
-  
-            <span class="panel-name">  
-                <span style="color:#42d66b;">●</span>  
-                Live  
-            </span>  
- 
+        <div class="panel-left" style="gap:10px;">  
+            <div class="panel-name">  
+                <strong>  
+                    Vista de aplicación  
+                </strong>  
+            </div>  
 
             <button  
                 id="visualEditBtn"  
@@ -5307,28 +4876,18 @@ function replaceAllMatches() {
                 onclick="toggleVisualEdit()">  
                 Editor Visual  
             </button>  
-  
-            <button  
-                id="desktopPreview"  
-                class="preview-button active"  
-                title="Vista laptop">  
-                Laptop  
-            </button>  
-  
-            <button  
-                id="mobilePreview"  
-                class="preview-button"  
-                title="Vista teléfono">  
-                Teléfono  
-            </button>  
-  
         </div>  
+
+        <div class="preview-controls" style="gap:6px;">
+            <button id="desktopPreview" class="preview-button active" title="Vista Laptop / Escritorio" onclick="setPreviewDeviceMode('desktop')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px;"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="2" y1="20" x2="22" y2="20"></line></svg>Laptop</button>
+            <button id="mobilePreview" class="preview-button" title="Vista Teléfono Movil" onclick="setPreviewDeviceMode('mobile')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px;"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>Teléfono</button>
+        </div>
   
     </div>  
   
   
     <div class="preview-wrapper-container"> 
-        <div class="preview-wrapper">  
+        <div class="preview-wrapper" id="previewWrapper">  
             <iframe  
                 id="previewFrame"  
                 class="preview-frame"  
@@ -5345,7 +4904,7 @@ function replaceAllMatches() {
 <div id="diffOverlay" class="overlay"> 
     <div class="dialog" style="width: 750px; max-width: calc(100vw - 20px);"> 
         <div class="dialog-title" style="display: flex; justify-content: space-between; align-items: center;"> 
-            <span>👀 Revisión de cambios de Miwy</span> 
+            <span> Revisión de cambios de Miwy</span> 
             <span id="diffFileName" style="font-size: 11px; font-weight: normal; background: #222; padding: 4px 8px; border-radius: 4px; color: var(--orange);"></span> 
         </div> 
         <div class="dialog-description"> 
@@ -5365,10 +4924,10 @@ function replaceAllMatches() {
  
         <div class="dialog-buttons"> 
             <button id="rejectDiffBtn" class="dialog-cancel" style="background: #251010; color: var(--danger);"> 
-                ❌ Rechazar cambios 
+                 Rechazar cambios 
             </button> 
             <button id="acceptDiffBtn" class="dialog-confirm" style="background: #112d19; color: var(--green); border: 1px solid #235d34;"> 
-                ✅ Aceptar cambios 
+                 Aceptar cambios 
             </button> 
         </div> 
     </div> 
@@ -5393,7 +4952,7 @@ function replaceAllMatches() {
             <label style="display:flex; align-items:center; gap:10px; background:#181818; padding:10px 12px; border-radius:8px; border:1px solid #333;">
                 <input type="radio" name="exportFormat" value="zip" checked style="accent-color:var(--orange);">
                 <div>
-                    <strong style="font-size:12px; color:#fff; display:block;">📦 Archivo ZIP (.zip)</strong>
+                    <strong style="font-size:12px; color:#fff; display:block;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><line x1="12" y1="10" x2="12" y2="16"></line><polyline points="9 13 12 16 15 13"></polyline></svg> Archivo ZIP (.zip)</strong>
                     <small style="font-size:10px; color:#aaa;">Código fuente completo del proyecto</small>
                 </div>
             </label>
@@ -5482,13 +5041,13 @@ function replaceAllMatches() {
                 id="createProjectButton"  
                 class="create-project" 
                 style="flex: 1; margin-top: 0;">  
-                Crear proyecto  
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px; vertical-align:middle;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>Crear proyecto  
             </button>  
             <button  
                 id="importProjectBtn"  
                 class="create-project" 
                 style="flex: 1; margin-top: 0; background: #1a251c; color: var(--green);">  
-                📥 Importar 
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px; vertical-align:middle;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>Importar 
             </button>  
         </div> 
         <input type="file" id="importProjectInput" accept=".zip,.json,.html,.css,.js,.txt,.svg" multiple style="display: none;"> 
@@ -5623,7 +5182,7 @@ function replaceAllMatches() {
                     <div class="settings-option-left">  
 
                         <div class="option-icon icon-option-export" style="background: #1a251c;">  
-                            📦  
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><line x1="12" y1="10" x2="12" y2="16"></line><polyline points="9 13 12 16 15 13"></polyline></svg>  
                         </div>  
 
                         <div>  
@@ -5652,7 +5211,7 @@ function replaceAllMatches() {
                     <div class="settings-option-left">  
 
                         <div class="option-icon icon-option-import" style="background: #21180d;">  
-                            ⤴  
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><line x1="12" y1="16" x2="12" y2="10"></line><polyline points="9 13 12 10 15 13"></polyline></svg>  
                         </div>  
 
                         <div>  
@@ -5681,7 +5240,7 @@ function replaceAllMatches() {
                     <div class="settings-option-left">  
   
                         <div class="option-icon icon-option-edit">  
-                            ✏️  
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 22 22 22 12 2"></polygon><path d="M12 10l3 5h-6z"></path></svg>  
                         </div>  
   
                         <div>  
@@ -5706,7 +5265,7 @@ function replaceAllMatches() {
                     <div class="settings-option-left">  
   
                         <div class="option-icon icon-option-version">  
-                            ↶  
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 9 15"></polyline><path d="M3.05 11a9 9 0 0 1 .5-2"></path></svg>  
                         </div>  
   
                         <div>  
@@ -5729,33 +5288,6 @@ function replaceAllMatches() {
   
   
   
-                <button  
-                    id="themeButton"  
-                    class="settings-option">  
-  
-                    <div class="settings-option-left">  
-  
-                        <div class="option-icon icon-option-theme">  
-                            🎨  
-                        </div>  
-  
-                        <div>  
-  
-                            <strong>  
-                                Temas  
-                            </strong>  
-  
-                            <small>  
-                                Seleccionar tema de interfaz  
-                            </small>  
-  
-                        </div>  
-  
-                    </div>  
-  
-                    ›  
-  
-                </button>  
 
                 <button  
                     id="shortcutsButton"  
@@ -5764,7 +5296,7 @@ function replaceAllMatches() {
                     <div class="settings-option-left">  
 
                         <div class="option-icon icon-option-keyboard">  
-                            ⌨️  
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="6" y1="8" x2="6" y2="8"></line><line x1="10" y1="8" x2="10" y2="8"></line><line x1="14" y1="8" x2="14" y2="8"></line><line x1="18" y1="8" x2="18" y2="8"></line><line x1="6" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="18" y2="12"></line><line x1="8" y1="16" x2="16" y2="16"></line></svg>  
                         </div>  
 
                         <div>  
@@ -5789,7 +5321,7 @@ function replaceAllMatches() {
                     <button  
                         id="exitToGalleryBtn"  
                         class="settings-exit-button">  
-                        🚪 Salir a la Galería  
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:6px;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>Salir a la Galería  
                     </button>  
                 </div>
 
@@ -5830,11 +5362,6 @@ function replaceAllMatches() {
                     <span class="key-cap" style="background:#222; border:1px solid #333; padding:2px 6px; border-radius:4px; font-size:10px; color:var(--orange);">Ctrl + E</span>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center; background:#151515; padding:8px 12px; border-radius:6px; border:1px solid #222;">
-                    <span style="font-size:11px; color:#aaa;">Alternar vista Laptop/Teléfono</span>
-                    <span class="key-cap" style="background:#222; border:1px solid #333; padding:2px 6px; border-radius:4px; font-size:10px; color:var(--orange);">Ctrl + P</span>
-                </div>
-                <div style="display:flex; justify-content:space-between; align-items:center; background:#151515; padding:8px 12px; border-radius:6px; border:1px solid #222;">
-                    <span style="font-size:11px; color:#aaa;">Abrir Configuración</span>
                     <span class="key-cap" style="background:#222; border:1px solid #333; padding:2px 6px; border-radius:4px; font-size:10px; color:var(--orange);">Ctrl + ,</span>
                 </div>
             </div>
@@ -5852,83 +5379,36 @@ function replaceAllMatches() {
             </button>  
   
             <div class="section-title">  
-                Controles de Editor Visual  
+                Controles del Editor Visual  
             </div>  
   
-            <label class="repo-label">Orientación de Controles Flotantes</label>
-            <div style="display:flex; gap:8px; margin-bottom:16px;">
-                <button id="dockOrientHorizontalBtn" class="version-action" style="flex:1; height:36px; font-weight:bold;">↔️ Horizontal</button>
-                <button id="dockOrientVerticalBtn" class="version-action" style="flex:1; height:36px; font-weight:bold;">↕️ Vertical</button>
+            <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px;">
+                <button id="dockPosFloatingBtn" class="settings-option" style="height:48px; border-radius:10px;">
+                    <div class="settings-option-left">
+                        <div>
+                            <strong>Flotante</strong>
+                            <small>Controles móviles arrastrables</small>
+                        </div>
+                    </div>
+                    <span id="dockPosFloatingCheck" style="color:var(--orange); font-size:14px; font-weight:bold;">✓</span>
+                </button>
+
+                <div id="floatingSubOptions" style="display:flex; gap:8px; padding-left:14px; margin-bottom:4px;">
+                    <button id="dockOrientHorizontalBtn" class="version-action" style="flex:1; height:36px; font-weight:bold;">↔️ Horizontal</button>
+                    <button id="dockOrientVerticalBtn" class="version-action" style="flex:1; height:36px; font-weight:bold;">↕️ Vertical</button>
+                </div>
             </div>
 
             <label class="repo-label" style="margin-top:12px;">Herramientas del Editor</label>
             <div style="display:flex; flex-direction:column; gap:8px;">
                 <button id="toggleSearchSettingBtn" class="version-action" style="height:36px; text-align:left; padding:0 12px; font-weight:bold; display:flex; align-items:center; justify-content:space-between;">
                     <span>🔍 Buscador de Código</span>
-                    <span style="font-size:10px; color:var(--orange);">Abrir (Ctrl+F)</span>
-                </button>
-                <button id="toggleAutocompleteSettingBtn" class="version-action" style="height:36px; text-align:left; padding:0 12px; font-weight:bold; display:flex; align-items:center; justify-content:space-between;">
-                    <span>💡 Auto-Completado</span>
-                    <span id="autocompleteSettingStatus" style="font-size:10px; color:var(--green);">Activado</span>
+                    <span id="searchSettingStatus" style="font-size:10px; color:var(--green);">Activado</span>
                 </button>
             </div>
         </div>  
   
   
-        <!-- TEMAS -->  
-        <div  
-            id="themeSection"  
-            class="settings-section">  
-  
-            <button  
-                class="section-back"  
-                data-back>  
-                ← Volver  
-            </button>  
-  
-            <div class="section-title">  
-                Seleccionar Tema  
-            </div>  
-  
-            <div class="version-list"> 
-                <button class="settings-option theme-option-btn" data-theme="oscuro"> 
-                    <div class="settings-option-left"> 
-                        <div class="option-icon" style="background:#111; border: 1px solid #444; width: 24px; height: 24px;"></div> 
-                        <div> 
-                            <strong>Oscuro</strong> 
-                            <small>Fondo oscuro original (predeterminado)</small> 
-                        </div> 
-                    </div> 
-                </button> 
-                <button class="settings-option theme-option-btn" data-theme="claro"> 
-                    <div class="settings-option-left"> 
-                        <div class="option-icon" style="background:#eee; border: 1px solid #ccc; width: 24px; height: 24px;"></div> 
-                        <div> 
-                            <strong>Claro</strong> 
-                            <small>Interfaz brillante y limpia</small> 
-                        </div> 
-                    </div> 
-                </button> 
-                <button class="settings-option theme-option-btn" data-theme="cobalto"> 
-                    <div class="settings-option-left"> 
-                        <div class="option-icon" style="background:#002240; border: 1px solid #00aaff; width: 24px; height: 24px;"></div> 
-                        <div> 
-                            <strong>Cobalto</strong> 
-                            <small>Azul profundo con acentos neón</small> 
-                        </div> 
-                    </div> 
-                </button> 
-                <button class="settings-option theme-option-btn" data-theme="monokai"> 
-                    <div class="settings-option-left"> 
-                        <div class="option-icon" style="background:#272822; border: 1px solid #f92672; width: 24px; height: 24px;"></div> 
-                        <div> 
-                            <strong>Monokai</strong> 
-                            <small>Estilo de contraste para código</small> 
-                        </div> 
-                    </div> 
-                </button> 
-            </div> 
-        </div>  
  
  
         <!-- VERSIONES -->  
@@ -6857,16 +6337,11 @@ function getFileType(filename){
     if (ext === "jsx") return "jsx";  
     if (ext === "tsx") return "tsx";  
     if (ext === "css" || ext === "scss" || ext === "sass" || ext === "less") return "css";  
-    if (ext === "json" || ext === "json5") return "json";  
-    if (ext === "py") return "python";  
-    if (ext === "java") return "java";  
-    if (ext === "cpp" || ext === "c" || ext === "h" || ext === "hpp" || ext === "cc") return "cpp";  
-    if (ext === "cs") return "csharp";  
     if (ext === "php") return "php";  
-    if (ext === "go") return "go";  
-    if (ext === "rs") return "rust";  
-    if (ext === "rb") return "ruby";  
-    if (ext === "sql") return "sql";  
+    if (ext === "swift") return "swift";  
+    if (ext === "kt" || ext === "kts") return "kotlin";  
+    if (ext === "dart") return "dart";  
+    if (ext === "json" || ext === "json5") return "json";  
     if (ext === "md" || ext === "markdown") return "markdown";  
     if (ext === "xml") return "xml";  
     if (ext === "svg") return "svg";  
@@ -6887,23 +6362,18 @@ function getFileIcon(filename){
     if (type === "js") return `<span style="color:#f7df1e; font-weight:bold;">⚡ JS</span>`;  
     if (type === "ts") return `<span style="color:#3178c6; font-weight:bold;">🟦 TS</span>`;  
     if (type === "jsx" || type === "tsx") return `<span style="color:#61dafb; font-weight:bold;">⚛️ React</span>`;  
-    if (type === "json") return `<span style="color:#f29d27; font-weight:bold;">🧩 JSON</span>`;  
-    if (type === "python") return `<span style="color:#3776ab; font-weight:bold;">🐍 Py</span>`;  
-    if (type === "java") return `<span style="color:#5382a1; font-weight:bold;">☕ Java</span>`;  
-    if (type === "cpp") return `<span style="color:#00599c; font-weight:bold;">⚙️ C++</span>`;  
-    if (type === "csharp") return `<span style="color:#68217a; font-weight:bold;">💜 C#</span>`;  
     if (type === "php") return `<span style="color:#777bb4; font-weight:bold;">🐘 PHP</span>`;  
-    if (type === "go") return `<span style="color:#00add8; font-weight:bold;">🐹 Go</span>`;  
-    if (type === "rust") return `<span style="color:#dea584; font-weight:bold;">🦀 Rust</span>`;  
-    if (type === "ruby") return `<span style="color:#cc342d; font-weight:bold;">💎 Ruby</span>`;  
-    if (type === "sql") return `<span style="color:#e38c00; font-weight:bold;">🗄️ SQL</span>`;  
+    if (type === "swift") return `<span style="color:#f05138; font-weight:bold;">🐦 Swift</span>`;  
+    if (type === "kotlin") return `<span style="color:#a855f7; font-weight:bold;">🟣 Kotlin</span>`;  
+    if (type === "dart") return `<span style="color:#0175c2; font-weight:bold;">🎯 Dart</span>`;  
+    if (type === "json") return `<span style="color:#f29d27; font-weight:bold;">🧩 JSON</span>`;  
     if (type === "markdown") return `<span style="color:#083344; font-weight:bold;">📝 MD</span>`;  
     if (type === "xml") return `<span style="color:#ff6600; font-weight:bold;">🏷️ XML</span>`;  
     if (type === "svg") return `<span style="color:#ffb300; font-weight:bold;">◇ SVG</span>`;  
     if (type === "image") return `🖼️`;  
     if (type === "audio") return `🎵`;  
     if (type === "video") return `🎬`;  
-    if (type === "archive") return `📦`;  
+    if (type === "archive") return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><line x1="12" y1="10" x2="12" y2="16"></line><polyline points="9 13 12 16 15 13"></polyline></svg>`;  
   
     return `📄`;  
 }  
@@ -7187,7 +6657,7 @@ function renameMediaFilePrompt(oldFilename, currentDisplayName) {
             renderFiles();
             renderFolderManager(currentFolderDirectory);
             updatePreview();
-            showTopNotification(`✏️ Archivo renombrado a "${cleanNewName}"`, null, 2200);
+            showTopNotification(`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 22 22 22 12 2"></polygon><path d="M12 10l3 5h-6z"></path></svg> Archivo renombrado a "${cleanNewName}"`, null, 2200);
         }
     });
 }
@@ -7369,17 +6839,13 @@ function renderSyntaxHighlighting() {
 
     let grammarName = "markup";
     if (ext === "css") grammarName = "css";
-    else if (ext === "js" || ext === "ts" || ext === "jsx" || ext === "tsx") grammarName = "javascript";
+    else if (ext === "js" || ext === "jsx") grammarName = "javascript";
+    else if (ext === "ts" || ext === "tsx") grammarName = "typescript";
+    else if (ext === "php") grammarName = "php";
+    else if (ext === "swift") grammarName = "swift";
+    else if (ext === "kotlin") grammarName = "kotlin";
+    else if (ext === "dart") grammarName = "dart";
     else if (ext === "json") grammarName = "json";
-    else if (ext === "python") grammarName = "python";
-    else if (ext === "c") grammarName = "c";
-    else if (ext === "cpp" || ext === "cc" || ext === "hpp") grammarName = "cpp";
-    else if (ext === "rust" || ext === "rs") grammarName = "rust";
-    else if (ext === "nasm" || ext === "asm" || ext === "s") grammarName = "nasm";
-    else if (ext === "go") grammarName = "go";
-    else if (ext === "java") grammarName = "java";
-    else if (ext === "csharp" || ext === "cs") grammarName = "csharp";
-    else if (ext === "bash" || ext === "sh") grammarName = "bash";
 
     const prismReady = typeof Prism !== "undefined" && Boolean(Prism.languages[grammarName]);
     if (highlightedEditorValue === val && highlightedEditorFile === currentFileName && highlightedWithPrism === prismReady) {
@@ -7423,7 +6889,6 @@ codeEditor.addEventListener(
         )  
             return;  
 
-        lastEditorInputAt = Date.now();
   
         updateLineCounter();
 
@@ -7438,12 +6903,6 @@ codeEditor.addEventListener(
         }, hlDelay);
 
         syncEditorToProject();
-        const statusEl = document.getElementById("editorSaveStatus");
-        if (statusEl) {
-            statusEl.textContent = "● Guardando...";
-            statusEl.style.color = "var(--orange)";
-        }
-
         clearTimeout(editorSyncTimer);
         const saveDelay = codeEditor.value.length > LARGE_FILE_THRESHOLD ? 700 : 150;
         editorSyncTimer = setTimeout(() => {
@@ -7521,21 +6980,6 @@ codeEditor.addEventListener("scroll", () => {
     }
 });
 
-function autoSaveProjectState(){
-    try {
-        const editorSize = codeEditor && !codeEditor.disabled ? codeEditor.value.length : 0;
-        if (editorSize > LARGE_FILE_THRESHOLD) {
-            if (Date.now() - lastEditorInputAt >= 3000 && typeof saveCurrentFile === "function") saveCurrentFile();
-            return;
-        }
-        if (typeof saveCurrentFile === "function") saveCurrentFile();
-        if (typeof saveProjects === "function") saveProjects();
-    } catch (error) {
-        console.warn("autoSaveProjectState falló:", error);
-    }
-}
-
-setInterval(autoSaveProjectState, 15000);
   
   
 /* =====================================================  
@@ -7548,28 +6992,19 @@ let cachedActiveLine = -1;
 function updateLineCounter(){  
     const gutter = document.getElementById("lineGutter");
     const value = codeEditor && !codeEditor.disabled ? codeEditor.value : "";
-    const cursor = codeEditor && !codeEditor.disabled ? codeEditor.selectionStart : 0;
 
-    let line = 1;
-    let lastNewLine = -1;
-    for (let i = 0; i < cursor; i++) {
-        if (value.charCodeAt(i) === 10) {
-            line++;
-            lastNewLine = i;
-        }
-    }
-    const column = cursor - lastNewLine;
-
-    if (gutter) {
-        let totalLines = 1;
+    let totalLines = codeEditor && !codeEditor.disabled ? 1 : 0;
+    if (codeEditor && !codeEditor.disabled) {
         for (let i = 0; i < value.length; i++) {
             if (value.charCodeAt(i) === 10) totalLines++;
         }
+    }
 
+    if (gutter) {
         if (totalLines !== cachedGutterLineCount) {
             cachedGutterLineCount = totalLines;
             let numbers = "";
-            for (let i = 1; i <= totalLines; i++) {
+            for (let i = 1; i <= Math.max(1, totalLines); i++) {
                 numbers += i + "\n";
             }
             gutter.textContent = numbers;
@@ -7577,12 +7012,11 @@ function updateLineCounter(){
         gutter.scrollTop = codeEditor ? codeEditor.scrollTop : 0;
     }
 
-    if (!currentFileName || codeEditor.disabled) {  
-        if (lineCounter) lineCounter.textContent = "Ln 1, Col 1";
-        return;  
-    }  
-
-    if (lineCounter) lineCounter.textContent = `Ln ${line}, Col ${column}`;
+    if (lineCounter) {
+        lineCounter.textContent = `${totalLines} Línea${totalLines !== 1 ? 's' : ''}`;
+        lineCounter.style.color = "#42d66b";
+        lineCounter.style.fontWeight = "bold";
+    }
 }  
   
   
@@ -8092,24 +7526,17 @@ function saveProjectDialog(){
         saveCurrentFile();  
   
   
-        const project = {  
-  
-            id:Date.now().toString(),  
-  
-            name:name,  
-  
-            files:{},  
-  
-            versions:[],  
-  
-            version:0,  
-  
-            messages:[],  
-  
-            repository:null, 
- 
-            edited:false  
-  
+        const defaultProjectFiles = {};
+
+        const project = {
+            id: Date.now().toString(),
+            name: name,
+            files: defaultProjectFiles,
+            versions: [],
+            version: 0,
+            messages: [],
+            repository: null,
+            edited: false
         };  
   
   
@@ -8530,11 +7957,6 @@ const repositorySection =
         "repositorySection"  
     );  
  
-const themeSection =  
-    document.getElementById(  
-        "themeSection"  
-    );  
-  
   
 document  
     .getElementById("settingsButton")  
@@ -8580,11 +8002,6 @@ function showSettingsMain(){
         saveDevSection.classList.remove("active");
     }
  
-    if (themeSection) { 
-        themeSection.classList.remove(  
-            "active"  
-        );  
-    } 
 
     const visSection = document.getElementById("visualEditorSection");
     if (visSection) {
@@ -8604,7 +8021,9 @@ function exitToGallery() {
     const settingsBtn = document.getElementById("settingsButton");
     const brandTitle = document.getElementById("galleryBrandTitle");
     const visualDock = document.getElementById("parentVisualDock");
-    const visualEditBtn = document.getElementById("visualEditBtn");
+
+
+const visualEditBtn = document.getElementById("visualEditBtn");
 
     isVisualEditing = false;
     if (visualDock) {
@@ -8659,181 +8078,12 @@ document
     );  
   
   
-/* Auto-save cada 15 minutos (900,000 ms) */
-setInterval(() => {
-    const editorSize = codeEditor && !codeEditor.disabled ? codeEditor.value.length : 0;
-    saveCurrentFile();
-    if (editorSize <= LARGE_FILE_THRESHOLD) saveProjects();
-    const current = getCurrentProject();
-    if (current) {
-        if (typeof showTopNotification === "function") {
-            showTopNotification(`💾 Guardado automático: "${current.name}" guardado`, null, 3000);
-        }
-    }
-}, 15 * 60 * 1000);
 
-function runProjectDiagnostics() {
-    const project = typeof getCurrentProject === "function" ? getCurrentProject() : null;
-    if (!project || !project.files) return [];
-
-    const files = project.files;
-    const fileNames = Object.keys(files);
-    const allIssues = [];
-
-    // Helper linter for JS
-    const jshintLinter = typeof JSHINT !== "undefined" ? JSHINT : (typeof JSHint !== "undefined" ? JSHint : null);
-
-    // Collect all existing files for reference checking
-    const existingFileSet = new Set(fileNames.map(f => f.replace(/^\.\//, "")));
-
-    fileNames.forEach(filename => {
-        const content = files[filename] || "";
-        const fileType = typeof getFileType === "function" ? getFileType(filename) : "";
-
-        // 1. Análisis de JS/TS
-        if ((fileType === "js" || fileType === "ts") && jshintLinter) {
-            try {
-                jshintLinter(content, { esversion: 11, undef: false, unused: false, asi: true, expr: true, moz: true });
-                const errors = jshintLinter.errors || [];
-                errors.filter(Boolean).forEach(e => {
-                    allIssues.push({
-                        file: filename,
-                        line: e.line || 1,
-                        type: "error",
-                        message: `[Sintaxis JS] ${e.reason}`
-                    });
-                });
-            } catch (err) {
-                allIssues.push({ file: filename, line: 1, type: "error", message: `Error analizando JS: ${err.message}` });
-            }
-        }
-
-        // 2. Análisis de HTML
-        if (fileType === "html") {
-            if (typeof HTMLHint !== "undefined") {
-                try {
-                    const results = HTMLHint.verify(content);
-                    (results || []).forEach(r => {
-                        allIssues.push({
-                            file: filename,
-                            line: r.line || 1,
-                            type: r.type === "error" ? "error" : "warning",
-                            message: `[HTMLHint] ${r.message}`
-                        });
-                    });
-                } catch (err) {}
-            }
-
-            // Detección de dependencias/referencias faltantes en HTML (<script src>, <link href>, <img src>)
-            const srcRegex = /<(script|img|source|audio|video)\b[^>]*src=["']([^"']+)["']/gi;
-            let match;
-            while ((match = srcRegex.exec(content)) !== null) {
-                const srcPath = match[2].replace(/^\.\//, "");
-                if (!/^(https?:|data:|\/\/|blob:|#)/i.test(srcPath) && !existingFileSet.has(srcPath)) {
-                    const lineNum = content.substring(0, match.index).split("\n").length;
-                    allIssues.push({
-                        file: filename,
-                        line: lineNum,
-                        type: "warning",
-                        message: `[Dependencia Faltante] Archivo o recurso referenciado '${srcPath}' no existe en el proyecto`
-                    });
-                }
-            }
-
-            const hrefRegex = /<link\b[^>]*href=["']([^"']+)["']/gi;
-            while ((match = hrefRegex.exec(content)) !== null) {
-                const hrefPath = match[1].replace(/^\.\//, "");
-                if (!/^(https?:|data:|\/\/|#)/i.test(hrefPath) && !existingFileSet.has(hrefPath)) {
-                    const lineNum = content.substring(0, match.index).split("\n").length;
-                    allIssues.push({
-                        file: filename,
-                        line: lineNum,
-                        type: "warning",
-                        message: `[Estilo Faltante] Archivo CSS '${hrefPath}' referenciado no existe en el proyecto`
-                    });
-                }
-            }
-        }
-
-        // 3. Análisis de CSS
-        if (fileType === "css") {
-            const openBraces = (content.match(/\{/g) || []).length;
-            const closeBraces = (content.match(/\}/g) || []).length;
-            if (openBraces !== closeBraces) {
-                allIssues.push({
-                    file: filename,
-                    line: 1,
-                    type: "error",
-                    message: `[Sintaxis CSS] Desbalance de llaves '{' (${openBraces}) y '}' (${closeBraces})`
-                });
-            }
-        }
-    });
-
-    // Actualizar badge del botón de diagnósticos
-    const badge = document.getElementById("diagnosticsBadge");
-    if (badge) {
-        if (allIssues.length > 0) {
-            badge.textContent = allIssues.length;
-            badge.style.display = "inline-block";
-        } else {
-            badge.style.display = "none";
-        }
-    }
-
-    // Mostrar panel modal de resultados de diagnóstico
-    if (allIssues.length === 0) {
-        showCustomDialog({
-            title: "🔍 Diagnóstico Completo del Proyecto",
-            description: "✨ ¡Excelente! El análisis analizó todos los archivos del proyecto y no encontró errores ni dependencias faltantes.",
-            confirmText: "Aceptar",
-            cancelText: null
-        });
-    } else {
-        const issuesSummary = allIssues.slice(0, 10).map(i => `• [${i.file} - Línea ${i.line}]: ${i.message}`).join("\n");
-        const extraMsg = allIssues.length > 10 ? `\n...y ${allIssues.length - 10} problemas más.` : "";
-
-        showCustomDialog({
-            title: `🔍 Diagnóstico: ${allIssues.length} problema(s) detectado(s)`,
-            description: issuesSummary + extraMsg,
-            confirmText: "Revisar Archivo",
-            cancelText: "Cerrar",
-            onConfirm: () => {
-                if (allIssues.length > 0 && allIssues[0].file) {
-                    selectFile(allIssues[0].file);
-                }
-            }
-        });
-    }
-
-    return allIssues;
-}
-
-function lintAndFixCurrentCode() {
-    runProjectDiagnostics();
-}
  
  
 /* =====================================================  
-   TEMAS DE INTERFAZ (LOGIC)  
-===================================================== */  
-function applyTheme(themeName) { 
-    const validThemes = ["oscuro", "claro", "cobalto", "monokai"];
-    if (!validThemes.includes(themeName)) themeName = "oscuro";
-    document.body.classList.remove("theme-oscuro", "theme-claro", "theme-cobalto", "theme-monokai"); 
-    document.body.classList.add("theme-" + themeName); 
-    localStorage.setItem("miwy_theme", themeName); 
-    document.querySelectorAll(".theme-option-btn").forEach(btn => { 
-        if (btn.getAttribute("data-theme") === themeName) { 
-            btn.classList.add("active"); 
-            btn.style.borderColor = "var(--orange)"; 
-        } else { 
-            btn.classList.remove("active"); 
-            btn.style.borderColor = ""; 
-        } 
-    }); 
-} 
-
+   EXPORTAR E IMPORTAR PROYECTO HANDLERS
+===================================================== */
 const exportProjSettingsBtn = document.getElementById("exportProjectSettingsBtn");
 const exportDialog = document.getElementById("exportDialog");
 const cancelExportBtn = document.getElementById("cancelExport");
@@ -9024,22 +8274,6 @@ if (importProjectInput) {
     }); 
 } 
 
-document.querySelectorAll(".theme-option-btn").forEach(btn => { 
-    btn.addEventListener("click", () => { 
-        const selected = btn.getAttribute("data-theme"); 
-        applyTheme(selected); 
-    }); 
-}); 
-
-const themeBtn = document.getElementById("themeButton"); 
-if (themeBtn) { 
-    themeBtn.addEventListener("click", () => { 
-        settingsMain.style.display = "none"; 
-        themeSection.classList.add("active"); 
-    }); 
-} 
-
-applyTheme(localStorage.getItem("miwy_theme") || "oscuro"); 
 
 document.querySelectorAll("[data-back]").forEach(button => { 
     button.addEventListener("click", showSettingsMain); 
@@ -9205,28 +8439,6 @@ document.addEventListener("touchcancel", stopWorkspaceResize);
   
   
 /* =====================================================  
-   VISTA MÓVIL / LAPTOP
-===================================================== */  
-  
-const desktopPreview = document.getElementById("desktopPreview");  
-const mobilePreview = document.getElementById("mobilePreview");  
-
-if (desktopPreview) {
-    desktopPreview.addEventListener("click", () => {  
-        previewFrame.className = "preview-frame";
-        desktopPreview.classList.add("active");  
-        if (mobilePreview) mobilePreview.classList.remove("active");  
-    });  
-}
-
-if (mobilePreview) {
-    mobilePreview.addEventListener("click", () => {  
-        previewFrame.className = "preview-frame mobile";
-        mobilePreview.classList.add("active");  
-        if (desktopPreview) desktopPreview.classList.remove("active");  
-    });  
-}
-  
   
 /* =====================================================  
    COPIAR CÓDIGO  
@@ -9242,6 +8454,27 @@ if (copyCodeBtn) {
             });
         } else {
             showCustomDialog({ title: "Copiar Código", description: "No hay código para copiar." });
+        }
+    });
+}
+
+const pasteCodeBtn = document.getElementById("pasteCodeBtn");
+if (pasteCodeBtn) {
+    pasteCodeBtn.addEventListener("click", async () => {
+        if (codeEditor && !codeEditor.disabled) {
+            try {
+                const text = await navigator.clipboard.readText();
+                if (text) {
+                    const start = codeEditor.selectionStart;
+                    const end = codeEditor.selectionEnd;
+                    codeEditor.value = codeEditor.value.substring(0, start) + text + codeEditor.value.substring(end);
+                    codeEditor.selectionStart = codeEditor.selectionEnd = start + text.length;
+                    codeEditor.dispatchEvent(new Event("input"));
+                    showShortcutToast("📋 Pegado", "Texto pegado desde el portapapeles");
+                }
+            } catch (err) {
+                showCustomDialog({ title: "Pegar Código", description: "Permiso denegado. Usa Ctrl+V para pegar directamente." });
+            }
         }
     });
 }
@@ -9296,28 +8529,42 @@ window.addEventListener("keydown", function(event) {
             showShortcutToast("Ctrl + E", "Exportando proyecto como ZIP"); 
         } 
     } 
- 
-    // Ctrl + P: Toggle Vista laptop/teléfono 
-    if (isCtrl && key === 'p') { 
-        event.preventDefault(); 
-        const desktopBtn = document.getElementById("desktopPreview"); 
-        const mobileBtn = document.getElementById("mobilePreview"); 
-        if (desktopBtn && mobileBtn) { 
-            if (mobileBtn.classList.contains("active")) { 
-                desktopBtn.click(); 
-                showShortcutToast("Ctrl + P", "Vista laptop activada"); 
-            } else { 
-                mobileBtn.click(); 
-                showShortcutToast("Ctrl + P", "Vista teléfono activada"); 
-            } 
-        } 
-    } 
+
+    // Ctrl + I: Importar Proyecto
+    if (isCtrl && key === 'i') {
+        event.preventDefault();
+        if (typeof openImportDialog === "function") openImportDialog();
+        showShortcutToast("Ctrl + I", "Importar proyecto");
+    }
+
+    // Ctrl + M: Alternar Laptop / Teléfono
+    if (isCtrl && key === 'm') {
+        event.preventDefault();
+        const nextMode = previewDeviceMode === "mobile" ? "desktop" : "mobile";
+        setPreviewDeviceMode(nextMode);
+        showShortcutToast("Ctrl + M", `Modo ${nextMode === "mobile" ? "Teléfono" : "Laptop"}`);
+    }
+
+    // Ctrl + Shift + V: Alternar Editor Visual
+    if (isCtrl && event.shiftKey && key === 'v') {
+        event.preventDefault();
+        toggleVisualEdit();
+    }
  
     // Ctrl + F: Buscar y Reemplazar
     if (isCtrl && key === 'f') {
         event.preventDefault();
         toggleCodeSearch();
         showShortcutToast("Ctrl + F", "Buscador de código");
+    }
+
+    // Escape: Cerrar diálogos / modales abiertos
+    if (event.key === 'Escape') {
+        const openOverlays = document.querySelectorAll(".overlay.open, .settings-overlay.open, .project-overlay.open");
+        if (openOverlays.length > 0) {
+            openOverlays.forEach(el => el.classList.remove("open"));
+            showShortcutToast("Esc", "Cerrar ventana");
+        }
     }
 
     // Ctrl + , (comma): Abrir configuración (Settings) 
@@ -9374,32 +8621,6 @@ if (realPhoneReload && realPhoneFrame && previewFrame) {
     });
 }
 
-function openRealPhoneModal() {
-    const modal = document.getElementById("realPhoneModal");
-    const pFrame = document.getElementById("previewFrame");
-    const rFrame = document.getElementById("realPhoneFrame");
-    if (pFrame && rFrame) {
-        rFrame.srcdoc = pFrame.srcdoc;
-    }
-    if (modal) {
-        modal.classList.add("open");
-    }
-}
-
-function closeRealPhoneModal() {
-    const modal = document.getElementById("realPhoneModal");
-    if (modal) {
-        modal.classList.remove("open");
-    }
-}
-
-function reloadRealPhoneFrame() {
-    const pFrame = document.getElementById("previewFrame");
-    const rFrame = document.getElementById("realPhoneFrame");
-    if (pFrame && rFrame) {
-        rFrame.srcdoc = pFrame.srcdoc;
-    }
-}
 </script>  
   
 
@@ -9441,28 +8662,6 @@ function reloadRealPhoneFrame() {
 </div>  
   
 
-<script>
-(function iconizeButtons() {
-    const emojiPattern = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu;
-    document.querySelectorAll("button").forEach(button => {
-        if (button.classList.contains("miwy-tb-btn")) return;
-        const original = button.textContent.toLowerCase();
-        button.classList.add("iconized");
-        const buttonKey = `${button.id} ${button.dataset.act || ""} ${original}`.toLowerCase();
-        if (emojiPattern.test(button.textContent)) {
-            emojiPattern.lastIndex = 0;
-            const walker = document.createTreeWalker(button, NodeFilter.SHOW_TEXT);
-            const textNodes = [];
-            while (walker.nextNode()) textNodes.push(walker.currentNode);
-            const spacesPattern = /\s+/g;
-            textNodes.forEach(node => {
-                const cleaned = node.nodeValue.replace(emojiPattern, "");
-                node.nodeValue = cleaned.replace(spacesPattern, " ");
-            });
-        }
-    });
-})();
-</script>
 
 </body>  
 </html>
